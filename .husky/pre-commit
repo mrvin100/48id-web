@@ -1,0 +1,7 @@
+# Run linting and formatting checks
+pnpm lint:check
+pnpm format:check
+pnpm type-check
+
+# Run tests (excluding property tests in pre-commit for speed)
+pnpm test --passWithNoTests --watchAll=false --testPathIgnorePatterns=".*\.property\.test\.(ts|tsx)$"
