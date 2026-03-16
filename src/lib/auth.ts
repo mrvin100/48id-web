@@ -1,5 +1,7 @@
 // Authentication utilities - implementation coming in Sprint 1
 
+import { config } from '@/lib/env'
+
 export interface AuthConfig {
   tokenKey: string
   refreshTokenKey: string
@@ -16,7 +18,7 @@ export const authConfig: AuthConfig = {
   refreshTokenKey: 'refresh_token',
   cookieOptions: {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
+    secure: config.security.secureCookies,
     sameSite: 'strict',
     maxAge: 60 * 60 * 24 * 7, // 7 days
   },

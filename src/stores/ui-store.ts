@@ -1,3 +1,4 @@
+import { config } from '@/lib/env'
 import { create } from 'zustand'
 import { devtools, persist } from 'zustand/middleware'
 import { immer } from 'zustand/middleware/immer'
@@ -162,7 +163,7 @@ export const useUIStore = create<UIState>()(
     ),
     {
       name: 'ui-store',
-      enabled: process.env.NODE_ENV === 'development',
+      enabled: config.app.enableDebug,
     }
   )
 )
