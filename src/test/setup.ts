@@ -1,6 +1,6 @@
 import '@testing-library/jest-dom'
 import { configure } from '@testing-library/react'
-import { beforeAll, afterEach, afterAll } from '@jest/globals'
+import { beforeAll, afterEach, afterAll, vi } from 'vitest'
 
 // Configure React Testing Library
 configure({
@@ -8,15 +8,15 @@ configure({
 })
 
 // Mock Next.js router
-jest.mock('next/navigation', () => ({
+vi.mock('next/navigation', () => ({
   useRouter() {
     return {
-      push: jest.fn(),
-      replace: jest.fn(),
-      prefetch: jest.fn(),
-      back: jest.fn(),
-      forward: jest.fn(),
-      refresh: jest.fn(),
+      push: vi.fn(),
+      replace: vi.fn(),
+      prefetch: vi.fn(),
+      back: vi.fn(),
+      forward: vi.fn(),
+      refresh: vi.fn(),
     }
   },
   useSearchParams() {
@@ -28,14 +28,14 @@ jest.mock('next/navigation', () => ({
 }))
 
 // Mock Next.js headers
-jest.mock('next/headers', () => ({
-  cookies: jest.fn(() => ({
-    get: jest.fn(),
-    set: jest.fn(),
-    delete: jest.fn(),
+vi.mock('next/headers', () => ({
+  cookies: vi.fn(() => ({
+    get: vi.fn(),
+    set: vi.fn(),
+    delete: vi.fn(),
   })),
-  headers: jest.fn(() => ({
-    get: jest.fn(),
+  headers: vi.fn(() => ({
+    get: vi.fn(),
   })),
 }))
 
@@ -46,7 +46,7 @@ beforeAll(() => {
 
 afterEach(() => {
   // Cleanup after each test
-  jest.clearAllMocks()
+  vi.clearAllMocks()
 })
 
 afterAll(() => {

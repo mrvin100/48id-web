@@ -1,4 +1,4 @@
-import { describe, it, expect } from '@jest/globals'
+import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
@@ -13,7 +13,7 @@ function TestButton({ onClick }: { onClick: () => void }) {
 
 describe('React Testing Library Integration', () => {
   it('should render components correctly', () => {
-    const mockClick = jest.fn()
+    const mockClick = vi.fn()
     render(<TestButton onClick={mockClick} />)
 
     const button = screen.getByTestId('test-button')
@@ -23,7 +23,7 @@ describe('React Testing Library Integration', () => {
 
   it('should handle user interactions', async () => {
     const user = userEvent.setup()
-    const mockClick = jest.fn()
+    const mockClick = vi.fn()
 
     render(<TestButton onClick={mockClick} />)
 

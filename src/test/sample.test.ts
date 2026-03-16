@@ -1,4 +1,4 @@
-import { describe, it, expect } from '@jest/globals'
+import { describe, it, expect } from 'vitest'
 import * as fc from 'fast-check'
 import { runPropertyTest } from './property-test-utils'
 
