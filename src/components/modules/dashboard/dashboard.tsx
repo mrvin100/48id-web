@@ -45,10 +45,10 @@ import { useDashboard } from '@/hooks/use-dashboard'
 
 // Fallback data for user status distribution (static chart data)
 const fallbackUserStatus = [
-  { status: 'Active', count: 1247, fill: 'var(--color-active)' },
-  { status: 'Inactive', count: 234, fill: 'var(--color-inactive)' },
-  { status: 'Pending', count: 89, fill: 'var(--color-pending)' },
-  { status: 'Locked', count: 12, fill: 'var(--color-locked)' },
+  { status: 'Active', count: 1247, fill: 'hsl(var(--chart-1))' },
+  { status: 'Inactive', count: 234, fill: 'hsl(var(--chart-2))' },
+  { status: 'Pending', count: 89, fill: 'hsl(var(--chart-3))' },
+  { status: 'Locked', count: 12, fill: 'hsl(var(--chart-4))' },
 ]
 
 const chartConfig = {
@@ -230,7 +230,7 @@ export function DashboardModule() {
                 <XAxis dataKey="day" />
                 <YAxis />
                 <ChartTooltip content={<ChartTooltipContent />} />
-                <Bar dataKey="logins" fill="var(--color-logins)" radius={4} />
+                <Bar dataKey="logins" fill="hsl(var(--chart-1))" radius={4} />
               </BarChart>
             </ChartContainer>
           </CardContent>

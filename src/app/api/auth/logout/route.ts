@@ -4,7 +4,7 @@ import ky from 'ky'
 import { LogoutResponse } from '@/types/auth.types'
 import { config } from '@/lib/env'
 
-export async function POST(request: NextRequest) {
+export async function POST(_request: NextRequest) {
   try {
     const cookieStore = await cookies()
     const token = cookieStore.get(config.auth.jwtCookieName)?.value

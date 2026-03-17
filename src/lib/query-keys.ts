@@ -43,7 +43,8 @@ export const authKeys = {
 export const auditKeys = {
   all: ['audit'] as const,
   logs: () => [...auditKeys.all, 'logs'] as const,
-  log: (filters?: Record<string, unknown>) => [...auditKeys.logs(), filters] as const,
+  log: (filters?: Record<string, unknown>) =>
+    [...auditKeys.logs(), filters] as const,
 }
 
 /**
@@ -52,7 +53,8 @@ export const auditKeys = {
 export const apiKeysKeys = {
   all: ['api-keys'] as const,
   lists: () => [...apiKeysKeys.all, 'list'] as const,
-  list: (filters?: Record<string, unknown>) => [...apiKeysKeys.lists(), filters] as const,
+  list: (filters?: Record<string, unknown>) =>
+    [...apiKeysKeys.lists(), filters] as const,
   details: () => [...apiKeysKeys.all, 'detail'] as const,
   detail: (id: string) => [...apiKeysKeys.details(), id] as const,
 }

@@ -180,7 +180,7 @@ function transformBackendUser(backendUser: BackendUser): User {
     lastName: backendUser.name?.split(' ').slice(1).join(' ') || '',
     role: Array.isArray(backendUser.roles)
       ? backendUser.roles[0]
-      : backendUser.roles ?? '',
+      : (backendUser.roles ?? ''),
     isEmailVerified: backendUser.profileCompleted ?? false,
     profilePicture: backendUser.profilePicture,
   }

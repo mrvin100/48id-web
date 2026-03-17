@@ -148,7 +148,8 @@ export function LoginModule() {
                     }
                   />
                   <FieldDescription>
-                    Enter your matricule in format K48-YYYY-XXX (e.g., K48-2024-001)
+                    Enter your matricule in format K48-YYYY-XXX (e.g.,
+                    K48-2024-001)
                   </FieldDescription>
                   {fieldState.invalid && (
                     <FieldError errors={[fieldState.error]} />
