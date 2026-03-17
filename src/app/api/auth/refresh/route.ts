@@ -2,10 +2,37 @@ import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import ky from 'ky'
 import { RefreshTokenResponse, User, UserRole } from '@/types/auth.types'
-import { BackendUser } from '@/lib/api/users'
 import { config } from '@/lib/env'
 
-export async function POST(request: NextRequest) {
+interface BackendRefreshResponse {
+  success: boolean
+  user?: {
+    id: string
+    matricule: string
+    email: string
+    firstName: string
+    lastName: string
+    status: string
+    role: string
+    createdAt: string
+    updatedAt: string
+    lastLoginAt?: string
+    isEmailVerified?: boolean
+    profilePicture?: string
+    name?: string
+    phone?: string
+    batch?: string
+    specialization?: string
+    roles?: string[]
+    profileCompleted?: boolean
+  }
+  token?: string
+  refreshToken?: string
+  expiresAt?: string
+  message?: string
+}
+
+export async function POST(_request: NextRequest) {
   try {
     const cookieStore = await cookies()
     const refreshToken = cookieStore.get(config.auth.refreshCookieName)?.value
@@ -35,27 +62,7 @@ export async function POST(request: NextRequest) {
             methods: ['post'],
           },
         })
-        .json<{
-          success: boolean
-          user?: {
-            id: string
-            matricule: string
-            email: string
-            firstName: string
-            lastName: string
-            status: string
-            role: string
-            createdAt: string
-            updatedAt: string
-            lastLoginAt?: string
-            isEmailVerified?: boolean
-            profilePicture?: string
-          }
-          token?: string
-          refreshToken?: string
-          expiresAt?: string
-          message?: string
-        }>()
+        .json<BackendRefreshResponse>()
 
       if (
         !backendResponse.success ||
@@ -81,17 +88,15 @@ export async function POST(request: NextRequest) {
         matricule: backendResponse.user.matricule,
         email: backendResponse.user.email,
         name:
-          (backendResponse.user as any).name ||
+          backendResponse.user.name ||
           `${backendResponse.user.firstName} ${backendResponse.user.lastName}`,
-        phone: (backendResponse.user as any).phone,
-        batch: (backendResponse.user as any).batch,
-        specialization: (backendResponse.user as any).specialization,
+        phone: backendResponse.user.phone,
+        batch: backendResponse.user.batch,
+        specialization: backendResponse.user.specialization,
         status: backendResponse.user.status,
-        roles: (backendResponse.user as any).roles || [
-          backendResponse.user.role,
-        ],
+        roles: backendResponse.user.roles || [backendResponse.user.role],
         profileCompleted:
-          (backendResponse.user as any).profileCompleted ??
+          backendResponse.user.profileCompleted ??
           backendResponse.user.isEmailVerified ??
           false,
         lastLoginAt: backendResponse.user.lastLoginAt,
