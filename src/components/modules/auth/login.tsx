@@ -14,7 +14,6 @@ import { useRouter } from 'next/navigation'
 import { useForm, Controller } from 'react-hook-form'
 import { Eye, EyeOff, AlertCircle, Info } from 'lucide-react'
 import * as z from 'zod'
-import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import {
@@ -24,7 +23,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { Spinner } from '@/components/ui/spinner'
+import { SubmitButton } from '@/components/global'
 import {
   Field,
   FieldLabel,
@@ -210,20 +209,12 @@ export function LoginModule() {
             />
 
             {/* Submit Button */}
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={isLoading || form.formState.isSubmitting}
+            <SubmitButton
+              isLoading={isLoading || form.formState.isSubmitting}
+              loadingText="Signing in..."
             >
-              {isLoading || form.formState.isSubmitting ? (
-                <>
-                  <Spinner className="mr-2 h-4 w-4" />
-                  Signing in...
-                </>
-              ) : (
-                'Sign In'
-              )}
-            </Button>
+              Sign In
+            </SubmitButton>
           </form>
 
           {/* Help Text */}

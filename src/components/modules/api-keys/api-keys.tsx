@@ -18,7 +18,7 @@ import {
   EmptyTitle,
   EmptyDescription,
 } from '@/components/ui/empty'
-import { PageHeader } from '@/components/page-header'
+import { PageHeader } from '@/components/global'
 
 export function ApiKeysModule() {
   return (

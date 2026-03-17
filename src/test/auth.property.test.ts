@@ -28,6 +28,13 @@ vi.mock('ky', () => ({
       post: vi.fn(),
     })),
   },
+  HTTPError: class MockHTTPError extends Error {
+    response: { status: number }
+    constructor(response: { status: number }) {
+      super('HTTP Error')
+      this.response = response
+    }
+  },
 }))
 
 // Property test configuration
