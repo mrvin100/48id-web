@@ -28,14 +28,22 @@ export interface User {
   id: string
   matricule: string
   email: string
-  firstName: string
-  lastName: string
-  status: UserStatus
-  role: UserRole
+  name: string
+  phone?: string
+  batch?: string
+  specialization?: string
+  status: string
+  roles: string[] | string
+  profileCompleted: boolean
+  lastLoginAt?: string
   createdAt: string
   updatedAt: string
-  lastLoginAt?: string
-  isEmailVerified: boolean
+
+  // Computed fields for frontend compatibility
+  firstName?: string
+  lastName?: string
+  role?: string
+  isEmailVerified?: boolean
   profilePicture?: string
 }
 

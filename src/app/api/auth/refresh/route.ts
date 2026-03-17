@@ -84,13 +84,26 @@ export async function POST(request: NextRequest) {
         id: backendResponse.user.id,
         matricule: backendResponse.user.matricule,
         email: backendResponse.user.email,
-        firstName: backendResponse.user.firstName,
-        lastName: backendResponse.user.lastName,
-        status: backendResponse.user.status as UserStatus,
-        role: backendResponse.user.role as UserRole,
+        name:
+          (backendResponse.user as any).name ||
+          `${backendResponse.user.firstName} ${backendResponse.user.lastName}`,
+        phone: (backendResponse.user as any).phone,
+        batch: (backendResponse.user as any).batch,
+        specialization: (backendResponse.user as any).specialization,
+        status: backendResponse.user.status,
+        roles: (backendResponse.user as any).roles || [
+          backendResponse.user.role,
+        ],
+        profileCompleted:
+          (backendResponse.user as any).profileCompleted ??
+          backendResponse.user.isEmailVerified ??
+          false,
+        lastLoginAt: backendResponse.user.lastLoginAt,
         createdAt: backendResponse.user.createdAt,
         updatedAt: backendResponse.user.updatedAt,
-        lastLoginAt: backendResponse.user.lastLoginAt,
+        firstName: backendResponse.user.firstName,
+        lastName: backendResponse.user.lastName,
+        role: backendResponse.user.role as UserRole,
         isEmailVerified: backendResponse.user.isEmailVerified || false,
         profilePicture: backendResponse.user.profilePicture,
       }

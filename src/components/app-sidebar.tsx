@@ -56,12 +56,12 @@ export function AppSidebar() {
     <Sidebar variant="inset">
       <SidebarHeader>
         <div className="flex items-center gap-2 px-4 py-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+          <div className="bg-primary text-primary-foreground flex h-8 w-8 items-center justify-center rounded-lg">
             <span className="text-sm font-bold">48</span>
           </div>
           <div className="grid flex-1 text-left text-sm leading-tight">
             <span className="truncate font-semibold">48ID Admin</span>
-            <span className="truncate text-xs text-muted-foreground">
+            <span className="text-muted-foreground truncate text-xs">
               Portal
             </span>
           </div>
@@ -73,7 +73,7 @@ export function AppSidebar() {
           <SidebarGroupLabel>Navigation</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {NAVIGATION_ITEMS.map((item) => {
+              {NAVIGATION_ITEMS.map(item => {
                 const Icon = iconMap[item.icon as keyof typeof iconMap]
                 const isActive = pathname === item.href
 

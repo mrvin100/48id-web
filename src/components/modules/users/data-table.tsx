@@ -96,18 +96,18 @@ export function DataTable<TData, TValue>({
         <div className="flex flex-1 items-center space-x-2">
           {/* Global Search */}
           <div className="relative">
-            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Search className="text-muted-foreground absolute top-2.5 left-2 h-4 w-4" />
             <Input
               placeholder="Search users..."
               value={globalFilter ?? ''}
-              onChange={(event) => setGlobalFilter(event.target.value)}
-              className="pl-8 max-w-sm"
+              onChange={event => setGlobalFilter(event.target.value)}
+              className="max-w-sm pl-8"
             />
             {globalFilter && (
               <Button
                 variant="ghost"
                 onClick={() => setGlobalFilter('')}
-                className="absolute right-0 top-0 h-full px-3 py-0 hover:bg-transparent"
+                className="absolute top-0 right-0 h-full px-3 py-0 hover:bg-transparent"
               >
                 <X className="h-4 w-4" />
               </Button>
@@ -117,7 +117,7 @@ export function DataTable<TData, TValue>({
           {/* Status Filter */}
           <Select
             value={statusFilter || 'all'}
-            onValueChange={(value) =>
+            onValueChange={value =>
               table
                 .getColumn('status')
                 ?.setFilterValue(value === 'all' ? '' : value)
@@ -161,16 +161,14 @@ export function DataTable<TData, TValue>({
           <DropdownMenuContent align="end">
             {table
               .getAllColumns()
-              .filter((column) => column.getCanHide())
-              .map((column) => {
+              .filter(column => column.getCanHide())
+              .map(column => {
                 return (
                   <DropdownMenuCheckboxItem
                     key={column.id}
                     className="capitalize"
                     checked={column.getIsVisible()}
-                    onCheckedChange={(value) =>
-                      column.toggleVisibility(!!value)
-                    }
+                    onCheckedChange={value => column.toggleVisibility(!!value)}
                   >
                     {column.id}
                   </DropdownMenuCheckboxItem>
@@ -182,7 +180,7 @@ export function DataTable<TData, TValue>({
 
       {/* Selection Info */}
       {table.getFilteredSelectedRowModel().rows.length > 0 && (
-        <div className="flex items-center justify-between rounded-md border bg-muted/50 px-4 py-2">
+        <div className="bg-muted/50 flex items-center justify-between rounded-md border px-4 py-2">
           <div className="flex items-center space-x-2">
             <Badge variant="secondary">
               {table.getFilteredSelectedRowModel().rows.length} of{' '}
@@ -204,9 +202,9 @@ export function DataTable<TData, TValue>({
       <div className="rounded-md border">
         <Table>
           <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
+            {table.getHeaderGroups().map(headerGroup => (
               <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
+                {headerGroup.headers.map(header => {
                   return (
                     <TableHead key={header.id}>
                       {header.isPlaceholder
@@ -223,12 +221,12 @@ export function DataTable<TData, TValue>({
           </TableHeader>
           <TableBody>
             {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
+              table.getRowModel().rows.map(row => (
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && 'selected'}
                 >
-                  {row.getVisibleCells().map((cell) => (
+                  {row.getVisibleCells().map(cell => (
                     <TableCell key={cell.id}>
                       {flexRender(
                         cell.column.columnDef.cell,
@@ -258,7 +256,7 @@ export function DataTable<TData, TValue>({
           <p className="text-sm font-medium">Rows per page</p>
           <Select
             value={`${table.getState().pagination.pageSize}`}
-            onValueChange={(value) => {
+            onValueChange={value => {
               table.setPageSize(Number(value))
             }}
           >
@@ -266,7 +264,7 @@ export function DataTable<TData, TValue>({
               <SelectValue placeholder={table.getState().pagination.pageSize} />
             </SelectTrigger>
             <SelectContent side="top">
-              {[10, 20, 30, 40, 50].map((pageSize) => (
+              {[10, 20, 30, 40, 50].map(pageSize => (
                 <SelectItem key={pageSize} value={`${pageSize}`}>
                   {pageSize}
                 </SelectItem>

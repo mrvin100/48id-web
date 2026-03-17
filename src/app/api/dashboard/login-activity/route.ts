@@ -3,8 +3,8 @@ import { config } from '@/lib/env'
 
 export async function GET(request: NextRequest) {
   try {
-    // Call the backend dashboard metrics endpoint
-    const backendUrl = `${config.backend.apiUrl}/admin/dashboard/metrics`
+    // Call the backend dashboard login activity endpoint
+    const backendUrl = `${config.backend.apiUrl}/admin/dashboard/login-activity`
 
     const response = await fetch(backendUrl, {
       headers: {
@@ -20,10 +20,10 @@ export async function GET(request: NextRequest) {
     const data = await response.json()
     return NextResponse.json(data)
   } catch (error) {
-    console.error('Error fetching dashboard metrics:', error)
+    console.error('Error fetching login activity:', error)
     return NextResponse.json(
       {
-        error: 'Failed to fetch dashboard metrics from backend',
+        error: 'Failed to fetch login activity from backend',
         message: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 }

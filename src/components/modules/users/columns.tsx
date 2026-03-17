@@ -31,14 +31,14 @@ export const columns: ColumnDef<User>[] = [
           table.getIsAllPageRowsSelected() ||
           (table.getIsSomePageRowsSelected() && 'indeterminate')
         }
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+        onCheckedChange={value => table.toggleAllPageRowsSelected(!!value)}
         aria-label="Select all"
       />
     ),
     cell: ({ row }) => (
       <Checkbox
         checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
+        onCheckedChange={value => row.toggleSelected(!!value)}
         aria-label="Select row"
       />
     ),
@@ -75,9 +75,7 @@ export const columns: ColumnDef<User>[] = [
         </Button>
       )
     },
-    cell: ({ row }) => (
-      <div className="lowercase">{row.getValue('email')}</div>
-    ),
+    cell: ({ row }) => <div className="lowercase">{row.getValue('email')}</div>,
   },
   {
     accessorKey: 'firstName',
@@ -104,19 +102,19 @@ export const columns: ColumnDef<User>[] = [
             status === 'ACTIVE'
               ? 'default'
               : status === 'PENDING'
-              ? 'secondary'
-              : status === 'SUSPENDED'
-              ? 'destructive'
-              : 'outline'
+                ? 'secondary'
+                : status === 'SUSPENDED'
+                  ? 'destructive'
+                  : 'outline'
           }
           className={
             status === 'ACTIVE'
               ? 'bg-green-100 text-green-800 hover:bg-green-100 dark:bg-green-900/20 dark:text-green-400'
               : status === 'PENDING'
-              ? 'bg-yellow-100 text-yellow-800 hover:bg-yellow-100 dark:bg-yellow-900/20 dark:text-yellow-400'
-              : status === 'SUSPENDED'
-              ? 'bg-red-100 text-red-800 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400'
-              : 'bg-gray-100 text-gray-800 hover:bg-gray-100 dark:bg-gray-900/20 dark:text-gray-400'
+                ? 'bg-yellow-100 text-yellow-800 hover:bg-yellow-100 dark:bg-yellow-900/20 dark:text-yellow-400'
+                : status === 'SUSPENDED'
+                  ? 'bg-red-100 text-red-800 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400'
+                  : 'bg-gray-100 text-gray-800 hover:bg-gray-100 dark:bg-gray-900/20 dark:text-gray-400'
           }
         >
           {status}
@@ -136,8 +134,8 @@ export const columns: ColumnDef<User>[] = [
             role === 'ADMIN'
               ? 'border-purple-200 bg-purple-50 text-purple-800 dark:border-purple-800 dark:bg-purple-900/20 dark:text-purple-400'
               : role === 'STUDENT'
-              ? 'border-blue-200 bg-blue-50 text-blue-800 dark:border-blue-800 dark:bg-blue-900/20 dark:text-blue-400'
-              : 'border-gray-200 bg-gray-50 text-gray-800 dark:border-gray-800 dark:bg-gray-900/20 dark:text-gray-400'
+                ? 'border-blue-200 bg-blue-50 text-blue-800 dark:border-blue-800 dark:bg-blue-900/20 dark:text-blue-400'
+                : 'border-gray-200 bg-gray-50 text-gray-800 dark:border-gray-800 dark:bg-gray-900/20 dark:text-gray-400'
           }
         >
           {role}
@@ -169,7 +167,7 @@ export const columns: ColumnDef<User>[] = [
     cell: ({ row }) => {
       const lastLogin = row.getValue('lastLoginAt') as string | null
       if (!lastLogin) {
-        return <div className="text-sm text-muted-foreground">Never</div>
+        return <div className="text-muted-foreground text-sm">Never</div>
       }
       const date = new Date(lastLogin)
       return <div className="text-sm">{date.toLocaleDateString()}</div>

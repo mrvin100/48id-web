@@ -73,16 +73,30 @@ const userArb = fc.record({
   id: userIdArb,
   matricule: matriculeArb,
   email: emailArb,
-  firstName: nameArb,
-  lastName: nameArb,
-  status: userStatusArb,
-  role: userRoleArb,
-  createdAt: fc.date().map(d => d.toISOString()),
-  updatedAt: fc.date().map(d => d.toISOString()),
+  name: nameArb,
+  phone: fc.option(fc.string(), { nil: undefined }),
+  batch: fc.option(fc.string(), { nil: undefined }),
+  specialization: fc.option(fc.string(), { nil: undefined }),
+  status: userStatusArb.map(s => s.toString()),
+  roles: fc.oneof(
+    fc.array(
+      userRoleArb.map(r => r.toString()),
+      { minLength: 1 }
+    ),
+    userRoleArb.map(r => r.toString())
+  ),
+  profileCompleted: fc.boolean(),
   lastLoginAt: fc.option(
     fc.date().map(d => d.toISOString()),
     { nil: undefined }
   ),
+  createdAt: fc.date().map(d => d.toISOString()),
+  updatedAt: fc.date().map(d => d.toISOString()),
+
+  // Computed fields for compatibility
+  firstName: nameArb,
+  lastName: nameArb,
+  role: userRoleArb,
   isEmailVerified: fc.boolean(),
   profilePicture: fc.option(fc.webUrl(), { nil: undefined }),
 })
