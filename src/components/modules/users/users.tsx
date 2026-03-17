@@ -6,44 +6,58 @@
  * User management interface for the 48ID Admin Portal.
  * Provides user listing, search, and management capabilities.
  *
- * Requirements: 3.1, 3.2, 3.3, 3.4, 3.5
+ * Requirements: WEB-04-01, WEB-04-02
  */
 
-import { Users } from 'lucide-react'
-import {
-  Empty,
-  EmptyContent,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-  EmptyDescription,
-} from '@/components/ui/empty'
 import { PageHeader } from '@/components/global'
+import { DataTable } from './data-table'
+import { columns } from './columns'
+import { useUserManagement } from '@/hooks/use-users'
 
 export function UsersModule() {
+  const { users, totalUsers, isLoading, isError, error } = useUserManagement()
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <PageHeader
+          title="Users"
+          description="Manage user accounts and permissions"
+        />
+        <div className="flex h-64 items-center justify-center">
+          <div className="text-muted-foreground">Loading users...</div>
+        </div>
+      </div>
+    )
+  }
+
+  if (isError) {
+    return (
+      <div className="space-y-6">
+        <PageHeader
+          title="Users"
+          description="Manage user accounts and permissions"
+        />
+        <div className="flex h-64 items-center justify-center">
+          <div className="text-center">
+            <div className="text-destructive mb-2">Error loading users</div>
+            <div className="text-muted-foreground text-sm">
+              {error?.message || 'Failed to load users'}
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-6">
       <PageHeader
         title="Users"
-        description="Manage user accounts and permissions"
+        description={`Manage user accounts and permissions • ${totalUsers} total users`}
       />
 
-      {/* Placeholder for users functionality */}
-      <Empty className="border-2">
-        <EmptyHeader>
-          <EmptyMedia variant="icon">
-            <Users />
-          </EmptyMedia>
-          <EmptyContent>
-            <EmptyTitle>User Management</EmptyTitle>
-            <EmptyDescription>
-              User management features including user listing, search, role
-              management, and account status controls will be implemented in
-              Sprint 3.
-            </EmptyDescription>
-          </EmptyContent>
-        </EmptyHeader>
-      </Empty>
+      <DataTable columns={columns} data={users} />
     </div>
   )
 }

@@ -231,15 +231,26 @@ export const useAuthStore = create<AuthStoreState>()(
                 id: state.user.id,
                 matricule: state.user.matricule,
                 email: state.user.email,
+                name:
+                  state.user.name ||
+                  `${state.user.firstName} ${state.user.lastName}`,
+                phone: state.user.phone,
+                batch: state.user.batch,
+                specialization: state.user.specialization,
+                status: state.user.status,
+                roles: state.user.roles,
+                profileCompleted:
+                  state.user.profileCompleted ??
+                  state.user.isEmailVerified ??
+                  false,
+                lastLoginAt: state.user.lastLoginAt,
+                createdAt: state.user.createdAt,
+                updatedAt: state.user.updatedAt,
                 firstName: state.user.firstName,
                 lastName: state.user.lastName,
                 role: state.user.role,
-                status: state.user.status,
                 isEmailVerified: state.user.isEmailVerified,
                 profilePicture: state.user.profilePicture,
-                createdAt: state.user.createdAt,
-                updatedAt: state.user.updatedAt,
-                lastLoginAt: state.user.lastLoginAt,
               }
             : null,
           isAuthenticated: state.isAuthenticated,

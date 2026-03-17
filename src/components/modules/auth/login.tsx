@@ -41,8 +41,8 @@ const loginSchema = z.object({
     .string()
     .min(1, 'Matricule is required')
     .regex(
-      /^[A-Z0-9]{6,12}$/,
-      'Matricule must be 6-12 characters (letters and numbers only)'
+      /^K48-\d{4}-\d{3}$/,
+      'Matricule must be in format K48-YYYY-XXX (e.g., K48-2024-001)'
     ),
   password: z
     .string()
@@ -148,8 +148,8 @@ export function LoginModule() {
                     }
                   />
                   <FieldDescription>
-                    Enter your 6-12 character matricule (letters and numbers
-                    only)
+                    Enter your matricule in format K48-YYYY-XXX (e.g.,
+                    K48-2024-001)
                   </FieldDescription>
                   {fieldState.invalid && (
                     <FieldError errors={[fieldState.error]} />

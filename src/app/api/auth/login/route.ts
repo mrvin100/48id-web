@@ -1,13 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import ky from 'ky'
-import {
-  LoginRequest,
-  LoginResponse,
-  User,
-  UserRole,
-  UserStatus,
-} from '@/types/auth.types'
+import { LoginRequest, LoginResponse, User, UserRole } from '@/types/auth.types'
 import { config } from '@/lib/env'
 import { ROUTES } from '@/lib/routes'
 
@@ -27,12 +21,12 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Validate matricule format (basic validation)
-    if (!/^[A-Z0-9]{6,12}$/.test(body.matricule)) {
+    // Validate matricule format (K48-YYYY-XXX format)
+    if (!/^K48-\d{4}-\d{3}$/.test(body.matricule)) {
       return NextResponse.json(
         {
           success: false,
-          message: 'Invalid matricule format',
+          message: 'Invalid matricule format. Expected format: K48-YYYY-XXX',
         } as LoginResponse,
         { status: 400 }
       )
@@ -52,35 +46,34 @@ export async function POST(request: NextRequest) {
         },
       })
       .json<{
-        success: boolean
-        user?: {
+        access_token: string
+        refresh_token: string
+        token_type: string
+        expires_in: number
+        requires_password_change: boolean
+        user: {
           id: string
           matricule: string
+          name: string
           email: string
-          firstName: string
-          lastName: string
-          status: string
           role: string
+          batch?: string
+          specialization?: string
+          phone?: string
+          status: string
+          profileCompleted: boolean
+          lastLoginAt?: string
           createdAt: string
           updatedAt: string
-          lastLoginAt?: string
-          isEmailVerified?: boolean
           profilePicture?: string
         }
-        token?: string
-        refreshToken?: string
-        message?: string
       }>()
 
-    if (
-      !backendResponse.success ||
-      !backendResponse.token ||
-      !backendResponse.user
-    ) {
+    if (!backendResponse.access_token || !backendResponse.user) {
       return NextResponse.json(
         {
           success: false,
-          message: backendResponse.message || 'Authentication failed',
+          message: 'Authentication failed',
         } as LoginResponse,
         { status: 401 }
       )
@@ -91,14 +84,20 @@ export async function POST(request: NextRequest) {
       id: backendResponse.user.id,
       matricule: backendResponse.user.matricule,
       email: backendResponse.user.email,
-      firstName: backendResponse.user.firstName,
-      lastName: backendResponse.user.lastName,
-      status: backendResponse.user.status as UserStatus,
-      role: backendResponse.user.role as UserRole,
+      name: backendResponse.user.name,
+      phone: backendResponse.user.phone,
+      batch: backendResponse.user.batch,
+      specialization: backendResponse.user.specialization,
+      status: backendResponse.user.status,
+      roles: [backendResponse.user.role],
+      profileCompleted: backendResponse.user.profileCompleted,
+      lastLoginAt: backendResponse.user.lastLoginAt,
       createdAt: backendResponse.user.createdAt,
       updatedAt: backendResponse.user.updatedAt,
-      lastLoginAt: backendResponse.user.lastLoginAt,
-      isEmailVerified: backendResponse.user.isEmailVerified || false,
+      firstName: backendResponse.user.name?.split(' ')[0] || '',
+      lastName: backendResponse.user.name?.split(' ').slice(1).join(' ') || '',
+      role: backendResponse.user.role as UserRole,
+      isEmailVerified: backendResponse.user.profileCompleted,
       profilePicture: backendResponse.user.profilePicture,
     }
 
@@ -133,7 +132,7 @@ export async function POST(request: NextRequest) {
     const cookieStore = await cookies()
 
     // Set JWT token cookie
-    cookieStore.set(config.auth.jwtCookieName, backendResponse.token, {
+    cookieStore.set(config.auth.jwtCookieName, backendResponse.access_token, {
       httpOnly: true,
       secure: config.security.secureCookies,
       sameSite: 'strict',
@@ -142,10 +141,10 @@ export async function POST(request: NextRequest) {
     })
 
     // Set refresh token cookie if provided
-    if (backendResponse.refreshToken) {
+    if (backendResponse.refresh_token) {
       cookieStore.set(
         config.auth.refreshCookieName,
-        backendResponse.refreshToken,
+        backendResponse.refresh_token,
         {
           httpOnly: true,
           secure: config.security.secureCookies,

@@ -4,10 +4,11 @@ import ky from 'ky'
 import { LogoutResponse } from '@/types/auth.types'
 import { config } from '@/lib/env'
 
-export async function POST(request: NextRequest) {
+export async function POST(_request: NextRequest) {
   try {
     const cookieStore = await cookies()
     const token = cookieStore.get(config.auth.jwtCookieName)?.value
+    const refreshToken = cookieStore.get(config.auth.refreshCookieName)?.value
 
     // If no token exists, consider logout successful
     if (!token) {
@@ -21,18 +22,23 @@ export async function POST(request: NextRequest) {
     }
 
     try {
-      // Notify backend about logout to invalidate token
-      await ky.post(`${config.backend.apiUrl}/auth/logout`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        timeout: config.backend.timeout,
-        retry: {
-          limit: 1,
-          methods: ['post'],
-        },
-      })
+      // Notify backend about logout to invalidate refresh token
+      if (refreshToken) {
+        await ky.post(`${config.backend.apiUrl}/auth/logout`, {
+          json: {
+            refreshToken: refreshToken,
+          },
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          timeout: config.backend.timeout,
+          retry: {
+            limit: 1,
+            methods: ['post'],
+          },
+        })
+      }
     } catch (backendError) {
       // Log backend error but don't fail logout
       console.warn('Backend logout failed:', backendError)

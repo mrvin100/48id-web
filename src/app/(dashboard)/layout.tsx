@@ -1,4 +1,17 @@
+/**
+ * Dashboard Layout
+ *
+ * Layout for authenticated dashboard pages.
+ * Uses shadcn sidebar with proper navigation structure.
+ */
+
 import { ReactNode } from 'react'
+import {
+  SidebarProvider,
+  SidebarInset,
+  SidebarTrigger,
+} from '@/components/ui/sidebar'
+import { AppSidebar } from '@/components/app-sidebar'
 
 interface DashboardLayoutProps {
   children: ReactNode
@@ -6,19 +19,18 @@ interface DashboardLayoutProps {
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* AppShell component will be implemented in Sprint 2 */}
-      <div className="flex">
-        {/* Sidebar placeholder */}
-        <div className="w-64 bg-white shadow-sm">
-          <div className="p-4">
-            <h1 className="text-lg font-semibold">48ID Admin</h1>
+    <SidebarProvider>
+      <AppSidebar />
+      <SidebarInset>
+        <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
+          <SidebarTrigger className="-ml-1" />
+          <div className="bg-sidebar-border h-4 w-px" />
+          <div className="flex items-center gap-2">
+            <h1 className="text-lg font-semibold">48ID Admin Portal</h1>
           </div>
-        </div>
-
-        {/* Main content */}
-        <div className="flex-1 p-6">{children}</div>
-      </div>
-    </div>
+        </header>
+        <main className="flex-1 overflow-auto p-6">{children}</main>
+      </SidebarInset>
+    </SidebarProvider>
   )
 }

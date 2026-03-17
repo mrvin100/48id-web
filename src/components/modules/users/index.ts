@@ -7,3 +7,5 @@
  */
 
 export { UsersModule } from './users'
+export { DataTable } from './data-table'
+export { columns } from './columns'
