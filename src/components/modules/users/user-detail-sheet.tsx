@@ -139,15 +139,6 @@ export function UserDetailSheet({
               >
                 Security
               </TabsTrigger>
-              <TabsTrigger
-                value="security"
-                className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-0 py-2 h-auto"
-              >
-              {currentUser && (
-                <UserActionMenu user={currentUser} />
-              )}
-              </TabsTrigger>
-              
             </TabsList>
 
             {/* Profile Tab */}
