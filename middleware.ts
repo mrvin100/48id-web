@@ -13,33 +13,34 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { jwtVerify } from 'jose'
 import { config as envConfig } from '@/lib/env'
+import { ROUTES } from '@/lib/routes'
 
 // JWT Secret for token verification
 const JWT_SECRET = new TextEncoder().encode(envConfig.auth.jwtSecret)
 
 // Route configuration
 const PUBLIC_ROUTES = [
-  '/login',
-  '/access-denied',
-  '/', // Landing page
+  ROUTES.LOGIN,
+  ROUTES.ACCESS_DENIED,
+  ROUTES.HOME, // Landing page
 ]
 
 const API_ROUTES = ['/api/auth/login', '/api/auth/logout', '/api/auth/refresh']
 
 const PROTECTED_ROUTES = [
-  '/dashboard',
-  '/users',
-  '/csv-import',
-  '/audit',
-  '/api-keys',
+  ROUTES.DASHBOARD,
+  ROUTES.USERS,
+  ROUTES.CSV_IMPORT,
+  ROUTES.AUDIT,
+  ROUTES.API_KEYS,
 ]
 
 // Admin-only routes (require ADMIN or SYSTEM_OPERATOR role)
 const ADMIN_ROUTES = [
-  '/users',
-  '/csv-import',
-  '/audit',
-  '/api-keys',
+  ROUTES.USERS,
+  ROUTES.CSV_IMPORT,
+  ROUTES.AUDIT,
+  ROUTES.API_KEYS,
   '/api/users',
   '/api/csv',
   '/api/audit',
@@ -189,7 +190,7 @@ export async function middleware(request: NextRequest) {
 
     if (!token) {
       // Redirect to login if no token
-      const loginUrl = new URL('/login', request.url)
+      const loginUrl = new URL(ROUTES.LOGIN, request.url)
       loginUrl.searchParams.set('redirect', pathname)
       return NextResponse.redirect(loginUrl)
     }
@@ -233,7 +234,7 @@ export async function middleware(request: NextRequest) {
       }
 
       // Refresh failed or no refresh token, redirect to login
-      const loginUrl = new URL('/login', request.url)
+      const loginUrl = new URL(ROUTES.LOGIN, request.url)
       loginUrl.searchParams.set('redirect', pathname)
 
       // Clear invalid cookies
@@ -247,7 +248,7 @@ export async function middleware(request: NextRequest) {
     // Check role-based access for admin routes
     if (isAdminRoute(pathname) && !hasAdminAccess(payload.role)) {
       // Redirect to access denied page
-      return NextResponse.redirect(new URL('/access-denied', request.url))
+      return NextResponse.redirect(new URL(ROUTES.ACCESS_DENIED, request.url))
     }
 
     // User is authenticated and authorized, continue

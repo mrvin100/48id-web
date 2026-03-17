@@ -9,6 +9,7 @@ import {
   UserStatus,
 } from '@/types/auth.types'
 import { config } from '@/lib/env'
+import { ROUTES } from '@/lib/routes'
 
 export async function POST(request: NextRequest) {
   try {
@@ -71,7 +72,11 @@ export async function POST(request: NextRequest) {
         message?: string
       }>()
 
-    if (!backendResponse.success || !backendResponse.token || !backendResponse.user) {
+    if (
+      !backendResponse.success ||
+      !backendResponse.token ||
+      !backendResponse.user
+    ) {
       return NextResponse.json(
         {
           success: false,
@@ -107,7 +112,7 @@ export async function POST(request: NextRequest) {
           success: false,
           message:
             'Access denied. Admin portal is restricted to administrators only.',
-          redirectUrl: '/access-denied',
+          redirectUrl: ROUTES.ACCESS_DENIED,
         } as LoginResponse,
         { status: 403 }
       )
@@ -119,7 +124,7 @@ export async function POST(request: NextRequest) {
         success: true,
         user,
         message: 'Login successful',
-        redirectUrl: '/dashboard',
+        redirectUrl: ROUTES.DASHBOARD,
       } as LoginResponse,
       { status: 200 }
     )

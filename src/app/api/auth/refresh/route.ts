@@ -61,7 +61,11 @@ export async function POST(request: NextRequest) {
           message?: string
         }>()
 
-      if (!backendResponse.success || !backendResponse.token || !backendResponse.user) {
+      if (
+        !backendResponse.success ||
+        !backendResponse.token ||
+        !backendResponse.user
+      ) {
         // Clear invalid refresh token
         cookieStore.delete(config.auth.refreshCookieName)
         cookieStore.delete(config.auth.jwtCookieName)

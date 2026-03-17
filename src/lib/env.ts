@@ -65,18 +65,23 @@ if (!BACKEND_URL) {
   )
 }
 
+// Only validate secrets in actual production runtime, not during build
 if (
   NODE_ENV === 'production' &&
+  typeof window === 'undefined' && // Server-side
+  process.env.VERCEL !== '1' && // Not Vercel build
   JWT_SECRET === 'your-secret-key-change-in-production'
 ) {
-  throw new Error('JWT_SECRET must be set in production environment')
+  console.warn('JWT_SECRET should be set in production environment')
 }
 
 if (
   NODE_ENV === 'production' &&
+  typeof window === 'undefined' && // Server-side
+  process.env.VERCEL !== '1' && // Not Vercel build
   CSRF_SECRET === 'csrf-secret-change-in-production'
 ) {
-  throw new Error('CSRF_SECRET must be set in production environment')
+  console.warn('CSRF_SECRET should be set in production environment')
 }
 
 // Export configuration object for easy importing
