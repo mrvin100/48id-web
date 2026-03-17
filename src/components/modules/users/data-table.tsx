@@ -178,8 +178,8 @@ export function DataTable<TData, TValue>({
         </DropdownMenu>
       </div>
 
-      {/* Selection Info */}
-      {table.getFilteredSelectedRowModel().rows.length > 0 && (
+      {/* Selection Info - Hidden until bulk actions are implemented in Sprint 4 */}
+      {/* {table.getFilteredSelectedRowModel().rows.length > 0 && (
         <div className="bg-muted/50 flex items-center justify-between rounded-md border px-4 py-2">
           <div className="flex items-center space-x-2">
             <Badge variant="secondary">
@@ -196,7 +196,7 @@ export function DataTable<TData, TValue>({
             </Button>
           </div>
         </div>
-      )}
+      )} */}
 
       {/* Table */}
       <div className="rounded-md border">
