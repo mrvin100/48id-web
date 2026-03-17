@@ -83,7 +83,6 @@ export function UserActionMenu({ user }: UserActionMenuProps) {
           <Button
             variant="ghost"
             className="h-8 w-8 p-0"
-            onClick={(e) => e.stopPropagation()}
           >
             <span className="sr-only">Open menu</span>
             <MoreHorizontal className="h-4 w-4" />
@@ -93,14 +92,20 @@ export function UserActionMenu({ user }: UserActionMenuProps) {
           <DropdownMenuLabel>Admin Actions</DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuItem
-            onClick={() => setShowPasswordResetDialog(true)}
+            onClick={(e) => {
+              e.stopPropagation()
+              setShowPasswordResetDialog(true)
+            }}
             disabled={forcePasswordReset.isPending}
           >
             <KeyRound className="mr-2 h-4 w-4" />
             Force password reset
           </DropdownMenuItem>
           <DropdownMenuItem
-            onClick={() => setShowSuspendDialog(true)}
+            onClick={(e) => {
+              e.stopPropagation()
+              setShowSuspendDialog(true)
+            }}
             className={
               user.status === 'SUSPENDED'
                 ? 'text-green-600'
