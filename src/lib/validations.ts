@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { UserRole, UserStatus } from '@/stores/auth-store'
+import { UserRole, UserStatus } from '@/types/auth.types'
 
 /**
  * Zod validation schemas for the 48ID Admin Portal
@@ -12,7 +12,7 @@ import { UserRole, UserStatus } from '@/stores/auth-store'
  */
 
 // Common validation patterns
-const matriculePattern = /^K48-\d{4}-\d{3}$/
+const matriculePattern = /^[A-Z0-9]{6,12}$/
 const phonePattern = /^(\+237|0)[1-9](\d{8})$/
 const batchPattern = /^(20\d{2})$/
 
@@ -20,14 +20,8 @@ const batchPattern = /^(20\d{2})$/
  * Authentication schemas
  */
 export const loginSchema = z.object({
-  matricule: z
-    .string()
-    .min(1, 'Matricule is required')
-    .regex(matriculePattern, 'Matricule must be in format K48-YYYY-XXX'),
-  password: z
-    .string()
-    .min(1, 'Password is required')
-    .min(8, 'Password must be at least 8 characters'),
+  matricule: z.string().min(1, 'Matricule is required'),
+  password: z.string().min(1, 'Password is required'),
 })
 
 export const changePasswordSchema = z

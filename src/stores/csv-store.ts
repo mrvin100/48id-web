@@ -1,7 +1,8 @@
+import { config } from '@/lib/env'
 import { create } from 'zustand'
 import { devtools } from 'zustand/middleware'
 import { immer } from 'zustand/middleware/immer'
-import type { User } from './auth-store'
+import type { User } from '@/types/auth.types'
 
 /**
  * CSV validation error interface
@@ -267,7 +268,7 @@ export const useCSVStore = create<CSVState>()(
     })),
     {
       name: 'csv-store',
-      enabled: process.env.NODE_ENV === 'development',
+      enabled: config.app.enableDebug,
     }
   )
 )

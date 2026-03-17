@@ -1,4 +1,5 @@
 import ky, { type KyInstance, type Options } from 'ky'
+import { config } from '@/lib/env'
 
 /**
  * Base API client configuration using ky
@@ -51,7 +52,7 @@ const baseOptions: Options = {
         }
 
         // Log requests in development
-        if (process.env.NODE_ENV === 'development') {
+        if (config.app.enableDebug) {
           console.log(`🚀 ${request.method} ${request.url}`)
         }
       },
@@ -60,7 +61,7 @@ const baseOptions: Options = {
     beforeError: [
       error => {
         // Enhanced error logging
-        if (process.env.NODE_ENV === 'development') {
+        if (config.app.enableDebug) {
           console.error(
             `❌ ${error.request.method} ${error.request.url}:`,
             error.response?.status,
@@ -75,7 +76,7 @@ const baseOptions: Options = {
     afterResponse: [
       (request, options, response) => {
         // Log successful responses in development
-        if (process.env.NODE_ENV === 'development') {
+        if (config.app.enableDebug) {
           console.log(`✅ ${request.method} ${request.url}:`, response.status)
         }
 
