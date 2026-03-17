@@ -45,14 +45,21 @@ export async function GET(request: NextRequest) {
     })
 
     if (!response.ok) {
-      throw new Error(`Backend responded with ${response.status}`)
+      const errorText = await response.text()
+      console.error(`Backend error (${response.status}):`, errorText)
+      return NextResponse.json(
+        { error: `Backend error: ${response.status}` },
+        { status: response.status }
+      )
     }
 
     const data = await response.json()
     return NextResponse.json(data)
-  } catch (_error) {
+  } catch (error) {
+    console.error('API users route error:', error)
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
     return NextResponse.json(
-      { error: 'Failed to fetch users from backend' },
+      { error: `Failed to fetch users: ${errorMessage}` },
       { status: 500 }
     )
   }

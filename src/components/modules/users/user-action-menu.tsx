@@ -4,13 +4,14 @@
  * User Action Menu Component
  *
  * Row-level action dropdown menu for user operations.
- * Provides quick access to common user management actions.
+ * Provides quick access to admin actions only.
  *
+ * Note: View Details and Edit Profile are accessed by clicking the row
  * Requirements: WEB-04-05
  */
 
 import { useState } from 'react'
-import { MoreHorizontal, Eye, Edit, KeyRound, Lock } from 'lucide-react'
+import { MoreHorizontal, KeyRound, Lock } from 'lucide-react'
 import { User } from '@/types/auth.types'
 import { Button } from '@/components/ui/button'
 import {
@@ -35,26 +36,18 @@ import { toast } from 'sonner'
 import {
   useForcePasswordReset,
   useChangeUserStatus,
-  useDeleteUser,
 } from '@/hooks/use-users'
 
 interface UserActionMenuProps {
   user: User
-  onViewDetails?: (user: User) => void
-  onEditUser?: (user: User) => void
 }
 
-export function UserActionMenu({
-  user,
-  onViewDetails,
-  onEditUser,
-}: UserActionMenuProps) {
+export function UserActionMenu({ user }: UserActionMenuProps) {
   const [showPasswordResetDialog, setShowPasswordResetDialog] = useState(false)
   const [showSuspendDialog, setShowSuspendDialog] = useState(false)
 
   const forcePasswordReset = useForcePasswordReset()
   const changeStatus = useChangeUserStatus()
-  const deleteUser = useDeleteUser()
 
   const handlePasswordReset = async () => {
     try {
@@ -93,15 +86,7 @@ export function UserActionMenu({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuLabel>Actions</DropdownMenuLabel>
-          <DropdownMenuItem onClick={() => onViewDetails?.(user)}>
-            <Eye className="mr-2 h-4 w-4" />
-            View details
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => onEditUser?.(user)}>
-            <Edit className="mr-2 h-4 w-4" />
-            Edit profile
-          </DropdownMenuItem>
+          <DropdownMenuLabel>Admin Actions</DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuItem
             onClick={() => setShowPasswordResetDialog(true)}

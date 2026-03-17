@@ -80,6 +80,7 @@ export function UsersModule() {
           onEditUser: handleEditUser,
         })}
         data={users}
+        onRowClick={handleViewDetails}
       />
 
       <UserDetailSheet

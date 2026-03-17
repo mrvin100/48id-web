@@ -180,13 +180,7 @@ export const columns = ({
     cell: ({ row }) => {
       const user = row.original
 
-      return (
-        <UserActionMenu
-          user={user}
-          onViewDetails={onViewDetails}
-          onEditUser={onEditUser}
-        />
-      )
+      return <UserActionMenu user={user} />
     },
   },
 ]
