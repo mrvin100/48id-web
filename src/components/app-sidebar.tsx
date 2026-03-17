@@ -7,7 +7,7 @@
 
 'use client'
 
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import {
   LayoutDashboard,
@@ -32,7 +32,7 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from '@/components/ui/sidebar'
-import { NAVIGATION_ITEMS } from '@/lib/routes'
+import { NAVIGATION_ITEMS, ROUTES } from '@/lib/routes'
 import { useAuthStore } from '@/stores/auth-store'
 
 // Map icon names to components
@@ -46,10 +46,18 @@ const iconMap = {
 
 export function AppSidebar() {
   const pathname = usePathname()
+  const router = useRouter()
   const { user, logout } = useAuthStore()
 
-  const handleLogout = () => {
-    logout()
+  const handleLogout = async () => {
+    try {
+      await logout()
+      router.push(ROUTES.LOGIN)
+    } catch (error) {
+      console.error('Logout error:', error)
+      // Even if logout fails, redirect to login for security
+      router.push(ROUTES.LOGIN)
+    }
   }
 
   return (

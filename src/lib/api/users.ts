@@ -18,6 +18,33 @@ export interface UserFilters {
   sort?: string
 }
 
+export interface BackendUser {
+  id: string
+  matricule: string
+  email: string
+  name?: string
+  phone?: string
+  batch?: string
+  specialization?: string
+  status: string
+  roles?: string[]
+  profileCompleted?: boolean
+  lastLoginAt?: string
+  createdAt: string
+  updatedAt: string
+  profilePicture?: string
+}
+
+export interface BackendPaginatedUsersResponse {
+  content: BackendUser[]
+  totalElements: number
+  totalPages: number
+  size: number
+  number: number
+  first: boolean
+  last: boolean
+}
+
 export interface PaginatedUsersResponse {
   content: User[]
   totalElements: number
@@ -61,7 +88,9 @@ export const usersApi = {
       searchParams.set('size', filters.size.toString())
     if (filters?.sort) searchParams.set('sort', filters.sort)
 
-    const response = await apiClient.get('users', { searchParams }).json<any>()
+    const response = await apiClient
+      .get('users', { searchParams })
+      .json<BackendPaginatedUsersResponse>()
 
     // Transform backend response to frontend format
     return {
@@ -74,7 +103,7 @@ export const usersApi = {
    * Get a specific user by ID
    */
   getUser: async (id: string): Promise<User> => {
-    const response = await apiClient.get(`users/${id}`).json<any>()
+    const response = await apiClient.get(`users/${id}`).json<BackendUser>()
     return transformBackendUser(response)
   },
 
@@ -84,7 +113,7 @@ export const usersApi = {
   updateUser: async (id: string, data: UpdateUserData): Promise<User> => {
     const response = await apiClient
       .put(`users/${id}`, { json: data })
-      .json<any>()
+      .json<BackendUser>()
     return transformBackendUser(response)
   },
 
@@ -94,7 +123,7 @@ export const usersApi = {
   changeRole: async (id: string, data: ChangeRoleData): Promise<User> => {
     const response = await apiClient
       .put(`users/${id}/role`, { json: data })
-      .json<any>()
+      .json<BackendUser>()
     return transformBackendUser(response)
   },
 
@@ -104,7 +133,7 @@ export const usersApi = {
   changeStatus: async (id: string, data: ChangeStatusData): Promise<User> => {
     const response = await apiClient
       .put(`users/${id}/status`, { json: data })
-      .json<any>()
+      .json<BackendUser>()
     return transformBackendUser(response)
   },
 
@@ -130,18 +159,18 @@ export const usersApi = {
 /**
  * Transform backend user data to frontend format
  */
-function transformBackendUser(backendUser: any): User {
+function transformBackendUser(backendUser: BackendUser): User {
   return {
     id: backendUser.id,
     matricule: backendUser.matricule,
     email: backendUser.email,
-    name: backendUser.name,
+    name: backendUser.name ?? '',
     phone: backendUser.phone,
     batch: backendUser.batch,
     specialization: backendUser.specialization,
     status: backendUser.status,
-    roles: backendUser.roles,
-    profileCompleted: backendUser.profileCompleted,
+    roles: backendUser.roles ?? [],
+    profileCompleted: backendUser.profileCompleted ?? false,
     lastLoginAt: backendUser.lastLoginAt,
     createdAt: backendUser.createdAt,
     updatedAt: backendUser.updatedAt,
@@ -151,8 +180,8 @@ function transformBackendUser(backendUser: any): User {
     lastName: backendUser.name?.split(' ').slice(1).join(' ') || '',
     role: Array.isArray(backendUser.roles)
       ? backendUser.roles[0]
-      : backendUser.roles,
-    isEmailVerified: backendUser.profileCompleted || false,
+      : backendUser.roles ?? '',
+    isEmailVerified: backendUser.profileCompleted ?? false,
     profilePicture: backendUser.profilePicture,
   }
 }

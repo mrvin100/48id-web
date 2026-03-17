@@ -1,12 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import ky from 'ky'
-import {
-  RefreshTokenResponse,
-  User,
-  UserRole,
-  UserStatus,
-} from '@/types/auth.types'
+import { RefreshTokenResponse, User, UserRole } from '@/types/auth.types'
+import { BackendUser } from '@/lib/api/users'
 import { config } from '@/lib/env'
 
 export async function POST(request: NextRequest) {

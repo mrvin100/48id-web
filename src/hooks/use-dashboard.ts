@@ -6,20 +6,8 @@
  */
 
 import { useQuery } from '@tanstack/react-query'
-import {
-  dashboardApi,
-  type DashboardMetrics,
-  type LoginActivityResponse,
-  type RecentActivityResponse,
-} from '@/lib/api/dashboard'
-
-// Query Keys
-export const dashboardKeys = {
-  all: ['dashboard'] as const,
-  metrics: () => [...dashboardKeys.all, 'metrics'] as const,
-  loginActivity: () => [...dashboardKeys.all, 'login-activity'] as const,
-  recentActivity: () => [...dashboardKeys.all, 'recent-activity'] as const,
-}
+import { dashboardApi } from '@/lib/api/dashboard'
+import { dashboardKeys } from '@/lib/query-keys'
 
 /**
  * Hook to fetch dashboard metrics with auto-refresh
