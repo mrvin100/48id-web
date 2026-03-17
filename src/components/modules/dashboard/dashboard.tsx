@@ -9,6 +9,7 @@
  * Requirements: WEB-03-01, WEB-03-02, WEB-03-03, WEB-03-04
  */
 
+import { useState, useEffect } from 'react'
 import {
   Users,
   Activity,
@@ -68,18 +69,63 @@ const chartConfig = {
     label: 'Pending',
     color: 'hsl(var(--chart-3))',
   },
-  locked: {
-    label: 'Locked',
+  suspended: {
+    label: 'Suspended',
     color: 'hsl(var(--chart-4))',
   },
 } satisfies ChartConfig
 
 export function DashboardModule() {
+  const [currentTime, setCurrentTime] = useState<string>('')
   const { metrics, loginActivity, recentActivity, isLoading, isError, error } =
     useDashboard()
 
+  // Fix hydration error by using client-side time display
+  useEffect(() => {
+    const updateTime = () => {
+      setCurrentTime(new Date().toLocaleTimeString())
+    }
+
+    updateTime() // Set initial time
+    const interval = setInterval(updateTime, 1000) // Update every second
+
+    return () => clearInterval(interval)
+  }, [])
+
   // Determine backend status
   const backendStatus = isError ? 'error' : metrics ? 'available' : 'loading'
+
+  // Create user status distribution data from real backend metrics
+  const userStatusData = metrics
+    ? [
+        {
+          status: 'Active',
+          count: metrics.activeUsers,
+          fill: 'hsl(var(--chart-1))',
+        },
+        {
+          status: 'Inactive',
+          count: Math.max(
+            0,
+            metrics.totalUsers -
+              metrics.activeUsers -
+              metrics.pendingActivations -
+              metrics.suspendedUsers
+          ),
+          fill: 'hsl(var(--chart-2))',
+        },
+        {
+          status: 'Pending',
+          count: metrics.pendingActivations,
+          fill: 'hsl(var(--chart-3))',
+        },
+        {
+          status: 'Suspended',
+          count: metrics.suspendedUsers,
+          fill: 'hsl(var(--chart-4))',
+        },
+      ]
+    : fallbackUserStatus
 
   return (
     <div className="space-y-6">
@@ -89,7 +135,7 @@ export function DashboardModule() {
       >
         <div className="text-muted-foreground flex items-center gap-2 text-sm">
           <Clock className="h-4 w-4" />
-          <span>Last updated: {new Date().toLocaleTimeString()}</span>
+          <span>Last updated: {currentTime || 'Loading...'}</span>
         </div>
       </PageHeader>
 
@@ -248,7 +294,7 @@ export function DashboardModule() {
             <ChartContainer config={chartConfig} className="h-[300px]">
               <PieChart>
                 <Pie
-                  data={fallbackUserStatus}
+                  data={userStatusData}
                   dataKey="count"
                   nameKey="status"
                   cx="50%"
@@ -256,7 +302,7 @@ export function DashboardModule() {
                   outerRadius={80}
                   label={({ status, count }) => `${status}: ${count}`}
                 >
-                  {fallbackUserStatus.map((entry, index) => (
+                  {userStatusData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.fill} />
                   ))}
                 </Pie>
