@@ -58,7 +58,7 @@ export class AuditService {
   ): Promise<PaginatedResponse<AuditLog>> {
     try {
       const searchParams = new URLSearchParams()
-      
+
       if (params.page !== undefined) {
         searchParams.set('page', params.page.toString())
       }
@@ -95,7 +95,7 @@ export class AuditService {
   async exportAuditLogs(params: AuditParams): Promise<Blob> {
     try {
       const searchParams = new URLSearchParams()
-      
+
       if (params.userId) {
         searchParams.set('userId', params.userId)
       }
@@ -142,7 +142,9 @@ export class AuditService {
         case 404:
           return new Error('Audit logs not found')
         case 429:
-          return new Error('Too many requests. Please wait before trying again.')
+          return new Error(
+            'Too many requests. Please wait before trying again.'
+          )
         case 503:
           return new Error('Audit service is temporarily unavailable')
         default:
