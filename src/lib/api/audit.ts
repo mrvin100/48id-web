@@ -47,15 +47,15 @@ export const auditApi = {
   getAuditLog: async (filters?: AuditFilters): Promise<PaginatedAuditEventsResponse> => {
     const searchParams = new URLSearchParams()
 
-    if (filters?.eventType) searchParams.set('eventType', filters.eventType)
     if (filters?.userId) searchParams.set('userId', filters.userId)
-    if (filters?.dateFrom) searchParams.set('dateFrom', filters.dateFrom)
-    if (filters?.dateTo) searchParams.set('dateTo', filters.dateTo)
+    if (filters?.eventType) searchParams.set('eventType', filters.eventType)
+    if (filters?.dateFrom) searchParams.set('from', filters.dateFrom)
+    if (filters?.dateTo) searchParams.set('to', filters.dateTo)
     if (filters?.page !== undefined) searchParams.set('page', filters.page.toString())
     if (filters?.size !== undefined) searchParams.set('size', filters.size.toString())
     if (filters?.sort) searchParams.set('sort', filters.sort)
 
-    return apiClient.get('admin/audit', { searchParams }).json<PaginatedAuditEventsResponse>()
+    return apiClient.get('admin/audit-log', { searchParams }).json<PaginatedAuditEventsResponse>()
   },
 }
 

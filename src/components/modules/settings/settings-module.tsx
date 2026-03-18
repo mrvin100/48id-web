@@ -9,18 +9,27 @@
  */
 
 import { useState } from 'react'
-import { PageHeader } from '@/components/global'
-import { useAuthStore } from '@/stores/auth-store'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod/v4'
 import { useTheme } from 'next-themes'
+import { Moon, Sun, User as UserIcon, Mail, Phone, IdCard, Lock, KeyRound } from 'lucide-react'
+import { PageHeader } from '@/components/global'
+import { useAuthStore } from '@/stores/auth-store'
+import { SubmitButton } from '@/components/global/submit-button'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { toast } from 'sonner'
-import { Moon, Sun, User as UserIcon, Mail, Phone, IdCard } from 'lucide-react'
 
 const profileSchema = z.object({
   phone: z.string().optional(),
@@ -30,10 +39,22 @@ const profileSchema = z.object({
 
 type ProfileFormData = z.infer<typeof profileSchema>
 
+const passwordSchema = z.object({
+  currentPassword: z.string().min(1, 'Current password is required'),
+  newPassword: z.string().min(8, 'Password must be at least 8 characters'),
+  confirmPassword: z.string(),
+}).refine((data) => data.newPassword === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ['confirmPassword'],
+})
+
+type PasswordFormData = z.infer<typeof passwordSchema>
+
 export function SettingsModule() {
   const user = useAuthStore((state) => state.user)
   const { theme, setTheme } = useTheme()
   const [isEditing, setIsEditing] = useState(false)
+  const [showPasswordDialog, setShowPasswordDialog] = useState(false)
 
   const form = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema as never),
@@ -44,10 +65,34 @@ export function SettingsModule() {
     },
   })
 
+  const passwordForm = useForm<PasswordFormData>({
+    resolver: zodResolver(passwordSchema as never),
+    defaultValues: {
+      currentPassword: '',
+      newPassword: '',
+      confirmPassword: '',
+    },
+  })
+
   const onSubmit = async (data: ProfileFormData) => {
-    // TODO: Implement PUT /me endpoint
-    toast.success('Profile updated successfully')
-    setIsEditing(false)
+    try {
+      // TODO: Implement PUT /me endpoint when available
+      toast.success('Profile updated successfully')
+      setIsEditing(false)
+    } catch {
+      toast.error('Failed to update profile')
+    }
+  }
+
+  const onPasswordSubmit = async (data: PasswordFormData) => {
+    try {
+      // TODO: Implement POST /auth/change-password endpoint when available
+      toast.success('Password changed successfully')
+      setShowPasswordDialog(false)
+      passwordForm.reset()
+    } catch {
+      toast.error('Failed to change password')
+    }
   }
 
   return (
@@ -133,9 +178,9 @@ export function SettingsModule() {
                 />
               </div>
 
-              <Button type="submit" className="w-full">
+              <SubmitButton type="submit">
                 Save Changes
-              </Button>
+              </SubmitButton>
             </form>
           ) : (
             <>
@@ -162,6 +207,23 @@ export function SettingsModule() {
               )}
             </>
           )}
+        </CardContent>
+      </Card>
+
+      {/* Security Card */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <Lock className="h-5 w-5" />
+            <CardTitle>Security</CardTitle>
+          </div>
+          <CardDescription>Manage your password</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Button onClick={() => setShowPasswordDialog(true)}>
+            <KeyRound className="mr-2 h-4 w-4" />
+            Change Password
+          </Button>
         </CardContent>
       </Card>
 
@@ -203,6 +265,81 @@ export function SettingsModule() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Change Password Dialog */}
+      <Dialog open={showPasswordDialog} onOpenChange={setShowPasswordDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Change Password</DialogTitle>
+            <DialogDescription>
+              Enter your current password and choose a new one
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={passwordForm.handleSubmit(onPasswordSubmit)}>
+            <div className="grid gap-4 py-4">
+              <div className="grid gap-2">
+                <Label htmlFor="currentPassword">Current Password</Label>
+                <Input
+                  id="currentPassword"
+                  type="password"
+                  {...passwordForm.register('currentPassword')}
+                />
+                {passwordForm.formState.errors.currentPassword && (
+                  <p className="text-destructive text-sm">
+                    {passwordForm.formState.errors.currentPassword.message}
+                  </p>
+                )}
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="newPassword">New Password</Label>
+                <Input
+                  id="newPassword"
+                  type="password"
+                  {...passwordForm.register('newPassword')}
+                />
+                {passwordForm.formState.errors.newPassword && (
+                  <p className="text-destructive text-sm">
+                    {passwordForm.formState.errors.newPassword.message}
+                  </p>
+                )}
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="confirmPassword">Confirm New Password</Label>
+                <Input
+                  id="confirmPassword"
+                  type="password"
+                  {...passwordForm.register('confirmPassword')}
+                />
+                {passwordForm.formState.errors.confirmPassword && (
+                  <p className="text-destructive text-sm">
+                    {passwordForm.formState.errors.confirmPassword.message}
+                  </p>
+                )}
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setShowPasswordDialog(false)
+                  passwordForm.reset()
+                }}
+              >
+                Cancel
+              </Button>
+              <SubmitButton
+                type="submit"
+                isLoading={passwordForm.formState.isSubmitting}
+              >
+                Change Password
+              </SubmitButton>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

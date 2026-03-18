@@ -9,6 +9,8 @@
  */
 
 import { useState } from 'react'
+import { format } from 'date-fns'
+import { Calendar as CalendarIcon, Search, X, FileText } from 'lucide-react'
 import { PageHeader } from '@/components/global'
 import { useAuditLog } from '@/hooks/use-audit'
 import { AuditEventBadge } from './audit-event-badge'
@@ -31,14 +33,24 @@ import {
 } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription } from '@/components/ui/empty'
-import { FileText, Search, X } from 'lucide-react'
+import { Calendar } from '@/components/ui/calendar'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover'
+import { cn } from '@/lib/utils'
 
 export function AuditLogModule() {
   const [eventType, setEventType] = useState<string>('all')
   const [search, setSearch] = useState<string>('')
+  const [dateFrom, setDateFrom] = useState<Date | undefined>()
+  const [dateTo, setDateTo] = useState<Date | undefined>()
 
   const { data, isLoading, error } = useAuditLog({
     eventType: eventType !== 'all' ? eventType : undefined,
+    dateFrom: dateFrom ? format(dateFrom, 'yyyy-MM-dd') : undefined,
+    dateTo: dateTo ? format(dateTo, 'yyyy-MM-dd') : undefined,
     page: 0,
     size: 50,
   })
@@ -67,8 +79,8 @@ export function AuditLogModule() {
       />
 
       {/* Filters */}
-      <div className="flex items-center gap-4">
-        <div className="relative flex-1 max-w-sm">
+      <div className="flex flex-wrap items-center gap-4">
+        <div className="relative flex-1 min-w-[200px]">
           <Search className="text-muted-foreground absolute top-2.5 left-2 h-4 w-4" />
           <Input
             placeholder="Search events..."
@@ -89,7 +101,7 @@ export function AuditLogModule() {
         </div>
 
         <Select value={eventType} onValueChange={setEventType}>
-          <SelectTrigger className="w-[200px]">
+          <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Filter by event type" />
           </SelectTrigger>
           <SelectContent>
@@ -105,6 +117,65 @@ export function AuditLogModule() {
             <SelectItem value="API_KEY_REVOKED">API Key Revoked</SelectItem>
           </SelectContent>
         </Select>
+
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              className={cn(
+                'w-[180px] justify-start text-left font-normal',
+                !dateFrom && 'text-muted-foreground'
+              )}
+            >
+              <CalendarIcon className="mr-2 h-4 w-4" />
+              {dateFrom ? format(dateFrom, 'PPP') : <span>From Date</span>}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar
+              mode="single"
+              selected={dateFrom}
+              onSelect={setDateFrom}
+              initialFocus
+            />
+          </PopoverContent>
+        </Popover>
+
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              className={cn(
+                'w-[180px] justify-start text-left font-normal',
+                !dateTo && 'text-muted-foreground'
+              )}
+            >
+              <CalendarIcon className="mr-2 h-4 w-4" />
+              {dateTo ? format(dateTo, 'PPP') : <span>To Date</span>}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar
+              mode="single"
+              selected={dateTo}
+              onSelect={setDateTo}
+              initialFocus
+            />
+          </PopoverContent>
+        </Popover>
+
+        {(dateFrom || dateTo) && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              setDateFrom(undefined)
+              setDateTo(undefined)
+            }}
+          >
+            Clear Dates
+          </Button>
+        )}
       </div>
 
       {/* Table */}

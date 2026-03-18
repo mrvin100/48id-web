@@ -53,7 +53,7 @@ export const apiKeysApi = {
    * Create new API key
    */
   createApiKey: async (data: CreateApiKeyRequest): Promise<CreateApiKeyResponse> => {
-    return apiClient.post('admin/api-keys', { json: data }).json<CreateApiKeyResponse>()
+    return apiClient.post('admin/api-keys', { json: { applicationName: data.name, description: data.description } }).json<CreateApiKeyResponse>()
   },
 
   /**
