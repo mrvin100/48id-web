@@ -26,9 +26,6 @@ importers:
       '@tanstack/react-table':
         specifier: ^8.21.3
         version: 8.21.3(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
-      '@types/papaparse':
-        specifier: ^5.5.2
-        version: 5.5.2
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -132,6 +129,9 @@ importers:
       '@types/node':
         specifier: ^20
         version: 20.19.37
+      '@types/papaparse':
+        specifier: ^5.5.2
+        version: 5.5.2
       '@types/react':
         specifier: ^19
         version: 19.2.14
