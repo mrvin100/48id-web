@@ -29,6 +29,15 @@ export interface AuditFilters {
   sort?: string
 }
 
+export interface BackendAuditEvent {
+  id: string
+  userId: string
+  action: string
+  ipAddress: string
+  userAgent: string
+  timestamp: string
+}
+
 export interface PaginatedAuditEventsResponse {
   content: AuditEvent[]
   totalElements: number
@@ -55,7 +64,30 @@ export const auditApi = {
     if (filters?.size !== undefined) searchParams.set('size', filters.size.toString())
     if (filters?.sort) searchParams.set('sort', filters.sort)
 
-    return apiClient.get('admin/audit-log', { searchParams }).json<PaginatedAuditEventsResponse>()
+    const response = await apiClient.get('admin/audit-log', { searchParams }).json<{
+      content: BackendAuditEvent[]
+      totalElements: number
+      totalPages: number
+      size: number
+      number: number
+      first: boolean
+      last: boolean
+    }>()
+
+    // Transform backend response to frontend format
+    return {
+      ...response,
+      content: response.content.map(event => ({
+        id: event.id,
+        eventType: event.action,
+        userId: event.userId,
+        userName: 'System', // Backend doesn't provide user name yet
+        userMatricule: 'N/A', // Backend doesn't provide matricule yet
+        ipAddress: event.ipAddress,
+        timestamp: event.timestamp,
+        metadata: event.userAgent ? { userAgent: event.userAgent } : undefined,
+      })),
+    }
   },
 }
 
