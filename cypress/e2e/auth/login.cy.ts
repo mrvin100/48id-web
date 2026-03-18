@@ -118,10 +118,7 @@ describe('Login Flow', () => {
 describe('Authenticated User Redirect', () => {
   it('should redirect authenticated user from /login to /dashboard', () => {
     // Simulate authenticated session
-    cy.setCookie(
-      Cypress.env('jwtCookieName'),
-      'valid-jwt-token'
-    )
+    cy.setCookie(Cypress.env('jwtCookieName'), 'valid-jwt-token')
 
     cy.visit('/login')
 

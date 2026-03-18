@@ -47,7 +47,11 @@ interface UserEditFormProps {
   onSuccess?: () => void
 }
 
-export function UserEditForm({ user, mode = 'view', onSuccess }: UserEditFormProps) {
+export function UserEditForm({
+  user,
+  mode = 'view',
+  onSuccess,
+}: UserEditFormProps) {
   const [isEditing, setIsEditing] = useState(mode === 'edit')
   const updateUser = useUpdateUser()
 
