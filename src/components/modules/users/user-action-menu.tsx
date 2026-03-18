@@ -33,10 +33,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { toast } from 'sonner'
-import {
-  useForcePasswordReset,
-  useChangeUserStatus,
-} from '@/hooks/use-users'
+import { useForcePasswordReset, useChangeUserStatus } from '@/hooks/use-users'
 
 interface UserActionMenuProps {
   user: User
@@ -54,7 +51,7 @@ export function UserActionMenu({ user }: UserActionMenuProps) {
       await forcePasswordReset.mutateAsync(user.id)
       toast.success('Password reset email sent successfully')
       setShowPasswordResetDialog(false)
-    } catch (error) {
+    } catch (_error) {
       toast.error('Failed to send password reset email')
       setShowPasswordResetDialog(false)
     }
@@ -70,7 +67,7 @@ export function UserActionMenu({ user }: UserActionMenuProps) {
         `User ${user.status === 'SUSPENDED' ? 'reactivated' : 'suspended'} successfully`
       )
       setShowSuspendDialog(false)
-    } catch (error) {
+    } catch (_error) {
       toast.error('Failed to update user status')
       setShowSuspendDialog(false)
     }
@@ -80,10 +77,7 @@ export function UserActionMenu({ user }: UserActionMenuProps) {
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button
-            variant="ghost"
-            className="h-8 w-8 p-0"
-          >
+          <Button variant="ghost" className="h-8 w-8 p-0">
             <span className="sr-only">Open menu</span>
             <MoreHorizontal className="h-4 w-4" />
           </Button>
@@ -92,7 +86,7 @@ export function UserActionMenu({ user }: UserActionMenuProps) {
           <DropdownMenuLabel>Admin Actions</DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuItem
-            onClick={(e) => {
+            onClick={e => {
               e.stopPropagation()
               setShowPasswordResetDialog(true)
             }}
@@ -102,7 +96,7 @@ export function UserActionMenu({ user }: UserActionMenuProps) {
             Force password reset
           </DropdownMenuItem>
           <DropdownMenuItem
-            onClick={(e) => {
+            onClick={e => {
               e.stopPropagation()
               setShowSuspendDialog(true)
             }}
@@ -122,13 +116,13 @@ export function UserActionMenu({ user }: UserActionMenuProps) {
       {/* Password Reset Confirmation Dialog */}
       <AlertDialog
         open={showPasswordResetDialog}
-        onOpenChange={(open) => {
+        onOpenChange={open => {
           if (!open) {
             setShowPasswordResetDialog(false)
           }
         }}
       >
-        <AlertDialogContent onClick={(e) => e.stopPropagation()}>
+        <AlertDialogContent onClick={e => e.stopPropagation()}>
           <AlertDialogHeader>
             <AlertDialogTitle>Force Password Reset</AlertDialogTitle>
             <AlertDialogDescription>
@@ -137,9 +131,11 @@ export function UserActionMenu({ user }: UserActionMenuProps) {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={(e) => e.stopPropagation()}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel onClick={e => e.stopPropagation()}>
+              Cancel
+            </AlertDialogCancel>
             <AlertDialogAction
-              onClick={(e) => {
+              onClick={e => {
                 e.stopPropagation()
                 handlePasswordReset()
               }}
@@ -154,13 +150,13 @@ export function UserActionMenu({ user }: UserActionMenuProps) {
       {/* Suspend/Reactivate Confirmation Dialog */}
       <AlertDialog
         open={showSuspendDialog}
-        onOpenChange={(open) => {
+        onOpenChange={open => {
           if (!open) {
             setShowSuspendDialog(false)
           }
         }}
       >
-        <AlertDialogContent onClick={(e) => e.stopPropagation()}>
+        <AlertDialogContent onClick={e => e.stopPropagation()}>
           <AlertDialogHeader>
             <AlertDialogTitle>
               {user.status === 'SUSPENDED' ? 'Reactivate' : 'Suspend'} Account
@@ -172,9 +168,11 @@ export function UserActionMenu({ user }: UserActionMenuProps) {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={(e) => e.stopPropagation()}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel onClick={e => e.stopPropagation()}>
+              Cancel
+            </AlertDialogCancel>
             <AlertDialogAction
-              onClick={(e) => {
+              onClick={e => {
                 e.stopPropagation()
                 handleSuspend()
               }}

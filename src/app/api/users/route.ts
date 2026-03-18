@@ -57,7 +57,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(data)
   } catch (error) {
     console.error('API users route error:', error)
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+    const errorMessage =
+      error instanceof Error ? error.message : 'Unknown error'
     return NextResponse.json(
       { error: `Failed to fetch users: ${errorMessage}` },
       { status: 500 }

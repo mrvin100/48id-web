@@ -62,9 +62,12 @@ Cypress.Commands.add('waitForPageLoad', () => {
 })
 
 // Custom command: Mock API response
-Cypress.Commands.add('mockApiResponse', (endpoint: string, response: any) => {
-  cy.intercept('GET', `**/api/v1/${endpoint}`, response)
-})
+Cypress.Commands.add(
+  'mockApiResponse',
+  (endpoint: string, response: unknown) => {
+    cy.intercept('GET', `**/api/v1/${endpoint}`, response)
+  }
+)
 
 // Custom command: Mock login response
 Cypress.Commands.add('mockLogin', (user?: Partial<Cypress.TestUser>) => {
@@ -86,7 +89,7 @@ Cypress.Commands.add('mockLogin', (user?: Partial<Cypress.TestUser>) => {
 })
 
 // Custom command: Mock users list response
-Cypress.Commands.add('mockUsersList', (users?: any[]) => {
+Cypress.Commands.add('mockUsersList', (users?: unknown[]) => {
   cy.intercept('GET', '**/api/v1/users*', {
     statusCode: 200,
     body: {
@@ -146,6 +149,7 @@ afterEach(() => {
 
 // TypeScript declarations
 declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Cypress {
     interface TestUser {
       id: string
@@ -162,9 +166,9 @@ declare global {
       createTestUser(userData: Partial<TestUser>): Chainable<void>
       deleteTestUser(userId: string): Chainable<void>
       waitForPageLoad(): Chainable<void>
-      mockApiResponse(endpoint: string, response: any): Chainable<void>
+      mockApiResponse(endpoint: string, response: unknown): Chainable<void>
       mockLogin(user?: Partial<TestUser>): Chainable<void>
-      mockUsersList(users?: any[]): Chainable<void>
+      mockUsersList(users?: unknown[]): Chainable<void>
       verifyNoTokens(): Chainable<void>
     }
   }

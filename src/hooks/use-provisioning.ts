@@ -7,7 +7,6 @@
 
 import { useMutation } from '@tanstack/react-query'
 import { provisioningApi, type CsvImportResponse } from '@/lib/api/provisioning'
-import { provisioningKeys } from '@/lib/query-keys'
 
 /**
  * Hook to download CSV import template
@@ -34,10 +33,6 @@ export function useDownloadTemplate() {
 export function useImportUsers() {
   return useMutation({
     mutationFn: (file: File) => provisioningApi.importUsers(file),
-    onSuccess: (data: CsvImportResponse) => {
-      // Invalidate any user lists to refresh the data
-      // This will be handled by the component calling useUsers().refetch()
-    },
   })
 }
 

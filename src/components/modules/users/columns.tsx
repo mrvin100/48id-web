@@ -16,14 +16,11 @@ import { User } from '@/types/auth.types'
 import { UserActionMenu } from './user-action-menu'
 
 interface ColumnsProps {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onViewDetails?: (user: User) => void
-  onEditUser?: (user: User) => void
 }
 
-export const columns = ({
-  onViewDetails,
-  onEditUser,
-}: ColumnsProps): ColumnDef<User>[] => [
+export const columns = (_props: ColumnsProps): ColumnDef<User>[] => [
   {
     id: 'select',
     header: ({ table }) => (
@@ -44,7 +41,7 @@ export const columns = ({
           value && row.toggleSelected(!!value)
         }}
         aria-label="Select row"
-        onClick={(e) => e.stopPropagation()}
+        onClick={e => e.stopPropagation()}
       />
     ),
     enableSorting: false,

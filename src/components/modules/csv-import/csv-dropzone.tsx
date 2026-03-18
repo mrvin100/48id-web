@@ -199,7 +199,7 @@ export function CsvDropzone({
             return
           }
 
-          const headers = firstRow.map((h: any) =>
+          const headers = firstRow.map((h: string) =>
             String(h).trim().toLowerCase()
           )
 
@@ -227,13 +227,13 @@ export function CsvDropzone({
           const matricules = new Set<string>()
 
           for (let i = 1; i < results.data.length; i++) {
-            const row = results.data[i]
+            const row: unknown = results.data[i]
             if (!Array.isArray(row) || (row.length === 1 && !row[0])) continue
 
             const {
               row: parsedRow,
               hasError,
-              errorMessage,
+              errorMessage: _errorMessage,
             } = validateRow(row as string[], i + 1)
 
             // Check for duplicate matricules
@@ -263,7 +263,7 @@ export function CsvDropzone({
   )
 
   const onDrop = useCallback(
-    (acceptedFiles: File[], rejectedFiles: any[]) => {
+    (acceptedFiles: File[], rejectedFiles: unknown[]) => {
       if (rejectedFiles.length > 0) {
         setParseError('Invalid file type. Only CSV files are accepted.')
         return

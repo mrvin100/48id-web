@@ -236,7 +236,7 @@ export const useAuthStore = create<AuthStoreState>()(
             if (!str) return null
             return JSON.parse(str)
           },
-          setItem: (name: string, value: any) => {
+          setItem: (name: string, value: unknown) => {
             sessionStorage.setItem(name, JSON.stringify(value))
           },
           removeItem: (name: string) => {
@@ -244,7 +244,7 @@ export const useAuthStore = create<AuthStoreState>()(
           },
         } as any,
         // Only persist non-sensitive user data
-        partialize: (state) => ({
+        partialize: state => ({
           user: state.user
             ? {
                 id: state.user.id,
@@ -296,7 +296,7 @@ export const useAuthStore = create<AuthStoreState>()(
             }
           }
         },
-      },
+      }
     ),
     {
       name: 'auth-store',

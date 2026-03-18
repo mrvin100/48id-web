@@ -25,7 +25,7 @@ import {
 } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Download, Upload, CheckCircle2, AlertCircle } from 'lucide-react'
+import { Download, Upload, AlertCircle } from 'lucide-react'
 
 export function ProvisioningModule() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
@@ -57,7 +57,7 @@ export function ProvisioningModule() {
     try {
       await importUsers(selectedFile)
       toast.success('Import completed successfully')
-    } catch (error) {
+    } catch (_error) {
       toast.error('Import failed')
     }
   }
@@ -66,7 +66,7 @@ export function ProvisioningModule() {
     try {
       downloadTemplate.mutate()
       toast.success('Template downloaded')
-    } catch (error) {
+    } catch (_error) {
       toast.error('Failed to download template')
     }
   }

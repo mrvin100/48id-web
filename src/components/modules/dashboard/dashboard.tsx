@@ -313,7 +313,7 @@ export function DashboardModule() {
             </ChartContainer>
             {/* Legend below chart */}
             <div className="mt-4 flex flex-wrap gap-4">
-              {userStatusData.map((item, index) => (
+              {userStatusData.map(item => (
                 <div key={item.status} className="flex items-center gap-2">
                   <div
                     className="h-3 w-3 rounded-full"
