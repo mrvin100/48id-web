@@ -122,9 +122,13 @@ export function UserActionMenu({ user }: UserActionMenuProps) {
       {/* Password Reset Confirmation Dialog */}
       <AlertDialog
         open={showPasswordResetDialog}
-        onOpenChange={setShowPasswordResetDialog}
+        onOpenChange={(open) => {
+          if (!open) {
+            setShowPasswordResetDialog(false)
+          }
+        }}
       >
-        <AlertDialogContent>
+        <AlertDialogContent onClick={(e) => e.stopPropagation()}>
           <AlertDialogHeader>
             <AlertDialogTitle>Force Password Reset</AlertDialogTitle>
             <AlertDialogDescription>
@@ -133,9 +137,12 @@ export function UserActionMenu({ user }: UserActionMenuProps) {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel onClick={(e) => e.stopPropagation()}>Cancel</AlertDialogCancel>
             <AlertDialogAction
-              onClick={handlePasswordReset}
+              onClick={(e) => {
+                e.stopPropagation()
+                handlePasswordReset()
+              }}
               disabled={forcePasswordReset.isPending}
             >
               {forcePasswordReset.isPending ? 'Sending...' : 'Send Reset Email'}
@@ -145,8 +152,15 @@ export function UserActionMenu({ user }: UserActionMenuProps) {
       </AlertDialog>
 
       {/* Suspend/Reactivate Confirmation Dialog */}
-      <AlertDialog open={showSuspendDialog} onOpenChange={setShowSuspendDialog}>
-        <AlertDialogContent>
+      <AlertDialog
+        open={showSuspendDialog}
+        onOpenChange={(open) => {
+          if (!open) {
+            setShowSuspendDialog(false)
+          }
+        }}
+      >
+        <AlertDialogContent onClick={(e) => e.stopPropagation()}>
           <AlertDialogHeader>
             <AlertDialogTitle>
               {user.status === 'SUSPENDED' ? 'Reactivate' : 'Suspend'} Account
@@ -158,9 +172,12 @@ export function UserActionMenu({ user }: UserActionMenuProps) {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel onClick={(e) => e.stopPropagation()}>Cancel</AlertDialogCancel>
             <AlertDialogAction
-              onClick={handleSuspend}
+              onClick={(e) => {
+                e.stopPropagation()
+                handleSuspend()
+              }}
               disabled={changeStatus.isPending}
               className={
                 user.status === 'SUSPENDED'
