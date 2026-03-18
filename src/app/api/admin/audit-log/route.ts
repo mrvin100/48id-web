@@ -29,8 +29,13 @@ export async function GET(request: NextRequest) {
 
     if (userId) params.set('userId', userId)
     if (eventType) params.set('eventType', eventType)
-    if (from) params.set('from', from)
-    if (to) params.set('to', to)
+    // Only add date params if they have valid ISO format values
+    if (from && from.match(/^\d{4}-\d{2}-\d{2}$/)) {
+      params.set('from', `${from}T00:00:00Z`)
+    }
+    if (to && to.match(/^\d{4}-\d{2}-\d{2}$/)) {
+      params.set('to', `${to}T23:59:59Z`)
+    }
 
     const backendUrl = `${config.backend.apiUrl}/admin/audit-log?${params.toString()}`
 
@@ -45,10 +50,7 @@ export async function GET(request: NextRequest) {
       const errorText = await response.text()
       console.error(
         `Backend error (${response.status}):`,
-        'Content-Type:',
-        response.headers.get('content-type'),
-        'Body length:',
-        errorText?.length ?? 0
+        errorText
       )
       return NextResponse.json(
         { error: `Backend error: ${response.status}` },
