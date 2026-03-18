@@ -227,7 +227,22 @@ export function DataTable<TData, TValue>({
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && 'selected'}
-                  onClick={() => onRowClick?.(row.original)}
+                  onClick={e => {
+                    // Don't trigger row click for interactive elements
+                    const target = e.target as HTMLElement
+                    if (
+                      target.closest('button') ||
+                      target.closest('a') ||
+                      target.closest('input') ||
+                      target.closest('select') ||
+                      target.closest('textarea') ||
+                      target.closest('[role="button"]') ||
+                      target.closest('[data-no-row-click]')
+                    ) {
+                      return
+                    }
+                    onRowClick?.(row.original)
+                  }}
                   className={
                     onRowClick ? 'hover:bg-muted/50 cursor-pointer' : ''
                   }

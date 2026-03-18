@@ -17,8 +17,8 @@ import {
   Server,
   TrendingUp,
   Calendar,
-  Clock,
   AlertCircle,
+  Clock as ClockIcon,
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -71,22 +71,32 @@ const chartConfig = {
 // Explicit colors for pie chart segments
 const PIE_CHART_COLORS = ['#22c55e', '#6b7280', '#f59e0b', '#ef4444']
 
-export function DashboardModule() {
+// Clock component to avoid re-rendering entire dashboard every second
+function Clock() {
   const [currentTime, setCurrentTime] = useState<string>('')
-  const { metrics, loginActivity, recentActivity, isLoading, isError, error } =
-    useDashboard()
 
-  // Fix hydration error by using client-side time display
   useEffect(() => {
     const updateTime = () => {
       setCurrentTime(new Date().toLocaleTimeString())
     }
 
-    updateTime() // Set initial time
-    const interval = setInterval(updateTime, 1000) // Update every second
+    updateTime()
+    const interval = setInterval(updateTime, 1000)
 
     return () => clearInterval(interval)
   }, [])
+
+  return (
+    <div className="text-muted-foreground flex items-center gap-2 text-sm">
+      <ClockIcon className="h-4 w-4" />
+      <span>Last updated: {currentTime || 'Loading...'}</span>
+    </div>
+  )
+}
+
+export function DashboardModule() {
+  const { metrics, loginActivity, recentActivity, isLoading, isError, error } =
+    useDashboard()
 
   // Determine backend status
   const backendStatus = isError ? 'error' : metrics ? 'available' : 'loading'
@@ -134,10 +144,7 @@ export function DashboardModule() {
         title="Dashboard"
         description="Welcome to the 48ID Admin Portal"
       >
-        <div className="text-muted-foreground flex items-center gap-2 text-sm">
-          <Clock className="h-4 w-4" />
-          <span>Last updated: {currentTime || 'Loading...'}</span>
-        </div>
+        <Clock />
       </PageHeader>
 
       {/* Backend Status Alert */}
@@ -311,20 +318,6 @@ export function DashboardModule() {
                 <ChartLegend content={<ChartLegendContent />} />
               </PieChart>
             </ChartContainer>
-            {/* Legend below chart */}
-            <div className="mt-4 flex flex-wrap gap-4">
-              {userStatusData.map(item => (
-                <div key={item.status} className="flex items-center gap-2">
-                  <div
-                    className="h-3 w-3 rounded-full"
-                    style={{ backgroundColor: item.fill }}
-                  />
-                  <span className="text-sm">
-                    {item.status}: {item.count}
-                  </span>
-                </div>
-              ))}
-            </div>
           </CardContent>
         </Card>
       </div>

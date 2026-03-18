@@ -5,8 +5,9 @@
  * Provides template download and file upload functionality.
  */
 
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { provisioningApi, type CsvImportResponse } from '@/lib/api/provisioning'
+import { usersKeys } from '@/lib/query-keys'
 
 /**
  * Hook to download CSV import template
@@ -31,8 +32,14 @@ export function useDownloadTemplate() {
  * Hook to import users from CSV file
  */
 export function useImportUsers() {
+  const queryClient = useQueryClient()
+
   return useMutation({
     mutationFn: (file: File) => provisioningApi.importUsers(file),
+    onSuccess: () => {
+      // Invalidate users list to refresh after import
+      queryClient.invalidateQueries({ queryKey: usersKeys.all })
+    },
   })
 }
 

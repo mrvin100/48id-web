@@ -48,12 +48,14 @@ interface UserDetailSheetProps {
   user: User | null
   open: boolean
   onOpenChange: (open: boolean) => void
+  mode?: 'view' | 'edit'
 }
 
 export function UserDetailSheet({
   user,
   open,
   onOpenChange,
+  mode = 'view',
 }: UserDetailSheetProps) {
   const { data: userData, isLoading } = useUser(user?.id || '')
 
@@ -150,7 +152,7 @@ export function UserDetailSheet({
               value="profile"
               className="m-0 flex-1 overflow-auto p-6 data-[state=inactive]:hidden"
             >
-              <UserEditForm user={currentUser} />
+              <UserEditForm user={currentUser} mode={mode} />
             </TabsContent>
 
             {/* Activity Tab */}

@@ -10,7 +10,7 @@
  */
 
 import { useCallback, useState } from 'react'
-import { useDropzone } from 'react-dropzone'
+import { useDropzone, type FileRejection } from 'react-dropzone'
 import Papa from 'papaparse'
 import { Upload, FileText, X, CheckCircle2, AlertCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -247,6 +247,13 @@ export function CsvDropzone({
             previewRows.push(parsedRow)
           }
 
+          // Check for empty data - must have at least one valid row
+          if (previewRows.length === 0) {
+            setParseError('CSV file contains no valid data rows')
+            setPreview([])
+            return
+          }
+
           if (hasDuplicates) {
             setParseError('Warning: Duplicate matricules detected')
           }
@@ -263,7 +270,7 @@ export function CsvDropzone({
   )
 
   const onDrop = useCallback(
-    (acceptedFiles: File[], rejectedFiles: unknown[]) => {
+    (acceptedFiles: File[], rejectedFiles: FileRejection[]) => {
       if (rejectedFiles.length > 0) {
         setParseError('Invalid file type. Only CSV files are accepted.')
         return

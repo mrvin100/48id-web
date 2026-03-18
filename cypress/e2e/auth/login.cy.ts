@@ -30,7 +30,14 @@ describe('Login Flow', () => {
   })
 
   it('should show error for invalid credentials', () => {
-    cy.mockLogin()
+    // Mock failed login response (401)
+    cy.intercept('POST', '**/api/auth/login', {
+      statusCode: 401,
+      body: {
+        success: false,
+        message: 'Matricule or password is incorrect',
+      },
+    })
 
     cy.get('input[name="matricule"]').type('INVALID')
     cy.get('input[name="password"]').type('wrongpassword')
@@ -111,7 +118,10 @@ describe('Login Flow', () => {
 describe('Authenticated User Redirect', () => {
   it('should redirect authenticated user from /login to /dashboard', () => {
     // Simulate authenticated session
-    cy.setCookie('k48_access_token', 'valid-jwt-token')
+    cy.setCookie(
+      Cypress.env('jwtCookieName'),
+      'valid-jwt-token'
+    )
 
     cy.visit('/login')
 

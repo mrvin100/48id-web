@@ -13,6 +13,8 @@ export default defineConfig({
     viewportHeight: 720,
     env: {
       apiUrl: process.env.NEXT_PUBLIC_48ID_API_URL || 'http://localhost:8080',
+      jwtCookieName: 'k48_access_token',
+      refreshCookieName: 'k48_refresh_token',
     },
   },
 

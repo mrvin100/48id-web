@@ -13,7 +13,7 @@
  */
 
 import { create } from 'zustand'
-import { devtools, persist } from 'zustand/middleware'
+import { devtools, persist, createJSONStorage } from 'zustand/middleware'
 import { immer } from 'zustand/middleware/immer'
 import {
   User,
@@ -230,19 +230,7 @@ export const useAuthStore = create<AuthStoreState>()(
       {
         name: '48id-auth-storage',
         // Use sessionStorage for better security (cleared on tab close)
-        storage: {
-          getItem: (name: string) => {
-            const str = sessionStorage.getItem(name)
-            if (!str) return null
-            return JSON.parse(str)
-          },
-          setItem: (name: string, value: unknown) => {
-            sessionStorage.setItem(name, JSON.stringify(value))
-          },
-          removeItem: (name: string) => {
-            sessionStorage.removeItem(name)
-          },
-        } as any,
+        storage: createJSONStorage(() => sessionStorage),
         // Only persist non-sensitive user data
         partialize: state => ({
           user: state.user
@@ -290,7 +278,7 @@ export const useAuthStore = create<AuthStoreState>()(
                 state.user = null
                 state.isAuthenticated = false
                 state.lastActivity = null
-                // Clear sessionStorage
+                // Clear sessionStorage using the same name constant
                 sessionStorage.removeItem('48id-auth-storage')
               }
             }

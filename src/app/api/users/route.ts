@@ -46,7 +46,14 @@ export async function GET(request: NextRequest) {
 
     if (!response.ok) {
       const errorText = await response.text()
-      console.error(`Backend error (${response.status}):`, errorText)
+      // Log only safe metadata, not the full response body
+      console.error(
+        `Backend error (${response.status}):`,
+        'Content-Type:',
+        response.headers.get('content-type'),
+        'Body length:',
+        errorText?.length ?? 0
+      )
       return NextResponse.json(
         { error: `Backend error: ${response.status}` },
         { status: response.status }
@@ -56,11 +63,11 @@ export async function GET(request: NextRequest) {
     const data = await response.json()
     return NextResponse.json(data)
   } catch (error) {
+    // Log full error internally for debugging
     console.error('API users route error:', error)
-    const errorMessage =
-      error instanceof Error ? error.message : 'Unknown error'
+    // Return generic error to client - never expose internal details
     return NextResponse.json(
-      { error: `Failed to fetch users: ${errorMessage}` },
+      { error: 'Failed to fetch users' },
       { status: 500 }
     )
   }

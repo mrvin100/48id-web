@@ -50,10 +50,10 @@ describe('Logout Flow', () => {
     cy.get('[data-testid="user-menu"]').click()
     cy.contains('Sign out').click()
 
-    // Confirm logout
-    cy.contains('Sign out').click()
+    // Confirm logout - scope to dialog to avoid ambiguity
+    cy.get('[role="alertdialog"]').contains('Sign out').click()
 
-    // Should redirect to login
+    // Wait for navigation to complete
     cy.url().should('include', '/login')
   })
 
@@ -64,14 +64,18 @@ describe('Logout Flow', () => {
       body: { success: true },
     })
 
+    // Precondition: Verify cookies exist before logout
+    cy.getCookie(Cypress.env('jwtCookieName')).should('exist')
+    cy.getCookie(Cypress.env('refreshCookieName')).should('exist')
+
     // Logout
     cy.get('[data-testid="user-menu"]').click()
     cy.contains('Sign out').click()
     cy.contains('Sign out').click()
 
     // Cookies should be cleared
-    cy.getCookie('k48_access_token').should('be.null')
-    cy.getCookie('k48_refresh_token').should('be.null')
+    cy.getCookie(Cypress.env('jwtCookieName')).should('be.null')
+    cy.getCookie(Cypress.env('refreshCookieName')).should('be.null')
   })
 
   it('should not access dashboard after logout', () => {

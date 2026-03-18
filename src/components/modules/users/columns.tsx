@@ -37,7 +37,7 @@ export const columns = ({ onViewDetails }: ColumnsProps): ColumnDef<User>[] => [
         checked={row.getIsSelected()}
         onCheckedChange={value => {
           // Stop event propagation to prevent row click
-          value && row.toggleSelected(!!value)
+          row.toggleSelected(!!value)
         }}
         aria-label="Select row"
         onClick={e => e.stopPropagation()}

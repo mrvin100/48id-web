@@ -62,9 +62,9 @@ export function ProvisioningModule() {
     }
   }
 
-  const handleDownloadTemplate = () => {
+  const handleDownloadTemplate = async () => {
     try {
-      downloadTemplate.mutate()
+      await downloadTemplate.mutateAsync()
       toast.success('Template downloaded')
     } catch (_error) {
       toast.error('Failed to download template')

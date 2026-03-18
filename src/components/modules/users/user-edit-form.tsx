@@ -12,7 +12,7 @@
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import * as z from 'zod'
+import * as z from 'zod/v4'
 import { User } from '@/types/auth.types'
 import { useUpdateUser } from '@/hooks/use-users'
 import { toast } from 'sonner'
@@ -43,11 +43,12 @@ type UserEditFormData = z.infer<typeof userEditSchema>
 
 interface UserEditFormProps {
   user: User
+  mode?: 'view' | 'edit'
   onSuccess?: () => void
 }
 
-export function UserEditForm({ user, onSuccess }: UserEditFormProps) {
-  const [isEditing, setIsEditing] = useState(false)
+export function UserEditForm({ user, mode = 'view', onSuccess }: UserEditFormProps) {
+  const [isEditing, setIsEditing] = useState(mode === 'edit')
   const updateUser = useUpdateUser()
 
   const form = useForm<UserEditFormData>({
