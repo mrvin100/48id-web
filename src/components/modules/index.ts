@@ -23,3 +23,6 @@ export * from './audit'
 
 // API keys modules
 export * from './api-keys'
+
+// Settings modules
+export * from './settings'

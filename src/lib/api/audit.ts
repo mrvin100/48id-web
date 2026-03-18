@@ -1,0 +1,62 @@
+/**
+ * Audit API Layer
+ *
+ * API functions for audit log operations.
+ * Handles fetching and filtering audit events.
+ */
+
+import { apiClient } from './client'
+
+// Types
+export interface AuditEvent {
+  id: string
+  eventType: string
+  userId: string
+  userName: string
+  userMatricule: string
+  ipAddress: string
+  timestamp: string
+  metadata?: Record<string, unknown>
+}
+
+export interface AuditFilters {
+  eventType?: string
+  userId?: string
+  dateFrom?: string
+  dateTo?: string
+  page?: number
+  size?: number
+  sort?: string
+}
+
+export interface PaginatedAuditEventsResponse {
+  content: AuditEvent[]
+  totalElements: number
+  totalPages: number
+  size: number
+  number: number
+  first: boolean
+  last: boolean
+}
+
+// API Functions
+export const auditApi = {
+  /**
+   * Get paginated audit log with optional filters
+   */
+  getAuditLog: async (filters?: AuditFilters): Promise<PaginatedAuditEventsResponse> => {
+    const searchParams = new URLSearchParams()
+
+    if (filters?.eventType) searchParams.set('eventType', filters.eventType)
+    if (filters?.userId) searchParams.set('userId', filters.userId)
+    if (filters?.dateFrom) searchParams.set('dateFrom', filters.dateFrom)
+    if (filters?.dateTo) searchParams.set('dateTo', filters.dateTo)
+    if (filters?.page !== undefined) searchParams.set('page', filters.page.toString())
+    if (filters?.size !== undefined) searchParams.set('size', filters.size.toString())
+    if (filters?.sort) searchParams.set('sort', filters.sort)
+
+    return apiClient.get('admin/audit', { searchParams }).json<PaginatedAuditEventsResponse>()
+  },
+}
+
+export default auditApi

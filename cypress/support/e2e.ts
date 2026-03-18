@@ -4,6 +4,8 @@
 
 // Import testing-library commands
 import '@testing-library/cypress/add-commands'
+// Import axe-core for accessibility testing
+import 'cypress-axe'
 
 // Custom command: Login
 Cypress.Commands.add('login', (matricule: string, password: string) => {
