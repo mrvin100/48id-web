@@ -41,7 +41,17 @@ export async function POST(_request: NextRequest) {
       }
     } catch (backendError) {
       // Log backend error but don't fail logout
-      console.warn('Backend logout failed:', backendError)
+      // 401 is expected if token is already invalid/expired
+      if (backendError instanceof Error) {
+        const message = backendError.message
+        if (message.includes('401')) {
+          console.info(
+            'Backend logout: Token already expired (401) - expected behavior'
+          )
+        } else {
+          console.warn('Backend logout failed:', message)
+        }
+      }
       // Continue with cookie cleanup regardless of backend response
     }
 

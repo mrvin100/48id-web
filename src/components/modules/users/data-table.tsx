@@ -50,11 +50,13 @@ import { Badge } from '@/components/ui/badge'
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
+  onRowClick?: (row: TData) => void
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
+  onRowClick,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -178,8 +180,8 @@ export function DataTable<TData, TValue>({
         </DropdownMenu>
       </div>
 
-      {/* Selection Info */}
-      {table.getFilteredSelectedRowModel().rows.length > 0 && (
+      {/* Selection Info - Hidden until bulk actions are implemented in Sprint 4 */}
+      {/* {table.getFilteredSelectedRowModel().rows.length > 0 && (
         <div className="bg-muted/50 flex items-center justify-between rounded-md border px-4 py-2">
           <div className="flex items-center space-x-2">
             <Badge variant="secondary">
@@ -196,7 +198,7 @@ export function DataTable<TData, TValue>({
             </Button>
           </div>
         </div>
-      )}
+      )} */}
 
       {/* Table */}
       <div className="rounded-md border">
@@ -225,6 +227,25 @@ export function DataTable<TData, TValue>({
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && 'selected'}
+                  onClick={e => {
+                    // Don't trigger row click for interactive elements
+                    const target = e.target as HTMLElement
+                    if (
+                      target.closest('button') ||
+                      target.closest('a') ||
+                      target.closest('input') ||
+                      target.closest('select') ||
+                      target.closest('textarea') ||
+                      target.closest('[role="button"]') ||
+                      target.closest('[data-no-row-click]')
+                    ) {
+                      return
+                    }
+                    onRowClick?.(row.original)
+                  }}
+                  className={
+                    onRowClick ? 'hover:bg-muted/50 cursor-pointer' : ''
+                  }
                 >
                   {row.getVisibleCells().map(cell => (
                     <TableCell key={cell.id}>

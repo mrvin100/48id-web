@@ -4,11 +4,16 @@
  * This store manages authentication state including user data, loading states,
  * and error handling. It integrates with the AuthService for all auth operations.
  *
+ * Storage Strategy:
+ * - User data persisted in sessionStorage (survives page refresh, cleared on tab close)
+ * - JWT tokens stored in HttpOnly cookies (secure, not accessible to JavaScript)
+ * - Session automatically validated on rehydration
+ *
  * Requirements: 1.1, 1.3
  */
 
 import { create } from 'zustand'
-import { devtools, persist } from 'zustand/middleware'
+import { devtools, persist, createJSONStorage } from 'zustand/middleware'
 import { immer } from 'zustand/middleware/immer'
 import {
   User,
@@ -224,6 +229,8 @@ export const useAuthStore = create<AuthStoreState>()(
       })),
       {
         name: '48id-auth-storage',
+        // Use sessionStorage for better security (cleared on tab close)
+        storage: createJSONStorage(() => sessionStorage),
         // Only persist non-sensitive user data
         partialize: state => ({
           user: state.user
@@ -271,6 +278,8 @@ export const useAuthStore = create<AuthStoreState>()(
                 state.user = null
                 state.isAuthenticated = false
                 state.lastActivity = null
+                // Clear sessionStorage using the same name constant
+                sessionStorage.removeItem('48id-auth-storage')
               }
             }
           }

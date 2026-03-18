@@ -58,3 +58,11 @@ export const apiKeysKeys = {
   details: () => [...apiKeysKeys.all, 'detail'] as const,
   detail: (id: string) => [...apiKeysKeys.details(), id] as const,
 }
+
+/**
+ * Query key factory for provisioning
+ */
+export const provisioningKeys = {
+  all: ['provisioning'] as const,
+  importResult: () => [...provisioningKeys.all, 'import-result'] as const,
+}

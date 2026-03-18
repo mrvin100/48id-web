@@ -9,13 +9,32 @@
  * Requirements: WEB-04-01, WEB-04-02
  */
 
+import { useState } from 'react'
 import { PageHeader } from '@/components/global'
 import { DataTable } from './data-table'
 import { columns } from './columns'
+import { UserDetailSheet } from './user-detail-sheet'
 import { useUserManagement } from '@/hooks/use-users'
+import { User } from '@/types/auth.types'
 
 export function UsersModule() {
+  const [selectedUser, setSelectedUser] = useState<User | null>(null)
+  const [sheetOpen, setSheetOpen] = useState(false)
+  const [sheetMode, setSheetMode] = useState<'view' | 'edit'>('view')
+
   const { users, totalUsers, isLoading, isError, error } = useUserManagement()
+
+  const handleViewDetails = (user: User) => {
+    setSelectedUser(user)
+    setSheetOpen(true)
+    setSheetMode('view')
+  }
+
+  const handleEditUser = (user: User) => {
+    setSelectedUser(user)
+    setSheetOpen(true)
+    setSheetMode('edit')
+  }
 
   if (isLoading) {
     return (
@@ -57,7 +76,17 @@ export function UsersModule() {
         description={`Manage user accounts and permissions • ${totalUsers} total users`}
       />
 
-      <DataTable columns={columns} data={users} />
+      <DataTable
+        columns={columns({ onViewDetails: handleViewDetails })}
+        data={users}
+        onRowClick={handleViewDetails}
+      />
+
+      <UserDetailSheet
+        user={selectedUser}
+        open={sheetOpen}
+        onOpenChange={setSheetOpen}
+      />
     </div>
   )
 }

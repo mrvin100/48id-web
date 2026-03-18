@@ -279,13 +279,20 @@ function ChartLegendContent({
     >
       {payload
         .filter(item => item.type !== 'none')
-        .map(item => {
-          const key = `${nameKey || item.dataKey || 'value'}`
-          const itemConfig = getPayloadConfigFromPayload(config, item, key)
+        .map((item, index) => {
+          // Use semantic key for config lookup (without index suffix)
+          const semanticKey = String(item.dataKey ?? nameKey ?? 'value')
+          const itemConfig = getPayloadConfigFromPayload(
+            config,
+            item,
+            semanticKey
+          )
+          // Use renderKey for React key (with index suffix for uniqueness)
+          const renderKey = `${semanticKey}-${index}`
 
           return (
             <div
-              key={item.value}
+              key={renderKey}
               className={cn(
                 '[&>svg]:text-muted-foreground flex items-center gap-1.5 [&>svg]:h-3 [&>svg]:w-3'
               )}

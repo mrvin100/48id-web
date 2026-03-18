@@ -17,8 +17,8 @@ import {
   Server,
   TrendingUp,
   Calendar,
-  Clock,
   AlertCircle,
+  Clock as ClockIcon,
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -44,64 +44,70 @@ import {
 } from 'recharts'
 import { useDashboard } from '@/hooks/use-dashboard'
 
-// Fallback data for user status distribution (static chart data)
-const fallbackUserStatus = [
-  { status: 'Active', count: 1247, fill: 'hsl(var(--chart-1))' },
-  { status: 'Inactive', count: 234, fill: 'hsl(var(--chart-2))' },
-  { status: 'Pending', count: 89, fill: 'hsl(var(--chart-3))' },
-  { status: 'Locked', count: 12, fill: 'hsl(var(--chart-4))' },
-]
-
+// Chart configuration with explicit colors
 const chartConfig = {
   logins: {
     label: 'Logins',
-    color: 'hsl(var(--chart-1))',
+    color: '#2563eb', // blue-600
   },
   active: {
     label: 'Active',
-    color: 'hsl(var(--chart-1))',
+    color: '#22c55e', // green-500
   },
   inactive: {
     label: 'Inactive',
-    color: 'hsl(var(--chart-2))',
+    color: '#6b7280', // gray-500
   },
   pending: {
     label: 'Pending',
-    color: 'hsl(var(--chart-3))',
+    color: '#f59e0b', // amber-500
   },
   suspended: {
     label: 'Suspended',
-    color: 'hsl(var(--chart-4))',
+    color: '#ef4444', // red-500
   },
 } satisfies ChartConfig
 
-export function DashboardModule() {
-  const [currentTime, setCurrentTime] = useState<string>('')
-  const { metrics, loginActivity, recentActivity, isLoading, isError, error } =
-    useDashboard()
+// Explicit colors for pie chart segments
+const PIE_CHART_COLORS = ['#22c55e', '#6b7280', '#f59e0b', '#ef4444']
 
-  // Fix hydration error by using client-side time display
+// Clock component to avoid re-rendering entire dashboard every second
+function Clock() {
+  const [currentTime, setCurrentTime] = useState<string>('')
+
   useEffect(() => {
     const updateTime = () => {
       setCurrentTime(new Date().toLocaleTimeString())
     }
 
-    updateTime() // Set initial time
-    const interval = setInterval(updateTime, 1000) // Update every second
+    updateTime()
+    const interval = setInterval(updateTime, 1000)
 
     return () => clearInterval(interval)
   }, [])
 
+  return (
+    <div className="text-muted-foreground flex items-center gap-2 text-sm">
+      <ClockIcon className="h-4 w-4" />
+      <span>Last updated: {currentTime || 'Loading...'}</span>
+    </div>
+  )
+}
+
+export function DashboardModule() {
+  const { metrics, loginActivity, recentActivity, isLoading, isError, error } =
+    useDashboard()
+
   // Determine backend status
   const backendStatus = isError ? 'error' : metrics ? 'available' : 'loading'
 
-  // Create user status distribution data from real backend metrics
+  // Create user status distribution data from real backend metrics with explicit colors
   const userStatusData = metrics
     ? [
         {
           status: 'Active',
           count: metrics.activeUsers,
-          fill: 'hsl(var(--chart-1))',
+          fill: PIE_CHART_COLORS[0],
         },
         {
           status: 'Inactive',
@@ -112,20 +118,25 @@ export function DashboardModule() {
               metrics.pendingActivations -
               metrics.suspendedUsers
           ),
-          fill: 'hsl(var(--chart-2))',
+          fill: PIE_CHART_COLORS[1],
         },
         {
           status: 'Pending',
           count: metrics.pendingActivations,
-          fill: 'hsl(var(--chart-3))',
+          fill: PIE_CHART_COLORS[2],
         },
         {
           status: 'Suspended',
           count: metrics.suspendedUsers,
-          fill: 'hsl(var(--chart-4))',
+          fill: PIE_CHART_COLORS[3],
         },
       ]
-    : fallbackUserStatus
+    : [
+        { status: 'Active', count: 0, fill: PIE_CHART_COLORS[0] },
+        { status: 'Inactive', count: 0, fill: PIE_CHART_COLORS[1] },
+        { status: 'Pending', count: 0, fill: PIE_CHART_COLORS[2] },
+        { status: 'Suspended', count: 0, fill: PIE_CHART_COLORS[3] },
+      ]
 
   return (
     <div className="space-y-6">
@@ -133,10 +144,7 @@ export function DashboardModule() {
         title="Dashboard"
         description="Welcome to the 48ID Admin Portal"
       >
-        <div className="text-muted-foreground flex items-center gap-2 text-sm">
-          <Clock className="h-4 w-4" />
-          <span>Last updated: {currentTime || 'Loading...'}</span>
-        </div>
+        <Clock />
       </PageHeader>
 
       {/* Backend Status Alert */}
@@ -276,7 +284,7 @@ export function DashboardModule() {
                 <XAxis dataKey="day" />
                 <YAxis />
                 <ChartTooltip content={<ChartTooltipContent />} />
-                <Bar dataKey="logins" fill="hsl(var(--chart-1))" radius={4} />
+                <Bar dataKey="logins" fill="#2563eb" radius={4} />
               </BarChart>
             </ChartContainer>
           </CardContent>
@@ -356,7 +364,9 @@ export function DashboardModule() {
               <div className="text-muted-foreground py-4 text-center">
                 {isLoading
                   ? 'Loading recent activity...'
-                  : 'No recent activity'}
+                  : isError
+                    ? `Error: ${error?.message}`
+                    : 'No recent activity'}
               </div>
             )}
           </div>
