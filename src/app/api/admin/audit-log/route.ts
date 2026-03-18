@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
       params.set('to', `${to}T23:59:59Z`)
     }
 
-    const backendUrl = `${config.backend.apiUrl}/admin/audit-log?${params.toString()}`
+    const backendUrl = `${config.backend.apiUrl}/api/v1/admin/audit-log?${params.toString()}`
 
     const response = await fetch(backendUrl, {
       headers: {
@@ -48,10 +48,7 @@ export async function GET(request: NextRequest) {
 
     if (!response.ok) {
       const errorText = await response.text()
-      console.error(
-        `Backend error (${response.status}):`,
-        errorText
-      )
+      console.error(`Backend error (${response.status}):`, errorText)
       return NextResponse.json(
         { error: `Backend error: ${response.status}` },
         { status: response.status }

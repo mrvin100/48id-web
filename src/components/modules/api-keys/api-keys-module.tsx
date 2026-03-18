@@ -10,7 +10,12 @@
 
 import { useState } from 'react'
 import { PageHeader } from '@/components/global'
-import { useApiKeys, useCreateApiKey, useRotateApiKey, useRevokeApiKey } from '@/hooks/use-api-keys'
+import {
+  useApiKeys,
+  useCreateApiKey,
+  useRotateApiKey,
+  useRevokeApiKey,
+} from '@/hooks/use-api-keys'
 import { Button } from '@/components/ui/button'
 import {
   Table,
@@ -42,7 +47,13 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription } from '@/components/ui/empty'
+import {
+  Empty,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+  EmptyDescription,
+} from '@/components/ui/empty'
 import { toast } from 'sonner'
 import { Key, Plus, Copy, RotateCw, Trash2, FileKey } from 'lucide-react'
 
@@ -65,7 +76,10 @@ export function ApiKeysModule() {
     const description = formData.get('description') as string
 
     try {
-      const response = await createKey.mutateAsync({ name, description: description || undefined })
+      const response = await createKey.mutateAsync({
+        name,
+        description: description || undefined,
+      })
       setNewKey(response.key)
       setShowCreateDialog(false)
       setShowKeyDialog(true)
@@ -130,12 +144,24 @@ export function ApiKeysModule() {
             {isLoading ? (
               Array.from({ length: 5 }).map((_, i) => (
                 <TableRow key={i}>
-                  <TableCell><Skeleton className="h-6 w-40" /></TableCell>
-                  <TableCell><Skeleton className="h-6 w-24" /></TableCell>
-                  <TableCell><Skeleton className="h-6 w-32" /></TableCell>
-                  <TableCell><Skeleton className="h-6 w-32" /></TableCell>
-                  <TableCell><Skeleton className="h-6 w-20" /></TableCell>
-                  <TableCell><Skeleton className="h-8 w-24" /></TableCell>
+                  <TableCell>
+                    <Skeleton className="h-6 w-40" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-6 w-24" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-6 w-32" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-6 w-32" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-6 w-20" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-8 w-24" />
+                  </TableCell>
                 </TableRow>
               ))
             ) : !apiKeys || apiKeys.length === 0 ? (
@@ -155,12 +181,16 @@ export function ApiKeysModule() {
                 </TableCell>
               </TableRow>
             ) : (
-              apiKeys.map((key) => (
+              apiKeys.map(key => (
                 <TableRow key={key.id}>
                   <TableCell className="font-medium">{key.name}</TableCell>
-                  <TableCell className="font-mono text-sm">{key.keyPrefix}••••••••</TableCell>
+                  <TableCell className="font-mono text-sm">
+                    {key.keyPrefix}••••••••
+                  </TableCell>
                   <TableCell className="text-sm">
-                    {key.lastUsedAt ? new Date(key.lastUsedAt).toLocaleDateString() : 'Never'}
+                    {key.lastUsedAt
+                      ? new Date(key.lastUsedAt).toLocaleDateString()
+                      : 'Never'}
                   </TableCell>
                   <TableCell className="text-sm">
                     {new Date(key.createdAt).toLocaleDateString()}
@@ -204,21 +234,35 @@ export function ApiKeysModule() {
             <DialogHeader>
               <DialogTitle>Create API Key</DialogTitle>
               <DialogDescription>
-                Create a new API key for your application. The key will be shown only once.
+                Create a new API key for your application. The key will be shown
+                only once.
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
               <div className="grid gap-2">
                 <Label htmlFor="name">Application Name</Label>
-                <Input id="name" name="name" placeholder="e.g., 48Hub" required />
+                <Input
+                  id="name"
+                  name="name"
+                  placeholder="e.g., 48Hub"
+                  required
+                />
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="description">Description (optional)</Label>
-                <Input id="description" name="description" placeholder="Optional description" />
+                <Input
+                  id="description"
+                  name="description"
+                  placeholder="Optional description"
+                />
               </div>
             </div>
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setShowCreateDialog(false)}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowCreateDialog(false)}
+              >
                 Cancel
               </Button>
               <Button type="submit" disabled={createKey.isPending}>
@@ -235,7 +279,8 @@ export function ApiKeysModule() {
           <DialogHeader>
             <DialogTitle>API Key Created</DialogTitle>
             <DialogDescription className="text-destructive">
-              This key will not be shown again. Copy it now and store it securely.
+              This key will not be shown again. Copy it now and store it
+              securely.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
@@ -256,13 +301,16 @@ export function ApiKeysModule() {
       </Dialog>
 
       {/* Rotate Confirmation */}
-      <AlertDialog open={!!keyToRotate} onOpenChange={() => setKeyToRotate(null)}>
+      <AlertDialog
+        open={!!keyToRotate}
+        onOpenChange={() => setKeyToRotate(null)}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Rotate API Key?</AlertDialogTitle>
             <AlertDialogDescription>
-              Rotating this key will immediately invalidate the current one.
-              The new key will be shown only once.
+              Rotating this key will immediately invalidate the current one. The
+              new key will be shown only once.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -275,18 +323,24 @@ export function ApiKeysModule() {
       </AlertDialog>
 
       {/* Revoke Confirmation */}
-      <AlertDialog open={!!keyToRevoke} onOpenChange={() => setKeyToRevoke(null)}>
+      <AlertDialog
+        open={!!keyToRevoke}
+        onOpenChange={() => setKeyToRevoke(null)}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Revoke API Key?</AlertDialogTitle>
             <AlertDialogDescription className="text-destructive">
-              All API requests from this application will immediately fail.
-              This action cannot be undone.
+              All API requests from this application will immediately fail. This
+              action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleRevoke} className="bg-destructive text-destructive-foreground">
+            <AlertDialogAction
+              onClick={handleRevoke}
+              className="bg-destructive text-destructive-foreground"
+            >
               Revoke
             </AlertDialogAction>
           </AlertDialogFooter>

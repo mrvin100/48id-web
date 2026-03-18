@@ -32,7 +32,13 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription } from '@/components/ui/empty'
+import {
+  Empty,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+  EmptyDescription,
+} from '@/components/ui/empty'
 import { Calendar } from '@/components/ui/calendar'
 import {
   Popover,
@@ -80,12 +86,12 @@ export function AuditLogModule() {
 
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-4">
-        <div className="relative flex-1 min-w-[200px]">
+        <div className="relative min-w-[200px] flex-1">
           <Search className="text-muted-foreground absolute top-2.5 left-2 h-4 w-4" />
           <Input
             placeholder="Search events..."
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={e => setSearch(e.target.value)}
             className="pl-8"
           />
           {search && (
@@ -193,10 +199,18 @@ export function AuditLogModule() {
             {isLoading ? (
               Array.from({ length: 10 }).map((_, i) => (
                 <TableRow key={i}>
-                  <TableCell><Skeleton className="h-6 w-32" /></TableCell>
-                  <TableCell><Skeleton className="h-6 w-40" /></TableCell>
-                  <TableCell><Skeleton className="h-6 w-24" /></TableCell>
-                  <TableCell><Skeleton className="h-6 w-32" /></TableCell>
+                  <TableCell>
+                    <Skeleton className="h-6 w-32" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-6 w-40" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-6 w-24" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-6 w-32" />
+                  </TableCell>
                 </TableRow>
               ))
             ) : events.length === 0 ? (
@@ -216,7 +230,7 @@ export function AuditLogModule() {
                 </TableCell>
               </TableRow>
             ) : (
-              events.map((event) => (
+              events.map(event => (
                 <TableRow key={event.id}>
                   <TableCell>
                     <AuditEventBadge eventType={event.eventType} />
@@ -224,7 +238,7 @@ export function AuditLogModule() {
                   <TableCell>
                     <div className="flex flex-col">
                       <span className="font-medium">{event.userName}</span>
-                      <span className="text-muted-foreground text-xs font-mono">
+                      <span className="text-muted-foreground font-mono text-xs">
                         {event.userMatricule}
                       </span>
                     </div>

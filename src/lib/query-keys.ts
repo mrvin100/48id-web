@@ -44,8 +44,7 @@ export const authKeys = {
 export const auditKeys = {
   all: ['audit'] as const,
   logs: () => [...auditKeys.all, 'logs'] as const,
-  log: (filters?: AuditFilters) =>
-    [...auditKeys.logs(), filters] as const,
+  log: (filters?: AuditFilters) => [...auditKeys.logs(), filters] as const,
 }
 
 /**

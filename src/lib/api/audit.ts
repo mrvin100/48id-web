@@ -53,26 +53,32 @@ export const auditApi = {
   /**
    * Get paginated audit log with optional filters
    */
-  getAuditLog: async (filters?: AuditFilters): Promise<PaginatedAuditEventsResponse> => {
+  getAuditLog: async (
+    filters?: AuditFilters
+  ): Promise<PaginatedAuditEventsResponse> => {
     const searchParams = new URLSearchParams()
 
     if (filters?.userId) searchParams.set('userId', filters.userId)
     if (filters?.eventType) searchParams.set('eventType', filters.eventType)
     if (filters?.dateFrom) searchParams.set('from', filters.dateFrom)
     if (filters?.dateTo) searchParams.set('to', filters.dateTo)
-    if (filters?.page !== undefined) searchParams.set('page', filters.page.toString())
-    if (filters?.size !== undefined) searchParams.set('size', filters.size.toString())
+    if (filters?.page !== undefined)
+      searchParams.set('page', filters.page.toString())
+    if (filters?.size !== undefined)
+      searchParams.set('size', filters.size.toString())
     if (filters?.sort) searchParams.set('sort', filters.sort)
 
-    const response = await apiClient.get('admin/audit-log', { searchParams }).json<{
-      content: BackendAuditEvent[]
-      totalElements: number
-      totalPages: number
-      size: number
-      number: number
-      first: boolean
-      last: boolean
-    }>()
+    const response = await apiClient
+      .get('admin/audit-log', { searchParams })
+      .json<{
+        content: BackendAuditEvent[]
+        totalElements: number
+        totalPages: number
+        size: number
+        number: number
+        first: boolean
+        last: boolean
+      }>()
 
     // Transform backend response to frontend format
     return {

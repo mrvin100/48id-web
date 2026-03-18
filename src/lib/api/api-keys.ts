@@ -55,7 +55,9 @@ export const apiKeysApi = {
    * Get list of API keys
    */
   getApiKeys: async (): Promise<ApiKey[]> => {
-    const response = await apiClient.get('admin/api-keys').json<BackendApiKey[]>()
+    const response = await apiClient
+      .get('admin/api-keys')
+      .json<BackendApiKey[]>()
     // Transform backend response to frontend format
     return response.map(key => ({
       id: key.id,
@@ -71,15 +73,23 @@ export const apiKeysApi = {
   /**
    * Create new API key
    */
-  createApiKey: async (data: CreateApiKeyRequest): Promise<CreateApiKeyResponse> => {
-    return apiClient.post('admin/api-keys', { json: { applicationName: data.name, description: data.description } }).json<CreateApiKeyResponse>()
+  createApiKey: async (
+    data: CreateApiKeyRequest
+  ): Promise<CreateApiKeyResponse> => {
+    return apiClient
+      .post('admin/api-keys', {
+        json: { applicationName: data.name, description: data.description },
+      })
+      .json<CreateApiKeyResponse>()
   },
 
   /**
    * Rotate API key
    */
   rotateApiKey: async (id: string): Promise<RotateApiKeyResponse> => {
-    return apiClient.post(`admin/api-keys/${id}/rotate`).json<RotateApiKeyResponse>()
+    return apiClient
+      .post(`admin/api-keys/${id}/rotate`)
+      .json<RotateApiKeyResponse>()
   },
 
   /**

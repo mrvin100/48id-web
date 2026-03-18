@@ -13,14 +13,29 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod/v4'
 import { useTheme } from 'next-themes'
-import { Moon, Sun, User as UserIcon, Mail, Phone, IdCard, Lock, KeyRound } from 'lucide-react'
+import {
+  Moon,
+  Sun,
+  User as UserIcon,
+  Mail,
+  Phone,
+  IdCard,
+  Lock,
+  KeyRound,
+} from 'lucide-react'
 import { PageHeader } from '@/components/global'
 import { useAuthStore } from '@/stores/auth-store'
 import { SubmitButton } from '@/components/global/submit-button'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 import {
   Dialog,
   DialogContent,
@@ -39,19 +54,21 @@ const profileSchema = z.object({
 
 type ProfileFormData = z.infer<typeof profileSchema>
 
-const passwordSchema = z.object({
-  currentPassword: z.string().min(1, 'Current password is required'),
-  newPassword: z.string().min(8, 'Password must be at least 8 characters'),
-  confirmPassword: z.string(),
-}).refine((data) => data.newPassword === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ['confirmPassword'],
-})
+const passwordSchema = z
+  .object({
+    currentPassword: z.string().min(1, 'Current password is required'),
+    newPassword: z.string().min(8, 'Password must be at least 8 characters'),
+    confirmPassword: z.string(),
+  })
+  .refine(data => data.newPassword === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ['confirmPassword'],
+  })
 
 type PasswordFormData = z.infer<typeof passwordSchema>
 
 export function SettingsModule() {
-  const user = useAuthStore((state) => state.user)
+  const user = useAuthStore(state => state.user)
   const { theme, setTheme } = useTheme()
   const [isEditing, setIsEditing] = useState(false)
   const [showPasswordDialog, setShowPasswordDialog] = useState(false)
@@ -178,9 +195,7 @@ export function SettingsModule() {
                 />
               </div>
 
-              <SubmitButton type="submit">
-                Save Changes
-              </SubmitButton>
+              <SubmitButton type="submit">Save Changes</SubmitButton>
             </form>
           ) : (
             <>
