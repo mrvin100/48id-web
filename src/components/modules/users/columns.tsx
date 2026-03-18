@@ -16,11 +16,10 @@ import { User } from '@/types/auth.types'
 import { UserActionMenu } from './user-action-menu'
 
 interface ColumnsProps {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onViewDetails?: (user: User) => void
 }
 
-export const columns = (_props: ColumnsProps): ColumnDef<User>[] => [
+export const columns = ({ onViewDetails }: ColumnsProps): ColumnDef<User>[] => [
   {
     id: 'select',
     header: ({ table }) => (

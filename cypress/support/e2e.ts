@@ -62,12 +62,10 @@ Cypress.Commands.add('waitForPageLoad', () => {
 })
 
 // Custom command: Mock API response
-Cypress.Commands.add(
-  'mockApiResponse',
-  (endpoint: string, response: unknown) => {
-    cy.intercept('GET', `**/api/v1/${endpoint}`, response)
-  }
-)
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+Cypress.Commands.add('mockApiResponse', (endpoint: string, response: any) => {
+  cy.intercept('GET', `**/api/v1/${endpoint}`, response)
+})
 
 // Custom command: Mock login response
 Cypress.Commands.add('mockLogin', (user?: Partial<Cypress.TestUser>) => {

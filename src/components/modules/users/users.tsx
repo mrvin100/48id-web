@@ -75,10 +75,7 @@ export function UsersModule() {
       />
 
       <DataTable
-        columns={columns({
-          onViewDetails: handleViewDetails,
-          onEditUser: handleEditUser,
-        })}
+        columns={columns({ onViewDetails: handleViewDetails })}
         data={users}
         onRowClick={handleViewDetails}
       />
