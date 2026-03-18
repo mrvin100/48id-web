@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
       params.set('to', `${to}T23:59:59Z`)
     }
 
-    const backendUrl = `${config.backend.apiUrl}/api/v1/admin/audit-log?${params.toString()}`
+    const backendUrl = `${config.backend.apiUrl}/admin/audit-log?${params.toString()}`
 
     const response = await fetch(backendUrl, {
       headers: {

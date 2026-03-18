@@ -85,9 +85,9 @@ export const auditApi = {
       ...response,
       content: response.content.map(event => ({
         id: event.id,
-        eventType: event.action,
+        eventType: event.action, // Map action to eventType
         userId: event.userId,
-        userName: 'System', // Backend doesn't provide user name yet
+        userName: 'Unknown User', // Backend doesn't provide user name yet
         userMatricule: 'N/A', // Backend doesn't provide matricule yet
         ipAddress: event.ipAddress,
         timestamp: event.timestamp,

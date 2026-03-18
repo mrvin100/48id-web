@@ -46,6 +46,7 @@ const ADMIN_ROUTES = [
   '/api/audit',
   '/api/api-keys',
   '/api/dashboard',
+  '/api/admin', // Add this to cover all admin API routes
 ]
 
 interface TokenPayload {
