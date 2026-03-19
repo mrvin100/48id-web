@@ -54,7 +54,7 @@ type LoginFormData = z.infer<typeof loginSchema>
 
 export function LoginModule() {
   const router = useRouter()
-  const { login, isLoading, error, clearError } = useAuthStore()
+  const { login, isLoading, error, clearError, setError } = useAuthStore()
   const [showPassword, setShowPassword] = useState(false)
 
   const form = useForm<LoginFormData>(
@@ -78,11 +78,9 @@ export function LoginModule() {
       const response = await login(credentials)
 
       if (response.success) {
-        // Redirect to dashboard on successful login
         router.push(ROUTES.DASHBOARD)
       } else {
-        // Handle login failure - errors will be shown via global error state
-        console.error('Login failed:', response.message)
+        setError({ code: 'LOGIN_FAILED', message: response.message || 'Login failed' })
       }
     } catch (err) {
       console.error('Login submission error:', err)

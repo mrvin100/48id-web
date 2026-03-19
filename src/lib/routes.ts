@@ -11,10 +11,12 @@ export const ROUTES = {
   LOGIN: '/login',
   ACCESS_DENIED: '/access-denied',
 
+  // Auth routes
+  ACTIVATE_ACCOUNT: '/activate-account',
+  RESET_PASSWORD: '/reset-password',
+
   // Dashboard routes
   DASHBOARD: '/dashboard',
-
-  // User management routes
   USERS: '/users',
   USER_DETAIL: (id: string) => `/users/${id}`,
 
@@ -31,6 +33,8 @@ export const ROUTES = {
   API: {
     AUTH: {
       LOGIN: '/api/auth/login',
+      ACTIVATE: '/api/auth/activate',
+      RESET_PASSWORD: '/api/auth/reset-password',
       LOGOUT: '/api/auth/logout',
       REFRESH: '/api/auth/refresh',
     },

@@ -9,3 +9,5 @@
 export { LoginModule } from './login'
 export { LogoutModule } from './logout'
 export { AccessDeniedModule } from './access-denied'
+export { ResetPasswordModule } from './reset-password'
+export { ActivateAccountModule } from './activate-account'

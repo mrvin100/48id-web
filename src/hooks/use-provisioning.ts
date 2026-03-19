@@ -47,16 +47,10 @@ export function useImportUsers() {
  * Composed hook for provisioning operations
  */
 export function useProvisioning() {
-  const downloadMutation = useDownloadTemplate()
   const importMutation = useImportUsers()
 
   return {
-    // Mutations
-    downloadTemplate: downloadMutation.mutate,
-    importUsers: importMutation.mutate,
-
-    // Mutation states
-    isDownloading: downloadMutation.isPending,
+    importUsers: importMutation.mutateAsync,
     isImporting: importMutation.isPending,
     importError: importMutation.error,
     importData: importMutation.data,

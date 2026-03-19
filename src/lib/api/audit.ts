@@ -32,6 +32,8 @@ export interface AuditFilters {
 export interface BackendAuditEvent {
   id: string
   userId: string
+  userName?: string
+  userMatricule?: string
   action: string
   ipAddress: string
   userAgent: string
@@ -85,10 +87,10 @@ export const auditApi = {
       ...response,
       content: response.content.map(event => ({
         id: event.id,
-        eventType: event.action, // Map action to eventType
+        eventType: event.action,
         userId: event.userId,
-        userName: 'Unknown User', // Backend doesn't provide user name yet
-        userMatricule: 'N/A', // Backend doesn't provide matricule yet
+        userName: event.userName ?? event.userId,
+        userMatricule: event.userMatricule ?? '',
         ipAddress: event.ipAddress,
         timestamp: event.timestamp,
         metadata: event.userAgent ? { userAgent: event.userAgent } : undefined,
