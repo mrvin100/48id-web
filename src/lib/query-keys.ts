@@ -6,6 +6,7 @@
  */
 
 import type { UserFilters } from './api/users'
+import type { AuditFilters } from './api/audit'
 
 /**
  * Query key factory for users
@@ -43,8 +44,7 @@ export const authKeys = {
 export const auditKeys = {
   all: ['audit'] as const,
   logs: () => [...auditKeys.all, 'logs'] as const,
-  log: (filters?: Record<string, unknown>) =>
-    [...auditKeys.logs(), filters] as const,
+  log: (filters?: AuditFilters) => [...auditKeys.logs(), filters] as const,
 }
 
 /**

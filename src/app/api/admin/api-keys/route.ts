@@ -2,12 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { config } from '@/lib/env'
 
-export async function GET(
-  _request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(request: NextRequest) {
   try {
-    const { id } = await params
     const cookieStore = await cookies()
     const jwtToken = cookieStore.get(config.auth.jwtCookieName)?.value
 
@@ -18,7 +14,7 @@ export async function GET(
       )
     }
 
-    const backendUrl = `${config.backend.apiUrl}/admin/users/${id}`
+    const backendUrl = `${config.backend.apiUrl}/admin/api-keys`
 
     const response = await fetch(backendUrl, {
       headers: {
@@ -29,7 +25,13 @@ export async function GET(
 
     if (!response.ok) {
       const errorText = await response.text()
-      console.error(`Backend error (${response.status}):`, errorText)
+      console.error(
+        `Backend error (${response.status}):`,
+        'Content-Type:',
+        response.headers.get('content-type'),
+        'Body length:',
+        errorText?.length ?? 0
+      )
       return NextResponse.json(
         { error: `Backend error: ${response.status}` },
         { status: response.status }
@@ -39,20 +41,16 @@ export async function GET(
     const data = await response.json()
     return NextResponse.json(data)
   } catch (error) {
-    console.error('API user detail route error:', error)
+    console.error('API api-keys route error:', error)
     return NextResponse.json(
-      { error: 'Failed to fetch user details' },
+      { error: 'Failed to fetch API keys' },
       { status: 500 }
     )
   }
 }
 
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function POST(request: NextRequest) {
   try {
-    const { id } = await params
     const cookieStore = await cookies()
     const jwtToken = cookieStore.get(config.auth.jwtCookieName)?.value
 
@@ -64,10 +62,10 @@ export async function PUT(
     }
 
     const body = await request.json()
-    const backendUrl = `${config.backend.apiUrl}/admin/users/${id}`
+    const backendUrl = `${config.backend.apiUrl}/admin/api-keys`
 
     const response = await fetch(backendUrl, {
-      method: 'PUT',
+      method: 'POST',
       headers: {
         Authorization: `Bearer ${jwtToken}`,
         'Content-Type': 'application/json',
@@ -77,7 +75,13 @@ export async function PUT(
 
     if (!response.ok) {
       const errorText = await response.text()
-      console.error(`Backend error (${response.status}):`, errorText)
+      console.error(
+        `Backend error (${response.status}):`,
+        'Content-Type:',
+        response.headers.get('content-type'),
+        'Body length:',
+        errorText?.length ?? 0
+      )
       return NextResponse.json(
         { error: `Backend error: ${response.status}` },
         { status: response.status }
@@ -87,9 +91,9 @@ export async function PUT(
     const data = await response.json()
     return NextResponse.json(data)
   } catch (error) {
-    console.error('API user update route error:', error)
+    console.error('API api-keys create route error:', error)
     return NextResponse.json(
-      { error: 'Failed to update user' },
+      { error: 'Failed to create API key' },
       { status: 500 }
     )
   }

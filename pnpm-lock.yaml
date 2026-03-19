@@ -147,9 +147,15 @@ importers:
       '@vitest/ui':
         specifier: ^2.1.9
         version: 2.1.9(vitest@2.1.9)
+      axe-core:
+        specifier: ^4.11.1
+        version: 4.11.1
       cypress:
         specifier: ^15.12.0
         version: 15.12.0
+      cypress-axe:
+        specifier: ^1.7.0
+        version: 1.7.0(axe-core@4.11.1)(cypress@15.12.0)
       eslint:
         specifier: ^9
         version: 9.39.4(jiti@2.6.1)
@@ -2769,6 +2775,13 @@ packages:
 
   csstype@3.2.3:
     resolution: {integrity: sha512-z1HGKcYy2xA8AGQfwrn0PAy+PB7X/GSj3UVJW9qKyn43xWa+gl5nXmU4qqLMRzWVLFC8KusUX8T/0kCiOYpAIQ==}
+
+  cypress-axe@1.7.0:
+    resolution: {integrity: sha512-zzJpvAAjauEB3GZl0KYXb8i3w6MztWAt2WM3czYTFyNVC30alDmqCm9E7GwZ4bgkldZJlmHakaVEyu73R5St4w==}
+    engines: {node: '>=10'}
+    peerDependencies:
+      axe-core: ^3 || ^4
+      cypress: ^10 || ^11 || ^12 || ^13 || ^14 || ^15
 
   cypress@15.12.0:
     resolution: {integrity: sha512-B2BRcudLfA4NZZP5QpA45J70bu1heCH59V1yKRLHAtiC49r7RV03X5ifUh7Nfbk8QNg93RAsc6oAmodm/+j0pA==}
@@ -8103,6 +8116,11 @@ snapshots:
       rrweb-cssom: 0.8.0
 
   csstype@3.2.3: {}
+
+  cypress-axe@1.7.0(axe-core@4.11.1)(cypress@15.12.0):
+    dependencies:
+      axe-core: 4.11.1
+      cypress: 15.12.0
 
   cypress@15.12.0:
     dependencies:
