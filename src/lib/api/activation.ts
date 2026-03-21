@@ -12,7 +12,7 @@ export interface ResetPasswordResponse {
 }
 
 async function extractMessage(err: HTTPError, fallback: string): Promise<never> {
-  const body = await err.response.json<Record<string, unknown>>().catch(() => ({}))
+  const body = await err.response.json().catch(() => ({})) as Record<string, unknown>
   throw new Error((body.detail ?? body.message ?? fallback) as string)
 }
 
