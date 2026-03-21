@@ -12,8 +12,8 @@ export interface ResetPasswordResponse {
 }
 
 async function extractMessage(err: HTTPError, fallback: string): Promise<never> {
-  const body = await err.response.json().catch(() => ({}))
-  throw new Error(body.message ?? fallback)
+  const body = await err.response.json<Record<string, unknown>>().catch(() => ({}))
+  throw new Error((body.detail ?? body.message ?? fallback) as string)
 }
 
 export const activationApi = {
