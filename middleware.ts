@@ -22,10 +22,18 @@ const JWT_SECRET = new TextEncoder().encode(envConfig.auth.jwtSecret)
 const PUBLIC_ROUTES = [
   ROUTES.LOGIN,
   ROUTES.ACCESS_DENIED,
-  ROUTES.HOME, // Landing page
+  ROUTES.HOME,
+  ROUTES.ACTIVATE_ACCOUNT,
+  ROUTES.RESET_PASSWORD,
 ]
 
-const API_ROUTES = ['/api/auth/login', '/api/auth/logout', '/api/auth/refresh']
+const API_ROUTES = [
+  ROUTES.API.AUTH.LOGIN,
+  ROUTES.API.AUTH.LOGOUT,
+  ROUTES.API.AUTH.REFRESH,
+  ROUTES.API.AUTH.ACTIVATE,
+  ROUTES.API.AUTH.RESET_PASSWORD,
+]
 
 const PROTECTED_ROUTES = [
   ROUTES.DASHBOARD,
@@ -218,13 +226,13 @@ export async function middleware(request: NextRequest) {
           )
 
           if (refreshResponse.ok) {
-            // Token refreshed successfully, continue with request
+            // Token refreshed successfully — forward new cookies and continue
             const response = NextResponse.next()
+            const setCookieHeaders = refreshResponse.headers.getSetCookie?.() ??
+              refreshResponse.headers.get('set-cookie')?.split(', ') ?? []
 
-            // Copy new cookies from refresh response
-            const setCookieHeader = refreshResponse.headers.get('set-cookie')
-            if (setCookieHeader) {
-              response.headers.set('set-cookie', setCookieHeader)
+            for (const cookie of setCookieHeaders) {
+              response.headers.append('set-cookie', cookie)
             }
 
             return response

@@ -2,12 +2,28 @@
  * HTTP Client Configuration
  *
  * Centralized HTTP client using ky for all API communications.
- * Handles error handling and request/response transformations.
  * Authentication is handled by Next.js middleware via HTTP-only cookies.
+ * Silent token refresh with deduplication via shared refreshPromise.
  */
 
 import ky from 'ky'
 import { config } from '@/lib/env'
+
+// Shared refresh promise — prevents concurrent 401s from triggering multiple refreshes
+let refreshPromise: Promise<boolean> | null = null
+
+async function attemptRefresh(): Promise<boolean> {
+  if (refreshPromise) return refreshPromise
+
+  refreshPromise = fetch('/api/auth/refresh', { method: 'POST' })
+    .then(res => res.ok)
+    .catch(() => false)
+    .finally(() => {
+      refreshPromise = null
+    })
+
+  return refreshPromise
+}
 
 // Create the main API client
 export const apiClient = ky.create({
@@ -19,25 +35,18 @@ export const apiClient = ky.create({
     statusCodes: [408, 413, 429, 500, 502, 503, 504],
   },
   hooks: {
-    beforeRequest: [
-      request => {
-        // Add common headers
-        request.headers.set('Content-Type', 'application/json')
-        // Note: Authentication is handled by Next.js middleware via HTTP-only cookies
-        // No need to manually set Authorization headers
-      },
-    ],
     afterResponse: [
-      async (request, options, response) => {
-        // Handle authentication errors
-        if (response.status === 401) {
-          // Redirect to login page
-          if (typeof window !== 'undefined') {
-            const currentPath = window.location.pathname
-            window.location.href = `/login?redirect=${encodeURIComponent(currentPath)}`
+      async (request, _options, response) => {
+        if (response.status === 401 && typeof window !== 'undefined') {
+          const refreshed = await attemptRefresh()
+          if (refreshed) {
+            // Retry the original request once after successful refresh
+            return ky(request)
           }
+          // Refresh failed — redirect to login
+          const currentPath = window.location.pathname
+          window.location.href = `/login?redirect=${encodeURIComponent(currentPath)}&reason=session_expired`
         }
-
         return response
       },
     ],

@@ -32,11 +32,11 @@ export function ImportResultSummary({
   result,
   onSuccess,
 }: ImportResultSummaryProps) {
-  const { successCount, errorCount, errors } = result
+  const { imported, failed, errors } = result
 
-  const isSuccess = errorCount === 0
-  const isPartialSuccess = successCount > 0 && errorCount > 0
-  const isCompleteFailure = successCount === 0 && errorCount > 0
+  const isSuccess = failed === 0 && imported > 0
+  const isPartialSuccess = imported > 0 && failed > 0
+  const isCompleteFailure = imported === 0 && (failed > 0 || errors.length > 0)
 
   return (
     <Card>
@@ -49,8 +49,7 @@ export function ImportResultSummary({
           <Alert className="border-green-200 bg-green-50 text-green-800 dark:border-green-800 dark:bg-green-900/20 dark:text-green-400">
             <CheckCircle2 className="h-5 w-5" />
             <AlertDescription className="ml-2">
-              <strong>Success!</strong> {successCount} users imported
-              successfully. Activation emails have been sent.
+              <strong>Success!</strong> {imported} users imported successfully.
             </AlertDescription>
           </Alert>
         )}
@@ -59,8 +58,7 @@ export function ImportResultSummary({
           <Alert className="border-yellow-200 bg-yellow-50 text-yellow-800 dark:border-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400">
             <AlertCircle className="h-5 w-5" />
             <AlertDescription className="ml-2">
-              <strong>Partial Success:</strong> {successCount} users imported
-              successfully, but {errorCount} rows failed. See details below.
+              <strong>Partial Success:</strong> {imported} imported, {failed} failed.
             </AlertDescription>
           </Alert>
         )}
@@ -69,25 +67,23 @@ export function ImportResultSummary({
           <Alert variant="destructive">
             <XCircle className="h-5 w-5" />
             <AlertDescription className="ml-2">
-              <strong>Import Failed:</strong> All {errorCount} rows failed to
-              import. See details below.
+              <strong>Import Failed:</strong> {errors[0]?.error ?? 'All rows failed.'}
             </AlertDescription>
           </Alert>
         )}
 
-        {/* Statistics */}
         <div className="grid grid-cols-3 gap-4">
           <div className="bg-card rounded-lg border p-4 text-center">
-            <p className="text-muted-foreground text-sm">Total Rows</p>
-            <p className="text-2xl font-bold">{successCount + errorCount}</p>
+            <p className="text-muted-foreground text-sm">Total</p>
+            <p className="text-2xl font-bold">{imported + failed}</p>
           </div>
           <div className="bg-card rounded-lg border p-4 text-center">
-            <p className="text-muted-foreground text-sm">Successful</p>
-            <p className="text-2xl font-bold text-green-600">{successCount}</p>
+            <p className="text-muted-foreground text-sm">Imported</p>
+            <p className="text-2xl font-bold text-green-600">{imported}</p>
           </div>
           <div className="bg-card rounded-lg border p-4 text-center">
             <p className="text-muted-foreground text-sm">Failed</p>
-            <p className="text-destructive text-2xl font-bold">{errorCount}</p>
+            <p className="text-destructive text-2xl font-bold">{failed}</p>
           </div>
         </div>
 
@@ -101,21 +97,15 @@ export function ImportResultSummary({
                   <TableRow>
                     <TableHead>Row</TableHead>
                     <TableHead>Matricule</TableHead>
-                    <TableHead>Error Code</TableHead>
-                    <TableHead>Message</TableHead>
+                    <TableHead>Error</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {errors.map((error, index) => (
                     <TableRow key={index} className="bg-destructive/5">
-                      <TableCell className="font-mono">
-                        {error.rowNumber}
-                      </TableCell>
+                      <TableCell className="font-mono">{error.row}</TableCell>
                       <TableCell>{error.matricule || 'N/A'}</TableCell>
-                      <TableCell className="font-mono text-xs">
-                        {error.errorCode}
-                      </TableCell>
-                      <TableCell>{error.message || error.errorCode}</TableCell>
+                      <TableCell>{error.error}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>

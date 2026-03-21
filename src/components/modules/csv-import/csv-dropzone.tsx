@@ -206,7 +206,7 @@ export function CsvDropzone({
           // Validate headers
           if (!headers || headers.length !== EXPECTED_HEADERS.length) {
             setParseError(
-              `Invalid CSV header. Expected: ${EXPECTED_HEADERS.join(', ')}`
+              `Invalid CSV format. Expected exactly 6 columns: ${EXPECTED_HEADERS.join(', ')}. Passwords are managed by the system — remove the password column if present.`
             )
             return
           }
@@ -216,7 +216,7 @@ export function CsvDropzone({
           )
           if (headerMismatch) {
             setParseError(
-              `Invalid CSV header. Expected: ${EXPECTED_HEADERS.join(', ')}`
+              `Invalid CSV headers. Expected: ${EXPECTED_HEADERS.join(', ')}`
             )
             return
           }

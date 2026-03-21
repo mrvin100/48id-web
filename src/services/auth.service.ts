@@ -60,7 +60,11 @@ export class AuthService {
         .json<LoginResponse>()
 
       if (!response.success) {
-        throw new Error(response.message || 'Login failed')
+        // Return failure with the exact BFF message — do not throw (avoids remapping)
+        return {
+          success: false,
+          message: response.message || 'Login failed',
+        }
       }
 
       return {

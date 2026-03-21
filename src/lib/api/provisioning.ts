@@ -7,47 +7,42 @@
 
 import { apiClient } from './client'
 
-// Request/Response Types
-export interface CsvImportResult {
-  successCount: number
-  errorCount: number
-  errors: CsvRowError[]
-}
+import { HTTPError } from 'ky'
 
+// Matches backend response shape exactly
 export interface CsvRowError {
-  rowNumber: number
+  row: number
   matricule: string
-  errorCode: string
-  message?: string
+  error: string
 }
 
 export interface CsvImportResponse {
-  successCount: number
-  errorCount: number
+  imported: number
+  failed: number
   errors: CsvRowError[]
 }
 
-// API Functions
 export const provisioningApi = {
-  /**
-   * Download CSV import template
-   */
   downloadTemplate: async (): Promise<Blob> => {
-    return apiClient.get('admin/users/import/template').blob()
+    return apiClient.get('csv/template').blob()
   },
 
-  /**
-   * Import users from CSV file
-   */
   importUsers: async (file: File): Promise<CsvImportResponse> => {
     const formData = new FormData()
     formData.append('file', file)
 
-    return apiClient
-      .post('admin/users/import', {
-        body: formData,
-      })
-      .json<CsvImportResponse>()
+    try {
+      return await apiClient
+        .post('admin/users/import', { body: formData })
+        .json<CsvImportResponse>()
+    } catch (err) {
+      if (err instanceof HTTPError) {
+        // Extract structured error body from backend 4xx responses
+        const body = await err.response.json().catch(() => null)
+        if (body) throw Object.assign(err, { responseBody: body })
+      }
+      throw err
+    }
   },
 }
 

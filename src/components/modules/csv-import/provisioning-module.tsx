@@ -56,9 +56,12 @@ export function ProvisioningModule() {
 
     try {
       await importUsers(selectedFile)
-      toast.success('Import completed successfully')
-    } catch (_error) {
-      toast.error('Import failed')
+      toast.success('Import completed')
+    } catch (err: unknown) {
+      // Show backend structured error if available, otherwise generic message
+      const body = (err as { responseBody?: { errors?: { error: string }[] } })?.responseBody
+      const detail = body?.errors?.[0]?.error
+      toast.error(detail ?? 'Import failed')
     }
   }
 
