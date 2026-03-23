@@ -1,5 +1,4 @@
-import ky from 'ky'
-import { HTTPError } from 'ky'
+import ky, { HTTPError } from 'ky'
 import { config } from '@/lib/env'
 
 // Public client — no 401 refresh hook (used for unauthenticated endpoints)
@@ -35,7 +34,8 @@ export const activationApi = {
         .post('auth/activate', { json: { token } })
         .json<ActivationResponse>()
     } catch (err) {
-      if (err instanceof HTTPError) await extractMessage(err, 'Activation failed')
+      if (err instanceof HTTPError)
+        await extractMessage(err, 'Activation failed')
       throw err
     }
   },

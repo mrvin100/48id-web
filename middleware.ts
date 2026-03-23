@@ -117,7 +117,7 @@ function isAdminRoute(pathname: string): boolean {
  */
 function isPublicRoute(pathname: string): boolean {
   return PUBLIC_ROUTES.some(route =>
-    route === ROUTES.HOME ? pathname === route : pathname.startsWith(route),
+    route === ROUTES.HOME ? pathname === route : pathname.startsWith(route)
   )
 }
 
@@ -228,8 +228,10 @@ export async function middleware(request: NextRequest) {
           if (refreshResponse.ok) {
             // Token refreshed successfully — forward new cookies and continue
             const response = NextResponse.next()
-            const setCookieHeaders = refreshResponse.headers.getSetCookie?.() ??
-              refreshResponse.headers.get('set-cookie')?.split(', ') ?? []
+            const setCookieHeaders =
+              refreshResponse.headers.getSetCookie?.() ??
+              refreshResponse.headers.get('set-cookie')?.split(', ') ??
+              []
 
             for (const cookie of setCookieHeaders) {
               response.headers.append('set-cookie', cookie)
