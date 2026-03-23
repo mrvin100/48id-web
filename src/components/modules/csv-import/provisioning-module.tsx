@@ -59,7 +59,8 @@ export function ProvisioningModule() {
       toast.success('Import completed')
     } catch (err: unknown) {
       // Show backend structured error if available, otherwise generic message
-      const body = (err as { responseBody?: { errors?: { error: string }[] } })?.responseBody
+      const body = (err as { responseBody?: { errors?: { error: string }[] } })
+        ?.responseBody
       const detail = body?.errors?.[0]?.error
       toast.error(detail ?? 'Import failed')
     }

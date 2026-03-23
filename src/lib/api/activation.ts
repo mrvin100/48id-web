@@ -19,11 +19,12 @@ export interface ResetPasswordResponse {
 
 async function extractMessage(
   err: HTTPError,
-  fallback: string,
+  fallback: string
 ): Promise<never> {
-  const body = (await err.response
-    .json()
-    .catch(() => ({}))) as Record<string, unknown>
+  const body = (await err.response.json().catch(() => ({}))) as Record<
+    string,
+    unknown
+  >
   throw new Error((body.detail ?? body.message ?? fallback) as string)
 }
 
@@ -42,7 +43,7 @@ export const activationApi = {
 
   resetPassword: async (
     token: string,
-    newPassword: string,
+    newPassword: string
   ): Promise<ResetPasswordResponse> => {
     try {
       return await publicApiClient

@@ -12,24 +12,39 @@ export async function PUT(
     const jwtToken = cookieStore.get(config.auth.jwtCookieName)?.value
 
     if (!jwtToken) {
-      return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
+      return NextResponse.json(
+        { error: 'Authentication required' },
+        { status: 401 }
+      )
     }
 
     const body = await request.json()
 
-    const response = await fetch(`${config.backend.apiUrl}/admin/users/${id}/status`, {
-      method: 'PUT',
-      headers: { Authorization: `Bearer ${jwtToken}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    })
+    const response = await fetch(
+      `${config.backend.apiUrl}/admin/users/${id}/status`,
+      {
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${jwtToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body),
+      }
+    )
 
     if (!response.ok) {
-      return NextResponse.json({ error: `Backend error: ${response.status}` }, { status: response.status })
+      return NextResponse.json(
+        { error: `Backend error: ${response.status}` },
+        { status: response.status }
+      )
     }
 
     return NextResponse.json(await response.json())
   } catch (error) {
     console.error('User status update error:', error)
-    return NextResponse.json({ error: 'Failed to update user status' }, { status: 500 })
+    return NextResponse.json(
+      { error: 'Failed to update user status' },
+      { status: 500 }
+    )
   }
 }

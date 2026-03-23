@@ -14,7 +14,12 @@ export function useActivateAccount(token: string | null) {
 
 export function useResetPassword() {
   return useMutation({
-    mutationFn: ({ token, newPassword }: { token: string; newPassword: string }) =>
-      activationApi.resetPassword(token, newPassword),
+    mutationFn: ({
+      token,
+      newPassword,
+    }: {
+      token: string
+      newPassword: string
+    }) => activationApi.resetPassword(token, newPassword),
   })
 }

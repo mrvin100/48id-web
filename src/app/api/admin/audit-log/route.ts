@@ -4,18 +4,16 @@ import { config } from '@/lib/env'
 
 async function fetchUser(
   userId: string,
-  token: string,
+  token: string
 ): Promise<{ name: string; matricule: string } | null> {
   try {
-    const res = await fetch(
-      `${config.backend.apiUrl}/admin/users/${userId}`,
-      { headers: { Authorization: `Bearer ${token}` } },
-    )
+    const res = await fetch(`${config.backend.apiUrl}/admin/users/${userId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
     if (!res.ok) return null
     const u = await res.json()
     return {
-      name:
-        u.name ?? `${u.firstName ?? ''} ${u.lastName ?? ''}`.trim(),
+      name: u.name ?? `${u.firstName ?? ''} ${u.lastName ?? ''}`.trim(),
       matricule: u.matricule ?? '',
     }
   } catch {
@@ -31,7 +29,7 @@ export async function GET(request: NextRequest) {
     if (!jwtToken) {
       return NextResponse.json(
         { error: 'Authentication required' },
-        { status: 401 },
+        { status: 401 }
       )
     }
 
@@ -58,13 +56,13 @@ export async function GET(request: NextRequest) {
           Authorization: `Bearer ${jwtToken}`,
           'Content-Type': 'application/json',
         },
-      },
+      }
     )
 
     if (!response.ok) {
       return NextResponse.json(
         { error: `Backend error: ${response.status}` },
-        { status: response.status },
+        { status: response.status }
       )
     }
 
@@ -76,7 +74,7 @@ export async function GET(request: NextRequest) {
       ...new Set<string>(
         (data.content as { userId: string }[])
           .map(e => e.userId)
-          .filter(Boolean),
+          .filter(Boolean)
       ),
     ].slice(0, MAX_AUDIT_USERS)
 
@@ -85,7 +83,7 @@ export async function GET(request: NextRequest) {
       uniqueUserIds.map(async id => {
         const user = await fetchUser(id, jwtToken)
         if (user) userMap.set(id, user)
-      }),
+      })
     )
 
     // Enrich events — preserve backend-supplied fields when lookup misses
@@ -96,9 +94,7 @@ export async function GET(request: NextRequest) {
       return {
         ...event,
         userName:
-          user?.name ??
-          (event.userName as string | undefined) ??
-          'Unknown',
+          user?.name ?? (event.userName as string | undefined) ?? 'Unknown',
         userMatricule:
           user?.matricule ??
           (event.userMatricule as string | undefined) ??
@@ -111,7 +107,7 @@ export async function GET(request: NextRequest) {
     console.error('API audit-log route error:', error)
     return NextResponse.json(
       { error: 'Failed to fetch audit log' },
-      { status: 500 },
+      { status: 500 }
     )
   }
 }

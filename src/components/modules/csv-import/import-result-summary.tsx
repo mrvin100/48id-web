@@ -58,7 +58,8 @@ export function ImportResultSummary({
           <Alert className="border-yellow-200 bg-yellow-50 text-yellow-800 dark:border-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400">
             <AlertCircle className="h-5 w-5" />
             <AlertDescription className="ml-2">
-              <strong>Partial Success:</strong> {imported} imported, {failed} failed.
+              <strong>Partial Success:</strong> {imported} imported, {failed}{' '}
+              failed.
             </AlertDescription>
           </Alert>
         )}
@@ -67,7 +68,8 @@ export function ImportResultSummary({
           <Alert variant="destructive">
             <XCircle className="h-5 w-5" />
             <AlertDescription className="ml-2">
-              <strong>Import Failed:</strong> {errors[0]?.error ?? 'All rows failed.'}
+              <strong>Import Failed:</strong>{' '}
+              {errors[0]?.error ?? 'All rows failed.'}
             </AlertDescription>
           </Alert>
         )}

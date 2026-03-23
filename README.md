@@ -23,14 +23,14 @@ The administration portal for 48ID — manage users, provision accounts, monitor
 
 ### What the portal provides
 
-| Feature | Description |
-|---------|-------------|
-| 🔑 **Authentication** | Secure login with HttpOnly cookie session management |
-| 👥 **User Management** | Browse, search, edit, suspend, and manage K48 users |
+| Feature                 | Description                                            |
+| ----------------------- | ------------------------------------------------------ |
+| 🔑 **Authentication**   | Secure login with HttpOnly cookie session management   |
+| 👥 **User Management**  | Browse, search, edit, suspend, and manage K48 users    |
 | 📦 **CSV Provisioning** | Bulk import users from CSV with preview and validation |
-| 📋 **Audit Log** | Paginated, filterable security event history |
-| 🔐 **API Keys** | Create, rotate, and revoke API keys for K48 services |
-| ⚙️ **Settings** | Admin profile management and password change |
+| 📋 **Audit Log**        | Paginated, filterable security event history           |
+| 🔐 **API Keys**         | Create, rotate, and revoke API keys for K48 services   |
+| ⚙️ **Settings**         | Admin profile management and password change           |
 
 ---
 
@@ -195,31 +195,31 @@ sequenceDiagram
 
 ## 📚 Documentation
 
-| Section | Description |
-|---------|-------------|
-| **[Architecture](docs/guide/architecture.md)** | Data flow, BFF pattern, ADRs, module structure |
-| **[Environment Setup](docs/guide/environment-setup.md)** | Variables, profiles, Docker, troubleshooting |
-| **[Contributing](CONTRIBUTING.md)** | Workflow, standards, branch naming, PR process |
-| **[Story Workflow](docs/developers/story-workflow.md)** | How to implement backlog stories step by step |
-| **[API Reference](docs/api/bff-routes.md)** | All BFF route handlers documented |
+| Section                                                  | Description                                    |
+| -------------------------------------------------------- | ---------------------------------------------- |
+| **[Architecture](docs/guide/architecture.md)**           | Data flow, BFF pattern, ADRs, module structure |
+| **[Environment Setup](docs/guide/environment-setup.md)** | Variables, profiles, Docker, troubleshooting   |
+| **[Contributing](CONTRIBUTING.md)**                      | Workflow, standards, branch naming, PR process |
+| **[Story Workflow](docs/developers/story-workflow.md)**  | How to implement backlog stories step by step  |
+| **[API Reference](docs/api/bff-routes.md)**              | All BFF route handlers documented              |
 
 ---
 
 ## 🛠️ Tech Stack
 
-| Layer | Technology |
-|-------|-----------|
-| **Framework** | Next.js 16.1 (App Router, Turbopack) |
-| **Language** | TypeScript 5 (strict mode) |
-| **Styling** | Tailwind CSS v4 |
-| **Components** | shadcn/ui (new-york style) |
-| **HTTP Client** | ky 1.14 |
-| **Server State** | TanStack Query v5 |
-| **Client State** | Zustand 5 |
-| **Forms** | React Hook Form + Zod |
-| **Unit Tests** | Vitest + React Testing Library |
-| **E2E Tests** | Cypress |
-| **Package Manager** | pnpm |
+| Layer               | Technology                           |
+| ------------------- | ------------------------------------ |
+| **Framework**       | Next.js 16.1 (App Router, Turbopack) |
+| **Language**        | TypeScript 5 (strict mode)           |
+| **Styling**         | Tailwind CSS v4                      |
+| **Components**      | shadcn/ui (new-york style)           |
+| **HTTP Client**     | ky 1.14                              |
+| **Server State**    | TanStack Query v5                    |
+| **Client State**    | Zustand 5                            |
+| **Forms**           | React Hook Form + Zod                |
+| **Unit Tests**      | Vitest + React Testing Library       |
+| **E2E Tests**       | Cypress                              |
+| **Package Manager** | pnpm                                 |
 
 ---
 
@@ -264,9 +264,10 @@ This repository implements the **MVP scope** of 48ID Web:
 ✅ Account activation and password reset flows  
 ✅ Audit log with filters and user resolution  
 ✅ API key management (create, rotate, revoke)  
-✅ Admin profile settings  
+✅ Admin profile settings
 
 **Future roadmap:**
+
 - Cmd+K command palette
 - Dark/light theme toggle
 - Lighthouse CI enforcement
@@ -285,6 +286,7 @@ This project is licensed under the [MIT License](LICENSE).
 Built with ❤️ by the K48 Team.
 
 **Part of the K48 ecosystem:**
+
 - **48ID Web** — Admin portal (this repository)
 - [48ID](https://github.com/mrvin100/48id) — Identity provider backend
 - [48Hub](https://github.com/mrvin100/48hub) — Alumni platform

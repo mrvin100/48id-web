@@ -57,6 +57,7 @@ git checkout -b feature/WEB-04-03-user-edit-form
 ```
 
 **Branch naming convention:**
+
 - `feature/` — New features
 - `fix/` — Bug fixes
 - `docs/` — Documentation updates
@@ -102,6 +103,7 @@ git commit -m "feat: add user edit form (WEB-04-03)"
 ```
 
 **Commit message format:**
+
 ```text
 <type>: <description> (<story-id>)
 
@@ -113,6 +115,7 @@ refactor: move reset-password logic to module
 ```
 
 **Commit types:**
+
 - `feat` — New feature
 - `fix` — Bug fix
 - `docs` — Documentation only
@@ -140,13 +143,13 @@ Every feature **must** follow this exact data flow — no exceptions:
 Component → Custom Hook → TanStack Query → lib/api function → BFF Route Handler → 48ID Backend
 ```
 
-| Layer | Location | Rule |
-|-------|----------|------|
-| **Page** | `app/(dashboard)/*/page.tsx` | Thin wrapper only — renders the module, nothing else |
-| **Module** | `components/modules/*/` | UI logic, uses hooks, no direct API calls |
-| **Hook** | `hooks/use-*.ts` | TanStack Query `useQuery` / `useMutation` wrapping api functions |
-| **API** | `lib/api/*.ts` | Pure HTTP functions using `apiClient` |
-| **BFF** | `app/api/*/route.ts` | Proxy to 48ID, reads JWT from cookie, forwards with Bearer token |
+| Layer      | Location                     | Rule                                                             |
+| ---------- | ---------------------------- | ---------------------------------------------------------------- |
+| **Page**   | `app/(dashboard)/*/page.tsx` | Thin wrapper only — renders the module, nothing else             |
+| **Module** | `components/modules/*/`      | UI logic, uses hooks, no direct API calls                        |
+| **Hook**   | `hooks/use-*.ts`             | TanStack Query `useQuery` / `useMutation` wrapping api functions |
+| **API**    | `lib/api/*.ts`               | Pure HTTP functions using `apiClient`                            |
+| **BFF**    | `app/api/*/route.ts`         | Proxy to 48ID, reads JWT from cookie, forwards with Bearer token |
 
 ### TypeScript
 
@@ -193,6 +196,7 @@ queryKey: ['users', filters]
 ### BFF Route Handlers
 
 Every BFF route must:
+
 1. Read the JWT from the cookie using `config.auth.jwtCookieName`
 2. Return 401 if no token
 3. Forward the token as `Authorization: Bearer <token>` to the backend
@@ -204,7 +208,11 @@ Every BFF route must:
 export async function GET(request: NextRequest) {
   const cookieStore = await cookies()
   const jwtToken = cookieStore.get(config.auth.jwtCookieName)?.value
-  if (!jwtToken) return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
+  if (!jwtToken)
+    return NextResponse.json(
+      { error: 'Authentication required' },
+      { status: 401 }
+    )
 
   const response = await fetch(`${config.backend.apiUrl}/admin/resource`, {
     headers: { Authorization: `Bearer ${jwtToken}` },
@@ -213,7 +221,7 @@ export async function GET(request: NextRequest) {
     const data = await response.json().catch(() => ({}))
     return NextResponse.json(
       { error: data?.detail ?? `Backend error: ${response.status}` },
-      { status: response.status },
+      { status: response.status }
     )
   }
   return NextResponse.json(await response.json())

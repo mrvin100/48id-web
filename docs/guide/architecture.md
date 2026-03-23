@@ -55,14 +55,14 @@ No component ever calls `fetch` or `apiClient` directly. No page contains busine
 
 ### Layer responsibilities
 
-| Layer | Location | Responsibility |
-|-------|----------|----------------|
-| **Page** | `app/(dashboard)/*/page.tsx` | Renders the module. Nothing else. |
-| **Module** | `components/modules/*/` | UI rendering, form state, user interactions |
-| **Hook** | `hooks/use-*.ts` | TanStack Query `useQuery` / `useMutation` |
-| **API** | `lib/api/*.ts` | Pure HTTP functions using `apiClient` |
-| **BFF** | `app/api/*/route.ts` | Auth proxy — reads cookie, forwards Bearer token |
-| **Middleware** | `middleware.ts` | Route protection, silent token refresh |
+| Layer          | Location                     | Responsibility                                   |
+| -------------- | ---------------------------- | ------------------------------------------------ |
+| **Page**       | `app/(dashboard)/*/page.tsx` | Renders the module. Nothing else.                |
+| **Module**     | `components/modules/*/`      | UI rendering, form state, user interactions      |
+| **Hook**       | `hooks/use-*.ts`             | TanStack Query `useQuery` / `useMutation`        |
+| **API**        | `lib/api/*.ts`               | Pure HTTP functions using `apiClient`            |
+| **BFF**        | `app/api/*/route.ts`         | Auth proxy — reads cookie, forwards Bearer token |
+| **Middleware** | `middleware.ts`              | Route protection, silent token refresh           |
 
 ---
 
@@ -73,6 +73,7 @@ No component ever calls `fetch` or `apiClient` directly. No page contains busine
 **Decision:** Custom BFF with HttpOnly cookies. Better Auth was evaluated and rejected.
 
 **Rationale:**
+
 - 48ID is already a full identity provider — it issues JWTs, manages sessions, handles refresh
 - Better Auth would require its own database tables (`session`, `account`, `user`) duplicating what already exists in PostgreSQL managed by 48ID
 - Two sources of truth for the same user identity is a maintenance problem
@@ -110,7 +111,7 @@ The `lib/api/client.ts` ky instance handles 401 responses from BFF routes:
 let refreshPromise: Promise<boolean> | null = null
 
 // afterResponse hook — fires on every 401
-async (request, _options, response) => {
+;async (request, _options, response) => {
   if (response.status === 401) {
     // All concurrent 401s share one refresh call
     const refreshed = await attemptRefresh()
@@ -196,11 +197,11 @@ export function useUsers(filters?: UserFilters) {
 
 ### Zustand (client state)
 
-| Store | Purpose | Persistence |
-|-------|---------|-------------|
-| `auth-store` | User profile, auth status | `localStorage` |
-| `ui-store` | Sidebar state, theme | `localStorage` |
-| `csv-store` | CSV import wizard state | None (session only) |
+| Store        | Purpose                   | Persistence         |
+| ------------ | ------------------------- | ------------------- |
+| `auth-store` | User profile, auth status | `localStorage`      |
+| `ui-store`   | Sidebar state, theme      | `localStorage`      |
+| `csv-store`  | CSV import wizard state   | None (session only) |
 
 ---
 
@@ -247,15 +248,15 @@ BFF routes read `data.detail` (not `data.message`) when forwarding errors to the
 
 ## ADR Index
 
-| ADR | Decision | Status |
-|-----|----------|--------|
-| ADR-001 | Next.js App Router over Pages Router | ✅ Adopted |
-| ADR-002 | TanStack Query for server state | ✅ Adopted |
-| ADR-003 | Zustand for client state | ✅ Adopted |
-| ADR-004 | ky over axios for HTTP | ✅ Adopted |
+| ADR     | Decision                                | Status     |
+| ------- | --------------------------------------- | ---------- |
+| ADR-001 | Next.js App Router over Pages Router    | ✅ Adopted |
+| ADR-002 | TanStack Query for server state         | ✅ Adopted |
+| ADR-003 | Zustand for client state                | ✅ Adopted |
+| ADR-004 | ky over axios for HTTP                  | ✅ Adopted |
 | ADR-005 | shadcn/ui over custom component library | ✅ Adopted |
-| ADR-006 | Custom BFF over Better Auth | ✅ Adopted |
-| ADR-007 | pnpm over npm/yarn | ✅ Adopted |
+| ADR-006 | Custom BFF over Better Auth             | ✅ Adopted |
+| ADR-007 | pnpm over npm/yarn                      | ✅ Adopted |
 
 ---
 

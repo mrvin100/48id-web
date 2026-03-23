@@ -8,7 +8,13 @@ import { useState } from 'react'
 import { CheckCircle2, XCircle, Eye, EyeOff } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { useResetPassword } from '@/hooks/use-activation'
 import { ROUTES } from '@/lib/routes'
@@ -53,8 +59,14 @@ export function ResetPasswordModule() {
         <Card className="w-full max-w-md">
           <CardContent className="flex flex-col items-center gap-4 pt-6 text-center">
             <XCircle className="text-destructive h-12 w-12" />
-            <p className="text-destructive font-medium">Invalid reset link. No token provided.</p>
-            <Button variant="outline" className="w-full" onClick={() => router.push(ROUTES.LOGIN)}>
+            <p className="text-destructive font-medium">
+              Invalid reset link. No token provided.
+            </p>
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => router.push(ROUTES.LOGIN)}
+            >
               Back to Login
             </Button>
           </CardContent>
@@ -75,7 +87,10 @@ export function ResetPasswordModule() {
             <p className="text-muted-foreground text-sm">
               You can now log in with your new password.
             </p>
-            <Button className="w-full" onClick={() => router.push(ROUTES.LOGIN)}>
+            <Button
+              className="w-full"
+              onClick={() => router.push(ROUTES.LOGIN)}
+            >
               Go to Login
             </Button>
           </CardContent>
@@ -93,7 +108,9 @@ export function ResetPasswordModule() {
         </CardHeader>
         <CardContent>
           <form
-            onSubmit={handleSubmit(d => mutate({ token, newPassword: d.newPassword }))}
+            onSubmit={handleSubmit(d =>
+              mutate({ token, newPassword: d.newPassword })
+            )}
             className="space-y-4"
           >
             {isError && (
@@ -105,7 +122,9 @@ export function ResetPasswordModule() {
             )}
 
             <div className="space-y-1">
-              <label htmlFor="newPassword" className="text-sm font-medium">New Password</label>
+              <label htmlFor="newPassword" className="text-sm font-medium">
+                New Password
+              </label>
               <div className="relative">
                 <Input
                   {...register('newPassword')}
@@ -120,16 +139,24 @@ export function ResetPasswordModule() {
                   className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400"
                   aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
                 </button>
               </div>
               {errors.newPassword && (
-                <p className="text-destructive text-xs">{errors.newPassword.message}</p>
+                <p className="text-destructive text-xs">
+                  {errors.newPassword.message}
+                </p>
               )}
             </div>
 
             <div className="space-y-1">
-              <label htmlFor="confirmPassword" className="text-sm font-medium">Confirm Password</label>
+              <label htmlFor="confirmPassword" className="text-sm font-medium">
+                Confirm Password
+              </label>
               <Input
                 {...register('confirmPassword')}
                 id="confirmPassword"
@@ -137,7 +164,9 @@ export function ResetPasswordModule() {
                 placeholder="Repeat your password"
               />
               {errors.confirmPassword && (
-                <p className="text-destructive text-xs">{errors.confirmPassword.message}</p>
+                <p className="text-destructive text-xs">
+                  {errors.confirmPassword.message}
+                </p>
               )}
             </div>
 

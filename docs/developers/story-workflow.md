@@ -31,6 +31,7 @@ flowchart TD
 **Location:** `MVP/48IDweb_Backlog_MVP (1).md`
 
 Extract:
+
 - **Story ID** (e.g., `WEB-04-03`)
 - **Acceptance criteria** (GIVEN / WHEN / THEN)
 - **Artefacts** (files to create or modify)
@@ -61,12 +62,20 @@ Every feature must implement **all layers in order**:
 export async function GET(request: NextRequest) {
   const cookieStore = await cookies()
   const jwtToken = cookieStore.get(config.auth.jwtCookieName)?.value
-  if (!jwtToken) return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
+  if (!jwtToken)
+    return NextResponse.json(
+      { error: 'Authentication required' },
+      { status: 401 }
+    )
 
   const response = await fetch(`${config.backend.apiUrl}/admin/resource`, {
     headers: { Authorization: `Bearer ${jwtToken}` },
   })
-  if (!response.ok) return NextResponse.json({ error: `Backend error: ${response.status}` }, { status: response.status })
+  if (!response.ok)
+    return NextResponse.json(
+      { error: `Backend error: ${response.status}` },
+      { status: response.status }
+    )
   return NextResponse.json(await response.json())
 }
 ```
@@ -151,7 +160,7 @@ export const ROUTES = {
   API: {
     // ...existing
     NEW_FEATURE: '/api/new-feature',
-  }
+  },
 }
 ```
 
@@ -174,8 +183,12 @@ Fix all errors before proceeding.
 // hooks/use-resource.test.ts
 describe('useResource', () => {
   it('returns resource data', async () => {
-    server.use(http.get('/api/resource/1', () => HttpResponse.json(mockResource)))
-    const { result } = renderHook(() => useResource('1'), { wrapper: QueryWrapper })
+    server.use(
+      http.get('/api/resource/1', () => HttpResponse.json(mockResource))
+    )
+    const { result } = renderHook(() => useResource('1'), {
+      wrapper: QueryWrapper,
+    })
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
     expect(result.current.data).toEqual(mockResource)
   })
@@ -192,10 +205,10 @@ pnpm test
 
 Create a checklist before opening the PR:
 
-| Criterion | Status |
-|-----------|--------|
-| GIVEN admin navigates to page WHEN loaded THEN data appears | ✅ |
-| GIVEN invalid input WHEN submitted THEN validation error shown | ✅ |
+| Criterion                                                      | Status |
+| -------------------------------------------------------------- | ------ |
+| GIVEN admin navigates to page WHEN loaded THEN data appears    | ✅     |
+| GIVEN invalid input WHEN submitted THEN validation error shown | ✅     |
 
 ---
 
@@ -219,18 +232,22 @@ git push -u origin feature/WEB-04-03-resource-management
 
 ```markdown
 ## Overview
+
 Implements **WEB-XX-XX**: [Story Title]
 
 ## Changes
+
 - `path/to/file` — description
 
 ## Acceptance Criteria
+
 | Criterion | Status |
-|-----------|--------|
-| AC 1 | ✅ |
-| AC 2 | ✅ |
+| --------- | ------ |
+| AC 1      | ✅     |
+| AC 2      | ✅     |
 
 ## Related
+
 - Epic: EXX — [Epic Name]
 ```
 
@@ -250,11 +267,11 @@ pnpm cy:open      # E2E tests
 
 ### Key files
 
-| Purpose | File |
-|---------|------|
-| Route constants | `src/lib/routes.ts` |
-| Query keys | `src/lib/query-keys.ts` |
-| HTTP client | `src/lib/api/client.ts` |
-| Auth store | `src/stores/auth-store.ts` |
-| Middleware | `middleware.ts` |
-| Backlog | `MVP/48IDweb_Backlog_MVP (1).md` |
+| Purpose         | File                             |
+| --------------- | -------------------------------- |
+| Route constants | `src/lib/routes.ts`              |
+| Query keys      | `src/lib/query-keys.ts`          |
+| HTTP client     | `src/lib/api/client.ts`          |
+| Auth store      | `src/stores/auth-store.ts`       |
+| Middleware      | `middleware.ts`                  |
+| Backlog         | `MVP/48IDweb_Backlog_MVP (1).md` |

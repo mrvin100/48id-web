@@ -23,11 +23,11 @@ The portal starts at **http://localhost:3000**
 
 ## Prerequisites
 
-| Requirement | Version | Notes |
-|-------------|---------|-------|
-| Node.js | 20+ | [Download](https://nodejs.org/) |
-| pnpm | 9+ | `npm install -g pnpm` |
-| 48ID backend | latest | Must be running on port 8080 |
+| Requirement  | Version | Notes                           |
+| ------------ | ------- | ------------------------------- |
+| Node.js      | 20+     | [Download](https://nodejs.org/) |
+| pnpm         | 9+      | `npm install -g pnpm`           |
+| 48ID backend | latest  | Must be running on port 8080    |
 
 ---
 
@@ -37,14 +37,14 @@ All configuration is done through environment variables. The `.env.example` file
 
 ### Key Variables
 
-| Variable | Description | Dev Default | Required |
-|----------|-------------|-------------|----------|
-| `BACKEND_URL` | 48ID backend base URL | `http://localhost:8080` | ✅ |
-| `NEXT_PUBLIC_APP_URL` | This app's public URL | `http://localhost:3000` | ✅ |
-| `JWT_COOKIE_NAME` | Access token cookie name | `auth-token` | ✅ |
-| `REFRESH_COOKIE_NAME` | Refresh token cookie name | `refresh-token` | ✅ |
-| `JWT_SECRET` | Secret for JWT verification in middleware | `your-secret-key-...` | ✅ prod |
-| `NODE_ENV` | Environment | `development` | auto |
+| Variable              | Description                               | Dev Default             | Required |
+| --------------------- | ----------------------------------------- | ----------------------- | -------- |
+| `BACKEND_URL`         | 48ID backend base URL                     | `http://localhost:8080` | ✅       |
+| `NEXT_PUBLIC_APP_URL` | This app's public URL                     | `http://localhost:3000` | ✅       |
+| `JWT_COOKIE_NAME`     | Access token cookie name                  | `auth-token`            | ✅       |
+| `REFRESH_COOKIE_NAME` | Refresh token cookie name                 | `refresh-token`         | ✅       |
+| `JWT_SECRET`          | Secret for JWT verification in middleware | `your-secret-key-...`   | ✅ prod  |
+| `NODE_ENV`            | Environment                               | `development`           | auto     |
 
 ### Security Variables (Production Only)
 
@@ -92,17 +92,17 @@ pnpm dev
 
 ## Available Scripts
 
-| Script | Description |
-|--------|-------------|
-| `pnpm dev` | Start dev server with Turbopack |
-| `pnpm build` | Production build |
-| `pnpm start` | Start production server |
-| `pnpm lint` | ESLint check |
-| `pnpm type-check` | TypeScript check (no emit) |
-| `pnpm test` | Run unit tests with Vitest |
+| Script               | Description                     |
+| -------------------- | ------------------------------- |
+| `pnpm dev`           | Start dev server with Turbopack |
+| `pnpm build`         | Production build                |
+| `pnpm start`         | Start production server         |
+| `pnpm lint`          | ESLint check                    |
+| `pnpm type-check`    | TypeScript check (no emit)      |
+| `pnpm test`          | Run unit tests with Vitest      |
 | `pnpm test:coverage` | Unit tests with coverage report |
-| `pnpm cy:open` | Open Cypress interactive runner |
-| `pnpm cy:run` | Run Cypress headless |
+| `pnpm cy:open`       | Open Cypress interactive runner |
+| `pnpm cy:run`        | Run Cypress headless            |
 
 ---
 

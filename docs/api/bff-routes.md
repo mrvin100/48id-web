@@ -3,6 +3,7 @@
 All BFF (Backend For Frontend) route handlers in `src/app/api/`.
 
 The BFF layer:
+
 - Reads the JWT from the `k48_access_token` HttpOnly cookie
 - Forwards requests to 48ID with `Authorization: Bearer <token>`
 - Never exposes raw tokens in response bodies
@@ -12,6 +13,7 @@ The BFF layer:
 ## Authentication Routes
 
 ### POST /api/auth/login
+
 Authenticates an admin and sets HttpOnly cookies.
 
 **Request:** `{ matricule: string, password: string }`  
@@ -22,6 +24,7 @@ Authenticates an admin and sets HttpOnly cookies.
 ---
 
 ### POST /api/auth/refresh
+
 Silently refreshes the access token using the refresh token cookie.
 
 **Request:** none (reads cookie automatically)  
@@ -32,6 +35,7 @@ Silently refreshes the access token using the refresh token cookie.
 ---
 
 ### POST /api/auth/logout
+
 Terminates the session on both client and backend.
 
 **Request:** none  
@@ -41,6 +45,7 @@ Terminates the session on both client and backend.
 ---
 
 ### POST /api/auth/activate
+
 Activates a provisioned account using the email token.
 
 **Request:** `{ token: string }`  
@@ -50,6 +55,7 @@ Activates a provisioned account using the email token.
 ---
 
 ### POST /api/auth/reset-password
+
 Resets a user's password using the email token. Tokens are single-use.
 
 **Request:** `{ token: string, newPassword: string }`  
@@ -61,6 +67,7 @@ Resets a user's password using the email token. Tokens are single-use.
 ## User Routes
 
 ### GET /api/users
+
 Returns a paginated list of users.
 
 **Query params:** `page`, `size`, `sort`, `status`, `batch`, `role`, `search`  
@@ -69,6 +76,7 @@ Returns a paginated list of users.
 ---
 
 ### GET /api/users/[id]
+
 Returns a single user by ID.
 
 **Response:** `User`
@@ -76,6 +84,7 @@ Returns a single user by ID.
 ---
 
 ### PUT /api/users/[id]
+
 Updates a user's profile fields.
 
 **Request:** `{ name?, phone?, batch?, specialization? }`  
@@ -84,6 +93,7 @@ Updates a user's profile fields.
 ---
 
 ### PUT /api/users/[id]/status
+
 Changes a user's status (ACTIVE / SUSPENDED).
 
 **Request:** `{ status: "ACTIVE" | "SUSPENDED" }`  
@@ -92,6 +102,7 @@ Changes a user's status (ACTIVE / SUSPENDED).
 ---
 
 ### POST /api/users/[id]/reset-password
+
 Forces a password reset email for a user.
 
 **Request:** none  
@@ -102,6 +113,7 @@ Forces a password reset email for a user.
 ## Admin Routes
 
 ### GET /api/admin/audit-log
+
 Returns paginated audit events with resolved user names.
 
 **Query params:** `page`, `size`, `eventType`, `userId`, `from`, `to`  
@@ -111,6 +123,7 @@ Returns paginated audit events with resolved user names.
 ---
 
 ### GET /api/admin/api-keys
+
 Returns all registered API keys.
 
 **Response:** `ApiKey[]`
@@ -118,6 +131,7 @@ Returns all registered API keys.
 ---
 
 ### POST /api/admin/api-keys
+
 Creates a new API key. Returns the raw key value once.
 
 **Request:** `{ appName: string, description?: string }`  
@@ -126,6 +140,7 @@ Creates a new API key. Returns the raw key value once.
 ---
 
 ### DELETE /api/admin/api-keys/[id]
+
 Revokes an API key.
 
 **Response:** 204 No Content
@@ -133,6 +148,7 @@ Revokes an API key.
 ---
 
 ### POST /api/admin/api-keys/[id]/rotate
+
 Rotates an API key. Invalidates the current key immediately.
 
 **Response:** `{ id, appName, key, createdAt }`
@@ -140,6 +156,7 @@ Rotates an API key. Invalidates the current key immediately.
 ---
 
 ### POST /api/admin/users/import
+
 Imports users from a CSV file (multipart/form-data).
 
 **Request:** `FormData` with `file` field (CSV)  
@@ -151,6 +168,7 @@ Imports users from a CSV file (multipart/form-data).
 ## Dashboard Routes
 
 ### GET /api/dashboard/metrics
+
 Returns user count metrics.
 
 **Response:** `{ totalUsers, activeUsers, pendingUsers, suspendedUsers }`
@@ -158,6 +176,7 @@ Returns user count metrics.
 ---
 
 ### GET /api/dashboard/login-activity
+
 Returns 7-day login activity for the chart.
 
 **Response:** `{ date, loginSuccess, loginFailure }[]`
@@ -165,6 +184,7 @@ Returns 7-day login activity for the chart.
 ---
 
 ### GET /api/dashboard/recent-activity
+
 Returns the last 10 audit events.
 
 **Response:** `AuditEvent[]`
@@ -174,6 +194,7 @@ Returns the last 10 audit events.
 ## CSV Routes
 
 ### GET /api/csv/template
+
 Downloads the official CSV import template.
 
 **Response:** `text/csv` file download  
@@ -185,6 +206,7 @@ Downloads the official CSV import template.
 ## Health
 
 ### GET /api/health
+
 Returns application health status.
 
 **Response:** `{ status: "ok" }`

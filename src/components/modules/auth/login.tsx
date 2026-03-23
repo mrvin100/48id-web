@@ -80,7 +80,10 @@ export function LoginModule() {
       if (response.success) {
         router.push(ROUTES.DASHBOARD)
       } else {
-        setError({ code: 'LOGIN_FAILED', message: response.message || 'Login failed' })
+        setError({
+          code: 'LOGIN_FAILED',
+          message: response.message || 'Login failed',
+        })
       }
     } catch (err) {
       console.error('Login submission error:', err)
