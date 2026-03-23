@@ -229,8 +229,9 @@ export const useAuthStore = create<AuthStoreState>()(
       })),
       {
         name: '48id-auth-storage',
-        // Use sessionStorage for better security (cleared on tab close)
-        storage: createJSONStorage(() => sessionStorage),
+        // Use localStorage so user profile survives page refresh.
+        // Tokens are in HttpOnly cookies — localStorage only holds display data.
+        storage: createJSONStorage(() => localStorage),
         // Only persist non-sensitive user data
         partialize: state => ({
           user: state.user
@@ -278,8 +279,7 @@ export const useAuthStore = create<AuthStoreState>()(
                 state.user = null
                 state.isAuthenticated = false
                 state.lastActivity = null
-                // Clear sessionStorage using the same name constant
-                sessionStorage.removeItem('48id-auth-storage')
+                localStorage.removeItem('48id-auth-storage')
               }
             }
           }

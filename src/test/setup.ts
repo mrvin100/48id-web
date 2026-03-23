@@ -39,6 +39,28 @@ vi.mock('next/headers', () => ({
   })),
 }))
 
+// Mock ky HTTP client to prevent real HTTP requests in tests
+vi.mock('ky', () => {
+  const mockResponse = {
+    json: vi.fn(() => Promise.resolve({})),
+    text: vi.fn(() => Promise.resolve('')),
+  }
+
+  const mockKy = vi.fn().mockReturnValue(mockResponse)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ;(mockKy as any).create = vi.fn(() => mockKy)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ;(mockKy as any).get = vi.fn(() => mockResponse)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ;(mockKy as any).post = vi.fn(() => mockResponse)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ;(mockKy as any).put = vi.fn(() => mockResponse)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ;(mockKy as any).delete = vi.fn(() => mockResponse)
+
+  return { default: mockKy, __esModule: true }
+})
+
 // Global test setup
 beforeAll(() => {
   // Setup any global test configuration

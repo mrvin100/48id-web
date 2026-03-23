@@ -169,15 +169,11 @@ describe('Property: Authentication Flow Integrity', () => {
         mockKy.default.create.mockReturnValue({ post: mockPost })
 
         // Act: Attempt login with invalid credentials
-        try {
-          await authService.login(credentials)
-          // Should not reach here
-          expect(true).toBe(false)
-        } catch (error) {
-          // Assert: Should throw error for invalid credentials
-          expect(error).toBeInstanceOf(Error)
-          expect((error as Error).message).toContain('Login failed')
-        }
+        const response = await authService.login(credentials)
+
+        // Assert: Should return failure response (not throw)
+        expect(response.success).toBe(false)
+        expect(response.message).toBeTruthy()
       }),
       propertyTestConfig
     )
@@ -340,15 +336,14 @@ describe('Property: Token Refresh Automation', () => {
         // @ts-expect-error - Mocking ky
         mockKy.default.create.mockReturnValue({ post: mockPost })
 
-        // Act: Attempt token refresh
+        // Act: Attempt token refresh — throws an AuthError (plain object with code+message)
         try {
           await authService.refreshToken()
-          // Should not reach here
-          expect(true).toBe(false)
+          expect(true).toBe(false) // should not reach here
         } catch (error) {
-          // Assert: Should throw error for failed refresh
-          expect(error).toBeInstanceOf(Error)
-          expect((error as Error).message).toContain('Token refresh failed')
+          // Assert: error has code and message (AuthError shape)
+          expect(error).toHaveProperty('code')
+          expect(error).toHaveProperty('message')
         }
       }),
       propertyTestConfig
