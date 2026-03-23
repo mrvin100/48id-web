@@ -42,7 +42,7 @@ graph TB
 
 Every feature follows this exact layered pattern:
 
-```
+```text
 Page (thin wrapper)
   └── Module Component (UI logic)
         └── Custom Hook (TanStack Query)
@@ -130,7 +130,7 @@ async (request, _options, response) => {
 
 ## Module Structure
 
-```
+```text
 src/
 ├── app/
 │   ├── (auth)/                   # Unauthenticated routes

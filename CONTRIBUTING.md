@@ -67,7 +67,7 @@ git checkout -b feature/WEB-04-03-user-edit-form
 Follow the **layered architecture** — every feature must go through all layers:
 
 ```
-BFF Route Handler → lib/api function → TanStack Query hook → Module component → Page (thin wrapper)
+Page (thin wrapper) → Module component → TanStack Query hook → lib/api function → BFF Route Handler
 ```
 
 See [Architecture Guide](docs/guide/architecture.md) for the full pattern.
@@ -209,7 +209,13 @@ export async function GET(request: NextRequest) {
   const response = await fetch(`${config.backend.apiUrl}/admin/resource`, {
     headers: { Authorization: `Bearer ${jwtToken}` },
   })
-  if (!response.ok) return NextResponse.json({ error: `Backend error: ${response.status}` }, { status: response.status })
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}))
+    return NextResponse.json(
+      { error: data?.detail ?? `Backend error: ${response.status}` },
+      { status: response.status },
+    )
+  }
   return NextResponse.json(await response.json())
 }
 ```

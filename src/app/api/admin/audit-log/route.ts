@@ -48,25 +48,41 @@ export async function GET(request: NextRequest) {
 
     const data = await response.json()
 
-    // Resolve unique userIds to user details in parallel
-    const uniqueUserIds: string[] = [...new Set<string>(
-      (data.content as { userId: string }[]).map(e => e.userId).filter(Boolean)
-    )]
+    // Resolve unique userIds — clamped to avoid unbounded N calls
+    const MAX_AUDIT_USERS = 20
+    const uniqueUserIds: string[] = [
+      ...new Set<string>(
+        (data.content as { userId: string }[])
+          .map(e => e.userId)
+          .filter(Boolean),
+      ),
+    ].slice(0, MAX_AUDIT_USERS)
 
     const userMap = new Map<string, { name: string; matricule: string }>()
     await Promise.all(
       uniqueUserIds.map(async id => {
         const user = await fetchUser(id, jwtToken)
         if (user) userMap.set(id, user)
-      })
+      }),
     )
 
-    // Enrich events with resolved user info
-    data.content = (data.content as { userId: string; [key: string]: unknown }[]).map(event => ({
-      ...event,
-      userName: userMap.get(event.userId)?.name ?? 'Unknown',
-      userMatricule: userMap.get(event.userId)?.matricule ?? event.userId,
-    }))
+    // Enrich events — preserve backend-supplied fields when lookup misses
+    data.content = (
+      data.content as { userId: string; [key: string]: unknown }[]
+    ).map(event => {
+      const user = userMap.get(event.userId)
+      return {
+        ...event,
+        userName:
+          user?.name ??
+          (event.userName as string | undefined) ??
+          'Unknown',
+        userMatricule:
+          user?.matricule ??
+          (event.userMatricule as string | undefined) ??
+          event.userId,
+      }
+    })
 
     return NextResponse.json(data)
   } catch (error) {

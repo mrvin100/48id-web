@@ -105,10 +105,11 @@ export function ResetPasswordModule() {
             )}
 
             <div className="space-y-1">
-              <label className="text-sm font-medium">New Password</label>
+              <label htmlFor="newPassword" className="text-sm font-medium">New Password</label>
               <div className="relative">
                 <Input
                   {...register('newPassword')}
+                  id="newPassword"
                   type={showPassword ? 'text' : 'password'}
                   placeholder="Min. 8 chars, upper, lower, digit, special"
                   className="pr-10"
@@ -128,9 +129,10 @@ export function ResetPasswordModule() {
             </div>
 
             <div className="space-y-1">
-              <label className="text-sm font-medium">Confirm Password</label>
+              <label htmlFor="confirmPassword" className="text-sm font-medium">Confirm Password</label>
               <Input
                 {...register('confirmPassword')}
+                id="confirmPassword"
                 type={showPassword ? 'text' : 'password'}
                 placeholder="Repeat your password"
               />

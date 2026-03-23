@@ -36,7 +36,8 @@ export const authKeys = {
   all: ['auth'] as const,
   profile: () => [...authKeys.all, 'profile'] as const,
   sessions: () => [...authKeys.all, 'sessions'] as const,
-  activation: (token: string) => [...authKeys.all, 'activation', token] as const,
+  activation: (token: string) =>
+    [...authKeys.all, 'activation', token] as const,
 }
 
 /**

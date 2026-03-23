@@ -12,7 +12,7 @@ import { HTTPError } from 'ky'
 // Matches backend response shape exactly
 export interface CsvRowError {
   row: number
-  matricule: string
+  matricule?: string | null
   error: string
 }
 

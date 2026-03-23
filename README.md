@@ -74,7 +74,7 @@ graph TB
 
 ### Data flow
 
-```
+```text
 Component → Custom Hook → TanStack Query → lib/api function → BFF Route Handler → 48ID Backend
 ```
 
@@ -82,7 +82,7 @@ Every feature follows this exact layered pattern — no component makes direct A
 
 ### Folder structure
 
-```
+```text
 src/
 ├── app/
 │   ├── (auth)/               # Public auth pages (login, activate, reset-password)
