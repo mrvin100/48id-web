@@ -2,8 +2,8 @@
 
 import { useSearchParams, useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
+import { createFormConfig } from '@/lib/form-config'
 import { useState } from 'react'
 import { CheckCircle2, XCircle, Eye, EyeOff } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -45,7 +45,7 @@ export function ResetPasswordModule() {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<FormData>({ resolver: zodResolver(schema) })
+  } = useForm<FormData>(createFormConfig(schema))
 
   if (!token) {
     return (
