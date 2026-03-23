@@ -46,13 +46,18 @@ vi.mock('ky', () => {
     text: vi.fn(() => Promise.resolve('')),
   }
 
-  const mockKy = vi.fn().mockReturnValue(mockResponse) as any
-  mockKy.create = vi.fn(() => mockKy)
-  mockKy.get = vi.fn(() => mockResponse)
-  mockKy.post = vi.fn(() => mockResponse)
-  mockKy.put = vi.fn(() => mockResponse)
-  mockKy.delete = vi.fn(() => mockResponse)
-  
+  const mockKy = vi.fn().mockReturnValue(mockResponse)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ;(mockKy as any).create = vi.fn(() => mockKy)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ;(mockKy as any).get = vi.fn(() => mockResponse)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ;(mockKy as any).post = vi.fn(() => mockResponse)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ;(mockKy as any).put = vi.fn(() => mockResponse)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ;(mockKy as any).delete = vi.fn(() => mockResponse)
+
   return { default: mockKy, __esModule: true }
 })
 
