@@ -41,24 +41,18 @@ vi.mock('next/headers', () => ({
 
 // Mock ky HTTP client to prevent real HTTP requests in tests
 vi.mock('ky', () => {
-  const mockKy = vi.fn()
+  const mockResponse = {
+    json: vi.fn(() => Promise.resolve({})),
+    text: vi.fn(() => Promise.resolve('')),
+  }
+
+  const mockKy = vi.fn().mockReturnValue(mockResponse) as any
   mockKy.create = vi.fn(() => mockKy)
-  mockKy.get = vi.fn(() => ({
-    json: vi.fn(() => Promise.resolve({})),
-    text: vi.fn(() => Promise.resolve('')),
-  }))
-  mockKy.post = vi.fn(() => ({
-    json: vi.fn(() => Promise.resolve({})),
-    text: vi.fn(() => Promise.resolve('')),
-  }))
-  mockKy.put = vi.fn(() => ({
-    json: vi.fn(() => Promise.resolve({})),
-    text: vi.fn(() => Promise.resolve('')),
-  }))
-  mockKy.delete = vi.fn(() => ({
-    json: vi.fn(() => Promise.resolve({})),
-    text: vi.fn(() => Promise.resolve('')),
-  }))
+  mockKy.get = vi.fn(() => mockResponse)
+  mockKy.post = vi.fn(() => mockResponse)
+  mockKy.put = vi.fn(() => mockResponse)
+  mockKy.delete = vi.fn(() => mockResponse)
+  
   return { default: mockKy, __esModule: true }
 })
 
