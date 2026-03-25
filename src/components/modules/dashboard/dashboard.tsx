@@ -373,13 +373,6 @@ export function DashboardModule() {
             </Card>
           </div>
         </TabsContent>
-
-        <TabsContent value="traffic">
-          <div className="text-muted-foreground py-12 text-center text-sm">
-            Traffic data will be available once operator accounts are
-            configured.
-          </div>
-        </TabsContent>
       </Tabs>
     </div>
   )
