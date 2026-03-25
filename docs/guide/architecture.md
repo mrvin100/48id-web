@@ -225,7 +225,7 @@ All route strings are defined as constants in `lib/routes.ts` — the middleware
 
 All matricule values across the app must match the backend-enforced format:
 
-```
+```text
 ^K48-B[0-9]+-[0-9]+$
 ```
 
@@ -252,7 +252,7 @@ The batch embedded in the matricule must match the user's `batch` field:
 
 The error message from `validateMatricule` **must match the backend exactly** — the frontend and backend share the same string so error messages are consistent whether validation fires client-side or server-side:
 
-```
+```text
 "Matricule prefix 'K48-B2' does not match batch 'B1'"
 ```
 

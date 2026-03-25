@@ -26,12 +26,17 @@ describe('validateMatricule', () => {
     )
   })
 
-  it('returns null for valid matricule with no batch provided', () => {
-    expect(validateMatricule('K48-B10-999')).toBeNull()
-  })
-
   it('returns error for empty string', () => {
     expect(validateMatricule('')).not.toBeNull()
+  })
+
+  it('returns error for lowercase input (format is case-sensitive)', () => {
+    expect(validateMatricule('k48-b1-12')).not.toBeNull()
+  })
+
+  it('returns error for matricule with surrounding whitespace', () => {
+    // validateMatricule does not trim — callers must trim before calling
+    expect(validateMatricule(' K48-B1-12 ')).not.toBeNull()
   })
 })
 

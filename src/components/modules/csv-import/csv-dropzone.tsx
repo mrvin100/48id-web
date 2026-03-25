@@ -252,8 +252,14 @@ export function CsvDropzone({
             const {
               row: parsedRow,
               hasError,
-              errorMessage: _errorMessage,
+              errorMessage,
             } = validateRow(row as string[], i + 1)
+
+            // Apply validation result to parsedRow
+            if (hasError) {
+              parsedRow.hasError = true
+              parsedRow.errorMessage = errorMessage
+            }
 
             // Check for duplicate matricules
             if (!hasError && matricules.has(parsedRow.matricule)) {
