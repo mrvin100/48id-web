@@ -31,7 +31,8 @@ import { useSearchParams } from 'next/navigation'
 import { useDashboard } from '@/hooks/use-dashboard'
 import { DashboardModule } from '@/components/modules/dashboard'
 
-const p = (init?: string) => new URLSearchParams(init) as unknown
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const p = (init?: string) => new URLSearchParams(init) as any
 
 function wrapper({ children }: { children: React.ReactNode }) {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } })
