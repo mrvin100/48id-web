@@ -65,7 +65,7 @@ export function TrafficTab() {
         {data.accounts.map(account => (
           <TableRow
             key={account.accountId}
-            className="cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="focus-visible:ring-ring cursor-pointer focus-visible:ring-2 focus-visible:outline-none"
             tabIndex={0}
             role="button"
             onClick={() =>

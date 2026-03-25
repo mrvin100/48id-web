@@ -101,8 +101,6 @@ describe('WEB-S4-FE-03 — TrafficTab', () => {
       error: new Error('Network error'),
     } as unknown as ReturnType<typeof useDashboardTraffic>)
     render(<TrafficTab />, { wrapper })
-    expect(
-      screen.getByText('Failed to load traffic data.')
-    ).toBeInTheDocument()
+    expect(screen.getByText('Failed to load traffic data.')).toBeInTheDocument()
   })
 })
