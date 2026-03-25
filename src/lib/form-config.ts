@@ -66,8 +66,8 @@ export const formFieldConfigs = {
   // Authentication fields
   matricule: {
     label: 'Matricule',
-    placeholder: 'K48-YYYY-XXX',
-    description: 'Your K48 student matricule',
+    placeholder: 'K48-B1-1',
+    description: 'Your K48 matricule (format: K48-B{n}-{seq})',
     required: true,
     autoComplete: 'username',
     type: 'text' as const,
