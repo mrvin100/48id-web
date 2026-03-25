@@ -15,7 +15,7 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import { ROUTES } from '@/lib/routes'
-import type { UserRole } from '@/types/auth.types'
+import { UserRole } from '@/types/auth.types'
 
 export interface NavigationItem {
   title: string
@@ -31,31 +31,31 @@ export const navigationConfig: NavigationItem[] = [
     title: 'Dashboard',
     href: ROUTES.DASHBOARD,
     icon: LayoutDashboard,
-    roles: ['ADMIN'],
+    roles: [UserRole.ADMIN],
   },
   {
     title: 'Users',
     href: ROUTES.USERS,
     icon: Users,
-    roles: ['ADMIN'],
+    roles: [UserRole.ADMIN],
   },
   {
     title: 'CSV Import',
     href: ROUTES.CSV_IMPORT,
     icon: Upload,
-    roles: ['ADMIN'],
+    roles: [UserRole.ADMIN],
   },
   {
     title: 'Audit Logs',
     href: ROUTES.AUDIT,
     icon: FileText,
-    roles: ['ADMIN'],
+    roles: [UserRole.ADMIN],
   },
   {
     title: 'API Keys',
     href: ROUTES.API_KEYS,
     icon: Key,
-    roles: ['ADMIN'],
+    roles: [UserRole.ADMIN],
   },
 
   // ── OPERATOR ───────────────────────────────────────────────────────────
@@ -63,31 +63,31 @@ export const navigationConfig: NavigationItem[] = [
     title: 'Dashboard',
     href: ROUTES.OPERATOR.DASHBOARD,
     icon: LayoutDashboard,
-    roles: ['OPERATOR'],
+    roles: [UserRole.OPERATOR],
   },
   {
     title: 'Users',
     href: ROUTES.OPERATOR.USERS,
     icon: Users,
-    roles: ['OPERATOR'],
+    roles: [UserRole.OPERATOR],
   },
   {
     title: 'Audit Logs',
     href: ROUTES.OPERATOR.AUDIT,
     icon: FileText,
-    roles: ['OPERATOR'],
+    roles: [UserRole.OPERATOR],
   },
   {
     title: 'Traffic',
     href: ROUTES.OPERATOR.TRAFFIC,
     icon: Activity,
-    roles: ['OPERATOR'],
+    roles: [UserRole.OPERATOR],
   },
   {
     title: 'API Key',
     href: ROUTES.OPERATOR.API_KEY,
     icon: Key,
-    roles: ['OPERATOR'],
+    roles: [UserRole.OPERATOR],
   },
 ]
 
