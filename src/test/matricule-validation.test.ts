@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect } from 'vitest'
-import { validateMatricule, getMatriculeHelperText } from '@/lib/csv-parser'
+import { validateMatricule, getMatriculeHelperText } from '@/lib/validations'
 
 describe('validateMatricule', () => {
   it('returns null for valid matricule matching batch', () => {

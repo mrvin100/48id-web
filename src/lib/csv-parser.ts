@@ -3,42 +3,8 @@
 import { User } from '@/types/auth.types'
 import { CSVValidationResult, CSVError } from '@/types/csv.types'
 
-// ── Matricule validation (E-BE-01 contract) ───────────────────────────────────
-
-const MATRICULE_FORMAT = /^K48-B[0-9]+-[0-9]+$/
-
-/**
- * Validates a matricule against the K48-B{n}-{seq} format and optional batch.
- * Error messages match the backend exactly (MatriculeValidator.java).
- *
- * @returns null if valid, error string if invalid
- */
-export function validateMatricule(
-  matricule: string,
-  batch?: string
-): string | null {
-  if (!MATRICULE_FORMAT.test(matricule)) {
-    return `Matricule '${matricule}' does not match required format K48-B{n}-{seq}`
-  }
-  if (batch) {
-    const expectedPrefix = `K48-${batch}-`
-    if (!matricule.startsWith(expectedPrefix)) {
-      const actualPrefix = matricule.substring(0, matricule.lastIndexOf('-'))
-      return `Matricule prefix '${actualPrefix}' does not match batch '${batch}'`
-    }
-  }
-  return null
-}
-
-/**
- * Returns a helper text string showing expected matricule examples for a given batch.
- * Used by form inputs to guide the user before submission.
- */
-export function getMatriculeHelperText(batch: string): string {
-  if (!batch)
-    return 'Expected format: K48-B{n}-{seq} (e.g. K48-B1-1, K48-B1-12)'
-  return `Expected format: K48-${batch}-1, K48-${batch}-12, …`
-}
+// Re-export from the single source of truth
+export { validateMatricule, getMatriculeHelperText } from '@/lib/validations'
 
 // ── CSV parsing stubs ─────────────────────────────────────────────────────────
 
