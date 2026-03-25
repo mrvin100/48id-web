@@ -55,7 +55,7 @@ import {
   EmptyDescription,
 } from '@/components/ui/empty'
 import { toast } from 'sonner'
-import { Key, Plus, Copy, RotateCw, Trash2, FileKey } from 'lucide-react'
+import { Plus, Copy, RotateCw, Trash2, FileKey } from 'lucide-react'
 
 export function ApiKeysModule() {
   const [showCreateDialog, setShowCreateDialog] = useState(false)

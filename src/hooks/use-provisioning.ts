@@ -6,7 +6,7 @@
  */
 
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { provisioningApi, type CsvImportResponse } from '@/lib/api/provisioning'
+import { provisioningApi } from '@/lib/api/provisioning'
 import { usersKeys } from '@/lib/query-keys'
 
 /**
