@@ -17,6 +17,7 @@ export async function GET() {
     const response = await fetch(
       `${config.backend.apiUrl}/admin/dashboard/traffic`,
       {
+        signal: AbortSignal.timeout(config.backend.timeout),
         headers: {
           Authorization: `Bearer ${jwtToken}`,
           'Content-Type': 'application/json',

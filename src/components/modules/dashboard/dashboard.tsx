@@ -98,10 +98,11 @@ function Clock() {
 export function DashboardModule() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const tab = searchParams.get('tab') ?? 'overview'
+  const raw = searchParams.get('tab')
+  const tab = raw === 'traffic' ? 'traffic' : 'overview'
 
   const { metrics, loginActivity, recentActivity, isLoading, isError, error } =
-    useDashboard()
+    useDashboard({ enabled: tab === 'overview' })
 
   const handleTabChange = (value: string) => {
     const params = new URLSearchParams(searchParams.toString())

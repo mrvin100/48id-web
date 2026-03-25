@@ -20,9 +20,9 @@ export async function POST(request: NextRequest) {
 
     const response = await fetch(backendUrl, {
       method: 'POST',
+      signal: AbortSignal.timeout(config.backend.timeout),
       headers: {
         Authorization: `Bearer ${jwtToken}`,
-        // Do NOT set Content-Type — let fetch set the multipart boundary automatically
       },
       body: formData,
     })

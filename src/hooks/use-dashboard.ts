@@ -50,10 +50,30 @@ export function useRecentActivity() {
 /**
  * Composed hook for all dashboard data
  */
-export function useDashboard() {
-  const metricsQuery = useDashboardMetrics()
-  const loginActivityQuery = useLoginActivity()
-  const recentActivityQuery = useRecentActivity()
+export function useDashboard({ enabled = true }: { enabled?: boolean } = {}) {
+  const metricsQuery = useQuery({
+    queryKey: dashboardKeys.metrics(),
+    queryFn: dashboardApi.getMetrics,
+    enabled,
+    staleTime: 30 * 1000,
+    refetchInterval: 60 * 1000,
+    refetchIntervalInBackground: true,
+  })
+  const loginActivityQuery = useQuery({
+    queryKey: dashboardKeys.loginActivity(),
+    queryFn: dashboardApi.getLoginActivity,
+    enabled,
+    staleTime: 5 * 60 * 1000,
+    refetchInterval: 5 * 60 * 1000,
+  })
+  const recentActivityQuery = useQuery({
+    queryKey: dashboardKeys.recentActivity(),
+    queryFn: dashboardApi.getRecentActivity,
+    enabled,
+    staleTime: 30 * 1000,
+    refetchInterval: 60 * 1000,
+    refetchIntervalInBackground: true,
+  })
 
   return {
     metrics: metricsQuery.data,

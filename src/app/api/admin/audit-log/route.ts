@@ -8,6 +8,7 @@ async function fetchUser(
 ): Promise<{ name: string; matricule: string } | null> {
   try {
     const res = await fetch(`${config.backend.apiUrl}/admin/users/${userId}`, {
+      signal: AbortSignal.timeout(config.backend.timeout),
       headers: { Authorization: `Bearer ${token}` },
     })
     if (!res.ok) return null
@@ -52,6 +53,7 @@ export async function GET(request: NextRequest) {
     const response = await fetch(
       `${config.backend.apiUrl}/admin/audit-log?${params}`,
       {
+        signal: AbortSignal.timeout(config.backend.timeout),
         headers: {
           Authorization: `Bearer ${jwtToken}`,
           'Content-Type': 'application/json',

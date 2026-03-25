@@ -22,6 +22,7 @@ export async function POST(
 
     const response = await fetch(backendUrl, {
       method: 'POST',
+      signal: AbortSignal.timeout(config.backend.timeout),
       headers: {
         Authorization: `Bearer ${jwtToken}`,
         'Content-Type': 'application/json',

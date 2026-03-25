@@ -17,6 +17,7 @@ export async function GET(_request: NextRequest) {
     const backendUrl = `${config.backend.apiUrl}/admin/api-keys`
 
     const response = await fetch(backendUrl, {
+      signal: AbortSignal.timeout(config.backend.timeout),
       headers: {
         Authorization: `Bearer ${jwtToken}`,
         'Content-Type': 'application/json',
@@ -66,6 +67,7 @@ export async function POST(request: NextRequest) {
 
     const response = await fetch(backendUrl, {
       method: 'POST',
+      signal: AbortSignal.timeout(config.backend.timeout),
       headers: {
         Authorization: `Bearer ${jwtToken}`,
         'Content-Type': 'application/json',
