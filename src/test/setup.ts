@@ -65,6 +65,10 @@ vi.mock('ky', () => {
 beforeAll(() => {
   // ResizeObserver is not implemented in jsdom — required by recharts
   global.ResizeObserver = class ResizeObserver {
+    callback: ResizeObserverCallback
+    constructor(callback: ResizeObserverCallback) {
+      this.callback = callback
+    }
     observe() {}
     unobserve() {}
     disconnect() {}

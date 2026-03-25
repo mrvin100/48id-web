@@ -342,7 +342,6 @@ export function DashboardModule() {
           </div>
         </CardContent>
       </Card>
-
     </div>
   )
 }

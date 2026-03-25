@@ -36,7 +36,6 @@ const mockMetrics = {
   activeSessions: 10,
   pendingActivations: 5,
   suspendedUsers: 2,
-  systemHealth: 'operational' as const,
 }
 
 beforeEach(() => {
@@ -64,15 +63,15 @@ describe('WEB-S4-FE-01 — Dashboard cleanup', () => {
 
   it('still renders metric cards', () => {
     render(<DashboardModule />, { wrapper })
-    expect(screen.getByText('Total Users')).toBeDefined()
-    expect(screen.getByText('Active Users')).toBeDefined()
-    expect(screen.getByText('Active Sessions')).toBeDefined()
-    expect(screen.getByText('Pending Activations')).toBeDefined()
+    expect(screen.getByText('Total Users')).toBeInTheDocument()
+    expect(screen.getByText('Active Users')).toBeInTheDocument()
+    expect(screen.getByText('Active Sessions')).toBeInTheDocument()
+    expect(screen.getByText('Pending Activations')).toBeInTheDocument()
   })
 
   it('still renders activity chart section', () => {
     render(<DashboardModule />, { wrapper })
-    expect(screen.getByText('7-Day Login Activity')).toBeDefined()
+    expect(screen.getByText('7-Day Login Activity')).toBeInTheDocument()
   })
 
   it('shows backend error alert when isError is true', () => {
