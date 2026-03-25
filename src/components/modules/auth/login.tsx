@@ -79,7 +79,8 @@ export function LoginModule() {
       const response = await login(credentials)
 
       if (response.success) {
-        router.push(response.redirectUrl ?? ROUTES.DASHBOARD)
+        const role = useAuthStore.getState().user?.role
+        router.push(role === 'OPERATOR' ? ROUTES.OPERATOR.DASHBOARD : ROUTES.DASHBOARD)
       } else {
         setError({
           code: 'LOGIN_FAILED',
