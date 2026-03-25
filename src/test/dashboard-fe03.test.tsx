@@ -40,7 +40,7 @@ beforeEach(() => {
     isLoading: false,
     isError: false,
     error: null,
-  } as ReturnType<typeof useDashboardTraffic>)
+  } as unknown as ReturnType<typeof useDashboardTraffic>)
 })
 
 describe('WEB-S4-FE-03 — TrafficTab', () => {
@@ -72,7 +72,7 @@ describe('WEB-S4-FE-03 — TrafficTab', () => {
       isLoading: false,
       isError: false,
       error: null,
-    } as ReturnType<typeof useDashboardTraffic>)
+    } as unknown as ReturnType<typeof useDashboardTraffic>)
     render(<TrafficTab />, { wrapper })
     expect(
       screen.getByText('No operator accounts with traffic yet.')
@@ -85,7 +85,7 @@ describe('WEB-S4-FE-03 — TrafficTab', () => {
       isLoading: true,
       isError: false,
       error: null,
-    } as ReturnType<typeof useDashboardTraffic>)
+    } as unknown as ReturnType<typeof useDashboardTraffic>)
     render(<TrafficTab />, { wrapper })
     expect(
       document.querySelectorAll('[data-slot="skeleton"]').length
@@ -98,7 +98,7 @@ describe('WEB-S4-FE-03 — TrafficTab', () => {
       isLoading: false,
       isError: true,
       error: new Error('Network error'),
-    } as ReturnType<typeof useDashboardTraffic>)
+    } as unknown as ReturnType<typeof useDashboardTraffic>)
     render(<TrafficTab />, { wrapper })
     expect(screen.getByText('Failed to load traffic data.')).toBeInTheDocument()
   })
