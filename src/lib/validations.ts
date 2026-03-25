@@ -12,9 +12,9 @@ import { UserRole, UserStatus } from '@/types/auth.types'
  */
 
 // Common validation patterns
-const matriculePattern = /^[A-Z0-9]{6,12}$/
+const matriculePattern = /^K48-B[0-9]+-[0-9]+$/
 const phonePattern = /^(\+237|0)[1-9](\d{8})$/
-const batchPattern = /^(20\d{2})$/
+const batchPattern = /^B[0-9]+$/
 
 /**
  * Authentication schemas
@@ -48,7 +48,10 @@ export const userSchema = z.object({
   matricule: z
     .string()
     .min(1, 'Matricule is required')
-    .regex(matriculePattern, 'Matricule must be in format K48-YYYY-XXX'),
+    .regex(
+      matriculePattern,
+      'Matricule must be in format K48-B{n}-{seq} (e.g. K48-B1-1)'
+    ),
   email: z
     .string()
     .min(1, 'Email is required')
@@ -73,7 +76,7 @@ export const userSchema = z.object({
   batch: z
     .string()
     .min(1, 'Batch is required')
-    .regex(batchPattern, 'Batch must be a valid year (20XX)'),
+    .regex(batchPattern, 'Batch must be in format B{n} (e.g. B1, B2)'),
   specialization: z
     .string()
     .min(1, 'Specialization is required')
@@ -239,7 +242,7 @@ export type SearchFormData = z.infer<typeof searchSchema>
 /**
  * Form validation helpers
  */
-export const validateMatricule = (matricule: string): boolean => {
+export const isValidMatriculeFormat = (matricule: string): boolean => {
   return matriculePattern.test(matricule)
 }
 
