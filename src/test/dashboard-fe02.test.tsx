@@ -75,9 +75,10 @@ describe('WEB-S4-FE-02 — Dashboard tab layout', () => {
   it('shows traffic tab content when ?tab=traffic', () => {
     vi.mocked(useSearchParams).mockReturnValue(p('tab=traffic'))
     render(<DashboardModule />, { wrapper })
-    expect(
-      screen.getByText(/Traffic data will be available/i)
-    ).toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: 'Traffic' })).toHaveAttribute(
+      'data-state',
+      'active'
+    )
   })
 
   it('calls router.replace with ?tab=traffic on tab click', async () => {
