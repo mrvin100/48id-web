@@ -26,7 +26,5 @@ export interface AggregatedTrafficResponse {
 
 export const dashboardTrafficApi = {
   getAggregatedTraffic: (): Promise<AggregatedTrafficResponse> =>
-    apiClient
-      .get('admin/dashboard/traffic')
-      .json<AggregatedTrafficResponse>(),
+    apiClient.get('admin/dashboard/traffic').json<AggregatedTrafficResponse>(),
 }

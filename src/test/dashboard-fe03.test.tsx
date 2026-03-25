@@ -87,7 +87,9 @@ describe('WEB-S4-FE-03 — TrafficTab', () => {
       error: null,
     } as ReturnType<typeof useDashboardTraffic>)
     render(<TrafficTab />, { wrapper })
-    expect(document.querySelectorAll('[class*="skeleton"]').length).toBeGreaterThan(0)
+    expect(
+      document.querySelectorAll('[class*="skeleton"]').length
+    ).toBeGreaterThan(0)
   })
 
   it('shows error state', () => {
@@ -98,8 +100,6 @@ describe('WEB-S4-FE-03 — TrafficTab', () => {
       error: new Error('Network error'),
     } as ReturnType<typeof useDashboardTraffic>)
     render(<TrafficTab />, { wrapper })
-    expect(
-      screen.getByText('Failed to load traffic data.')
-    ).toBeInTheDocument()
+    expect(screen.getByText('Failed to load traffic data.')).toBeInTheDocument()
   })
 })
