@@ -16,7 +16,7 @@ import { Upload, FileText, X, CheckCircle2, AlertCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { validateMatricule, getMatriculeHelperText } from '@/lib/csv-parser'
+import { validateMatricule, getMatriculeHelperText } from '@/lib/validations'
 
 interface CsvDropzoneProps {
   onFileSelect: (file: File, preview: CsvPreviewRow[]) => void

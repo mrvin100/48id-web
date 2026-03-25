@@ -3,9 +3,6 @@
 import { User } from '@/types/auth.types'
 import { CSVValidationResult, CSVError } from '@/types/csv.types'
 
-// Re-export from the single source of truth
-export { validateMatricule, getMatriculeHelperText } from '@/lib/validations'
-
 // ── CSV parsing stubs ─────────────────────────────────────────────────────────
 
 export interface CSVParseOptions {
