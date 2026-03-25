@@ -10,6 +10,7 @@
  */
 
 import { useState, useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import {
   Users,
   Activity,
@@ -22,6 +23,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { PageHeader } from '@/components/global'
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import {
   ChartContainer,
   ChartTooltip,
@@ -93,6 +95,17 @@ function Clock() {
 }
 
 export function DashboardModule() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const tabParam = searchParams.get('tab')
+  const tab = tabParam === 'traffic' ? 'traffic' : 'overview'
+
+  const handleTabChange = (value: string) => {
+    const params = new URLSearchParams(searchParams.toString())
+    params.set('tab', value)
+    router.replace(`?${params.toString()}`)
+  }
+
   const { metrics, loginActivity, recentActivity, isLoading, isError, error } =
     useDashboard()
 
@@ -158,190 +171,209 @@ export function DashboardModule() {
         </Alert>
       )}
 
-      {/* Metrics Grid */}
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-        {/* Total Users */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Users</CardTitle>
-            <Users className="text-muted-foreground h-4 w-4" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {isLoading
-                ? '...'
-                : (metrics?.totalUsers?.toLocaleString() ?? '0')}
-            </div>
-            <p className="text-muted-foreground text-xs">
-              <span className="text-green-600">+12%</span> from last month
-            </p>
-          </CardContent>
-        </Card>
+      <Tabs value={tab} onValueChange={handleTabChange}>
+        <TabsList>
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="traffic">Traffic</TabsTrigger>
+        </TabsList>
 
-        {/* Active Users */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Users</CardTitle>
-            <UserCheck className="text-muted-foreground h-4 w-4" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {isLoading
-                ? '...'
-                : (metrics?.activeUsers?.toLocaleString() ?? '0')}
-            </div>
-            <p className="text-muted-foreground text-xs">
-              <span className="text-green-600">+8%</span> from last month
-            </p>
-          </CardContent>
-        </Card>
-
-        {/* Active Sessions */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Active Sessions
-            </CardTitle>
-            <Activity className="text-muted-foreground h-4 w-4" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {isLoading
-                ? '...'
-                : (metrics?.activeSessions?.toLocaleString() ?? '0')}
-            </div>
-            <p className="text-muted-foreground text-xs">
-              <span className="text-green-600">+5%</span> from yesterday
-            </p>
-          </CardContent>
-        </Card>
-
-        {/* Pending Activations */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Pending Activations
-            </CardTitle>
-            <UserCheck className="text-muted-foreground h-4 w-4" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {isLoading
-                ? '...'
-                : (metrics?.pendingActivations?.toLocaleString() ?? '0')}
-            </div>
-            <p className="text-muted-foreground text-xs">
-              <span className="text-orange-600">+3</span> new today
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Charts Section */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        {/* Login Activity Chart */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5" />
-              7-Day Login Activity
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ChartContainer config={chartConfig} className="h-[300px]">
-              <BarChart data={loginActivity}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="day" />
-                <YAxis />
-                <ChartTooltip content={<ChartTooltipContent />} />
-                <Bar dataKey="logins" fill="#2563eb" radius={4} />
-              </BarChart>
-            </ChartContainer>
-          </CardContent>
-        </Card>
-
-        {/* User Status Distribution */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Users className="h-5 w-5" />
-              User Status Distribution
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ChartContainer config={chartConfig} className="h-[300px]">
-              <PieChart>
-                <Pie
-                  data={userStatusData}
-                  dataKey="count"
-                  nameKey="status"
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={80}
-                  label={({ status, count }) => `${status}: ${count}`}
-                >
-                  {userStatusData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.fill} />
-                  ))}
-                </Pie>
-                <ChartTooltip content={<ChartTooltipContent />} />
-                <ChartLegend content={<ChartLegendContent />} />
-              </PieChart>
-            </ChartContainer>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Recent Activity */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Calendar className="h-5 w-5" />
-            Recent Activity
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {recentActivity.length > 0 ? (
-              recentActivity.map((activity, index) => (
-                <div
-                  key={index}
-                  className="flex items-center justify-between border-b pb-2 last:border-b-0"
-                >
-                  <div className="flex items-center gap-3">
-                    <div
-                      className={`h-2 w-2 rounded-full ${
-                        activity.action.toLowerCase().includes('login')
-                          ? 'bg-green-500'
-                          : activity.action.toLowerCase().includes('error')
-                            ? 'bg-red-500'
-                            : 'bg-blue-500'
-                      }`}
-                    />
-                    <div>
-                      <p className="text-sm font-medium">{activity.action}</p>
-                      <p className="text-muted-foreground text-xs">
-                        {activity.user} • {activity.ipAddress}
-                      </p>
-                    </div>
+        <TabsContent value="overview">
+          <div className="space-y-6">
+            {/* Metrics Grid */}
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+              {/* Total Users */}
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">
+                    Total Users
+                  </CardTitle>
+                  <Users className="text-muted-foreground h-4 w-4" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">
+                    {isLoading
+                      ? '...'
+                      : (metrics?.totalUsers?.toLocaleString() ?? '0')}
                   </div>
-                  <span className="text-muted-foreground text-xs">
-                    {new Date(activity.timestamp).toLocaleString()}
-                  </span>
+                  <p className="text-muted-foreground text-xs">
+                    No comparison data
+                  </p>
+                </CardContent>
+              </Card>
+
+              {/* Active Users */}
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">
+                    Active Users
+                  </CardTitle>
+                  <UserCheck className="text-muted-foreground h-4 w-4" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">
+                    {isLoading
+                      ? '...'
+                      : (metrics?.activeUsers?.toLocaleString() ?? '0')}
+                  </div>
+                  <p className="text-muted-foreground text-xs">
+                    No comparison data
+                  </p>
+                </CardContent>
+              </Card>
+
+              {/* Active Sessions */}
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">
+                    Active Sessions
+                  </CardTitle>
+                  <Activity className="text-muted-foreground h-4 w-4" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">
+                    {isLoading
+                      ? '...'
+                      : (metrics?.activeSessions?.toLocaleString() ?? '0')}
+                  </div>
+                  <p className="text-muted-foreground text-xs">
+                    No comparison data
+                  </p>
+                </CardContent>
+              </Card>
+
+              {/* Pending Activations */}
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">
+                    Pending Activations
+                  </CardTitle>
+                  <UserCheck className="text-muted-foreground h-4 w-4" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">
+                    {isLoading
+                      ? '...'
+                      : (metrics?.pendingActivations?.toLocaleString() ?? '0')}
+                  </div>
+                  <p className="text-muted-foreground text-xs">
+                    No comparison data
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Charts Section */}
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+              {/* Login Activity Chart */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <TrendingUp className="h-5 w-5" />
+                    7-Day Login Activity
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ChartContainer config={chartConfig} className="h-[300px]">
+                    <BarChart data={loginActivity}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="day" />
+                      <YAxis />
+                      <ChartTooltip content={<ChartTooltipContent />} />
+                      <Bar dataKey="logins" fill="#2563eb" radius={4} />
+                    </BarChart>
+                  </ChartContainer>
+                </CardContent>
+              </Card>
+
+              {/* User Status Distribution */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Users className="h-5 w-5" />
+                    User Status Distribution
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ChartContainer config={chartConfig} className="h-[300px]">
+                    <PieChart>
+                      <Pie
+                        data={userStatusData}
+                        dataKey="count"
+                        nameKey="status"
+                        cx="50%"
+                        cy="50%"
+                        outerRadius={80}
+                        label={({ status, count }) => `${status}: ${count}`}
+                      >
+                        {userStatusData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.fill} />
+                        ))}
+                      </Pie>
+                      <ChartTooltip content={<ChartTooltipContent />} />
+                      <ChartLegend content={<ChartLegendContent />} />
+                    </PieChart>
+                  </ChartContainer>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Recent Activity */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Calendar className="h-5 w-5" />
+                  Recent Activity
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {recentActivity.length > 0 ? (
+                    recentActivity.map((activity, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center justify-between border-b pb-2 last:border-b-0"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div
+                            className={`h-2 w-2 rounded-full ${
+                              activity.action.toLowerCase().includes('login')
+                                ? 'bg-green-500'
+                                : activity.action
+                                      .toLowerCase()
+                                      .includes('error')
+                                  ? 'bg-red-500'
+                                  : 'bg-blue-500'
+                            }`}
+                          />
+                          <div>
+                            <p className="text-sm font-medium">
+                              {activity.action}
+                            </p>
+                            <p className="text-muted-foreground text-xs">
+                              {activity.user} • {activity.ipAddress}
+                            </p>
+                          </div>
+                        </div>
+                        <span className="text-muted-foreground text-xs">
+                          {new Date(activity.timestamp).toLocaleString()}
+                        </span>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-muted-foreground py-4 text-center">
+                      {isLoading
+                        ? 'Loading recent activity...'
+                        : isError
+                          ? `Error: ${error?.message}`
+                          : 'No recent activity'}
+                    </div>
+                  )}
                 </div>
-              ))
-            ) : (
-              <div className="text-muted-foreground py-4 text-center">
-                {isLoading
-                  ? 'Loading recent activity...'
-                  : isError
-                    ? `Error: ${error?.message}`
-                    : 'No recent activity'}
-              </div>
-            )}
+              </CardContent>
+            </Card>
           </div>
-        </CardContent>
-      </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }
