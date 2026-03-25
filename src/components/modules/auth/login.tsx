@@ -79,7 +79,7 @@ export function LoginModule() {
       const response = await login(credentials)
 
       if (response.success) {
-        router.push(ROUTES.DASHBOARD)
+        router.push(response.redirectUrl ?? ROUTES.DASHBOARD)
       } else {
         setError({
           code: 'LOGIN_FAILED',

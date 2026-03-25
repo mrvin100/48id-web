@@ -1,26 +1,15 @@
 /**
  * App Sidebar Component
  *
- * Main navigation sidebar for the 48ID Portal.
- * Renders role-specific navigation items while keeping the same layout
- * for all roles (ADMIN, OPERATOR, etc.).
+ * Unified sidebar for all roles. Navigation items are driven by
+ * getNavigationForRole() — same layout, different tabs per role.
  */
 
 'use client'
 
 import { usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import {
-  LayoutDashboard,
-  Users,
-  Upload,
-  FileText,
-  Key,
-  User,
-  LogOut,
-  Activity,
-} from 'lucide-react'
-
+import { User, LogOut } from 'lucide-react'
 import {
   Sidebar,
   SidebarContent,
@@ -34,38 +23,26 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from '@/components/ui/sidebar'
-import {
-  ADMIN_NAVIGATION_ITEMS,
-  OPERATOR_NAVIGATION_ITEMS,
-  ROUTES,
-} from '@/lib/routes'
+import { ROUTES } from '@/lib/routes'
+import { getNavigationForRole } from '@/lib/navigation'
 import { useAuthStore } from '@/stores/auth-store'
-
-const iconMap = {
-  LayoutDashboard,
-  Users,
-  Upload,
-  FileText,
-  Key,
-  Activity,
-}
+import type { UserRole } from '@/types/auth.types'
 
 export function AppSidebar() {
   const pathname = usePathname()
   const router = useRouter()
   const { user, logout } = useAuthStore()
 
-  const role =
-    (Array.isArray(user?.roles) ? user.roles[0] : user?.roles) ?? user?.role
+  const role = (
+    Array.isArray(user?.roles) ? user.roles[0] : (user?.roles ?? user?.role)
+  ) as UserRole | undefined
 
-  const navItems =
-    role === 'OPERATOR' ? OPERATOR_NAVIGATION_ITEMS : ADMIN_NAVIGATION_ITEMS
+  const navItems = role ? getNavigationForRole(role) : []
 
   const handleLogout = async () => {
     try {
       await logout()
-      router.push(ROUTES.LOGIN)
-    } catch {
+    } finally {
       router.push(ROUTES.LOGIN)
     }
   }
@@ -80,7 +57,7 @@ export function AppSidebar() {
           <div className="grid flex-1 text-left text-sm leading-tight">
             <span className="truncate font-semibold">48ID Portal</span>
             <span className="text-muted-foreground truncate text-xs capitalize">
-              {role === 'OPERATOR' ? 'Operator' : 'Admin'}
+              {role?.toLowerCase() ?? ''}
             </span>
           </div>
         </div>
@@ -92,11 +69,10 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {navItems.map(item => {
-                const Icon = iconMap[item.icon as keyof typeof iconMap]
+                const Icon = item.icon
                 const isActive = pathname === item.href
-
                 return (
-                  <SidebarMenuItem key={item.title}>
+                  <SidebarMenuItem key={item.href}>
                     <SidebarMenuButton asChild isActive={isActive}>
                       <Link href={item.href}>
                         <Icon className="h-4 w-4" />

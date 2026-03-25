@@ -100,21 +100,11 @@ export async function POST(request: NextRequest) {
       profilePicture: backendResponse.user.profilePicture,
     }
 
-    // Validate user role (only admin and system operators allowed)
-    if (
-      user.role !== UserRole.ADMIN &&
-      user.role !== UserRole.SYSTEM_OPERATOR
-    ) {
-      return NextResponse.json(
-        {
-          success: false,
-          message:
-            'Access denied. Admin portal is restricted to administrators only.',
-          redirectUrl: ROUTES.ACCESS_DENIED,
-        } as LoginResponse,
-        { status: 403 }
-      )
-    }
+    // Redirect each role to their home route
+    const redirectUrl =
+      user.role === UserRole.OPERATOR
+        ? ROUTES.OPERATOR.DASHBOARD
+        : ROUTES.DASHBOARD
 
     // Create response
     const response = NextResponse.json(
@@ -122,7 +112,7 @@ export async function POST(request: NextRequest) {
         success: true,
         user,
         message: 'Login successful',
-        redirectUrl: ROUTES.DASHBOARD,
+        redirectUrl,
       } as LoginResponse,
       { status: 200 }
     )

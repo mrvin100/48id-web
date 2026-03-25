@@ -75,7 +75,7 @@ const OPERATOR_ROUTES = [
 interface TokenPayload {
   sub: string
   matricule: string
-  role: 'ADMIN' | 'SYSTEM_OPERATOR' | 'OPERATOR' | 'STUDENT'
+  role: 'ADMIN' | 'OPERATOR' | 'STUDENT'
   iat: number
   exp: number
   iss: string
@@ -101,7 +101,7 @@ async function verifyToken(token: string): Promise<TokenPayload | null> {
 }
 
 function hasAdminAccess(role: string): boolean {
-  return role === 'ADMIN' || role === 'SYSTEM_OPERATOR'
+  return role === 'ADMIN'
 }
 
 function hasOperatorAccess(role: string): boolean {
@@ -251,10 +251,7 @@ export async function middleware(request: NextRequest) {
     }
 
     // OPERATOR hitting /dashboard → redirect to operator dashboard
-    if (
-      pathname === ROUTES.DASHBOARD &&
-      hasOperatorAccess(payload.role)
-    ) {
+    if (pathname === ROUTES.DASHBOARD && hasOperatorAccess(payload.role)) {
       return NextResponse.redirect(
         new URL(ROUTES.OPERATOR.DASHBOARD, request.url)
       )
@@ -267,7 +264,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|.*\\..*|public).*)',
-  ],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\..*|public).*)'],
 }

@@ -69,32 +69,9 @@ export const ROUTES = {
 } as const
 
 /**
- * Navigation items per role
+ * @deprecated Use getNavigationForRole() from '@/lib/navigation' instead.
  */
-export const ADMIN_NAVIGATION_ITEMS = [
-  { title: 'Dashboard', href: ROUTES.DASHBOARD, icon: 'LayoutDashboard' },
-  { title: 'Users', href: ROUTES.USERS, icon: 'Users' },
-  { title: 'CSV Import', href: ROUTES.CSV_IMPORT, icon: 'Upload' },
-  { title: 'Audit Logs', href: ROUTES.AUDIT, icon: 'FileText' },
-  { title: 'API Keys', href: ROUTES.API_KEYS, icon: 'Key' },
-] as const
-
-export const OPERATOR_NAVIGATION_ITEMS = [
-  {
-    title: 'Dashboard',
-    href: ROUTES.OPERATOR.DASHBOARD,
-    icon: 'LayoutDashboard',
-  },
-  { title: 'Users', href: ROUTES.OPERATOR.USERS, icon: 'Users' },
-  { title: 'Audit Logs', href: ROUTES.OPERATOR.AUDIT, icon: 'FileText' },
-  { title: 'Traffic', href: ROUTES.OPERATOR.TRAFFIC, icon: 'Activity' },
-  { title: 'API Key', href: ROUTES.OPERATOR.API_KEY, icon: 'Key' },
-] as const
-
-/**
- * @deprecated Use ADMIN_NAVIGATION_ITEMS or OPERATOR_NAVIGATION_ITEMS
- */
-export const NAVIGATION_ITEMS = ADMIN_NAVIGATION_ITEMS
+export const NAVIGATION_ITEMS = [] as const
 
 /**
  * Helper function to check if a route is active

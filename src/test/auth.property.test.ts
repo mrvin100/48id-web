@@ -58,7 +58,7 @@ const userIdArb = fc.uuid()
 
 const userRoleArb = fc.constantFrom(
   UserRole.ADMIN,
-  UserRole.SYSTEM_OPERATOR,
+  UserRole.OPERATOR,
   UserRole.STUDENT
 )
 const userStatusArb = fc.constantFrom(
@@ -264,20 +264,15 @@ describe('Property: Authentication Flow Integrity', () => {
   it('Property 1.5: Role-based access control should be enforced consistently', () => {
     fc.assert(
       fc.property(userArb, user => {
-        // Act: Check admin access
-        const hasAdminAccess1 =
-          user.role === UserRole.ADMIN || user.role === UserRole.SYSTEM_OPERATOR
-        const hasAdminAccess2 =
-          user.role === UserRole.ADMIN || user.role === UserRole.SYSTEM_OPERATOR
+        const hasAdminAccess1 = user.role === UserRole.ADMIN
+        const hasAdminAccess2 = user.role === UserRole.ADMIN
 
-        // Assert: Access control should be deterministic
         expect(hasAdminAccess1).toBe(hasAdminAccess2)
 
-        // Assert: Only ADMIN and SYSTEM_OPERATOR should have admin access
-        if (user.role === UserRole.STUDENT) {
-          expect(hasAdminAccess1).toBe(false)
-        } else {
+        if (user.role === UserRole.ADMIN) {
           expect(hasAdminAccess1).toBe(true)
+        } else {
+          expect(hasAdminAccess1).toBe(false)
         }
       }),
       propertyTestConfig
@@ -369,12 +364,7 @@ describe('Property: Token Refresh Automation', () => {
         expect(afterSet.user).toEqual(user)
         expect(afterSet.isAuthenticated).toBe(true)
         expect(afterSet.isAdmin()).toBe(user.role === UserRole.ADMIN)
-        expect(afterSet.isSystemOperator()).toBe(
-          user.role === UserRole.SYSTEM_OPERATOR
-        )
-        expect(afterSet.hasAdminAccess()).toBe(
-          user.role === UserRole.ADMIN || user.role === UserRole.SYSTEM_OPERATOR
-        )
+        expect(afterSet.hasAdminAccess()).toBe(user.role === UserRole.ADMIN)
 
         // Act: Clear user from store
         useAuthStore.getState().setUser(null)
@@ -384,7 +374,6 @@ describe('Property: Token Refresh Automation', () => {
         expect(afterClear.user).toBe(null)
         expect(afterClear.isAuthenticated).toBe(false)
         expect(afterClear.isAdmin()).toBe(false)
-        expect(afterClear.isSystemOperator()).toBe(false)
         expect(afterClear.hasAdminAccess()).toBe(false)
       }),
       propertyTestConfig

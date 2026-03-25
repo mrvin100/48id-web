@@ -41,7 +41,6 @@ interface AuthStoreState extends AuthState {
 
   // Computed getters
   isAdmin: () => boolean
-  isSystemOperator: () => boolean
   hasAdminAccess: () => boolean
   getUserDisplayName: () => string
   getSessionTimeRemaining: () => number | null
@@ -202,14 +201,9 @@ export const useAuthStore = create<AuthStoreState>()(
           return user?.role === 'ADMIN'
         },
 
-        isSystemOperator: () => {
-          const { user } = get()
-          return user?.role === 'SYSTEM_OPERATOR'
-        },
-
         hasAdminAccess: () => {
           const { user } = get()
-          return user?.role === 'ADMIN' || user?.role === 'SYSTEM_OPERATOR'
+          return user?.role === 'ADMIN'
         },
 
         getUserDisplayName: () => {
@@ -303,7 +297,6 @@ export const authSelectors = {
   isLoading: (state: AuthStoreState) => state.isLoading,
   error: (state: AuthStoreState) => state.error,
   isAdmin: (state: AuthStoreState) => state.isAdmin(),
-  isSystemOperator: (state: AuthStoreState) => state.isSystemOperator(),
   hasAdminAccess: (state: AuthStoreState) => state.hasAdminAccess(),
   userDisplayName: (state: AuthStoreState) => state.getUserDisplayName(),
   userEmail: (state: AuthStoreState) => state.user?.email ?? '',

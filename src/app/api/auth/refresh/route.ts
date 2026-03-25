@@ -109,25 +109,6 @@ export async function POST(_request: NextRequest) {
         profilePicture: backendResponse.user.profilePicture,
       }
 
-      // Validate user role (only admin and system operators allowed)
-      if (
-        user.role !== UserRole.ADMIN &&
-        user.role !== UserRole.SYSTEM_OPERATOR
-      ) {
-        // Clear tokens for unauthorized users
-        cookieStore.delete(config.auth.refreshCookieName)
-        cookieStore.delete(config.auth.jwtCookieName)
-
-        return NextResponse.json(
-          {
-            success: false,
-            message:
-              'Access denied. Admin portal is restricted to administrators only.',
-          } as RefreshTokenResponse,
-          { status: 403 }
-        )
-      }
-
       // Create response
       const response = NextResponse.json(
         {
