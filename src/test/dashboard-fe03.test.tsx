@@ -88,7 +88,7 @@ describe('WEB-S4-FE-03 — TrafficTab', () => {
     } as ReturnType<typeof useDashboardTraffic>)
     render(<TrafficTab />, { wrapper })
     expect(
-      document.querySelectorAll('[class*="skeleton"]').length
+      document.querySelectorAll('[data-slot="skeleton"]').length
     ).toBeGreaterThan(0)
   })
 
