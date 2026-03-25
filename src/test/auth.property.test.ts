@@ -195,7 +195,7 @@ describe('Property: Authentication Flow Integrity', () => {
         expect(isValid1).toBe(isValid2)
 
         // Assert: Valid matricules should match expected format
-        const expectedValid = /^K48-B[0-9]+-[0-9]+$/.test(
+        const expectedValid = /^K48-B[0-9]{1,4}-[0-9]+$/.test(
           matricule.trim().toUpperCase()
         )
         expect(isValid1).toBe(expectedValid)

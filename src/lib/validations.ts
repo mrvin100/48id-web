@@ -12,7 +12,7 @@ import { UserRole, UserStatus } from '@/types/auth.types'
  */
 
 // Common validation patterns
-export const matriculePattern = /^K48-B[0-9]+-[0-9]+$/
+export const matriculePattern = /^K48-B[0-9]{1,4}-[0-9]+$/
 const phonePattern = /^(\+237|0)[1-9](\d{8})$/
 const batchPattern = /^B[0-9]+$/
 
