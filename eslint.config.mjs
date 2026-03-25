@@ -14,6 +14,7 @@ const eslintConfig = defineConfig([
     },
     rules: {
       'prettier/prettier': 'error',
+      'react-hooks/incompatible-library': 'off',
       '@typescript-eslint/no-unused-vars': [
         'warn',
         {
