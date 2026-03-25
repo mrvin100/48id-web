@@ -4,6 +4,7 @@ import ky from 'ky'
 import { LoginRequest, LoginResponse, User, UserRole } from '@/types/auth.types'
 import { config } from '@/lib/env'
 import { ROUTES } from '@/lib/routes'
+import { validateMatricule } from '@/lib/validations'
 
 export async function POST(request: NextRequest) {
   try {
@@ -21,13 +22,11 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Validate matricule format (K48-YYYY-XXX format)
-    if (!/^K48-\d{4}-\d{3}$/.test(body.matricule)) {
+    // Validate matricule format
+    const matriculeError = validateMatricule(body.matricule)
+    if (matriculeError) {
       return NextResponse.json(
-        {
-          success: false,
-          message: 'Invalid matricule format. Expected format: K48-YYYY-XXX',
-        } as LoginResponse,
+        { success: false, message: matriculeError } as LoginResponse,
         { status: 400 }
       )
     }

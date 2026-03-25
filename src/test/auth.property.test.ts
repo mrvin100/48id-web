@@ -45,7 +45,12 @@ const propertyTestConfig = {
 }
 
 // Generators for test data
-const matriculeArb = fc.stringMatching(/^[A-Z0-9]{6,12}$/)
+const matriculeArb = fc
+  .tuple(
+    fc.integer({ min: 1, max: 99 }), // batch number
+    fc.integer({ min: 1, max: 9999 }) // sequence
+  )
+  .map(([b, s]) => `K48-B${b}-${s}`)
 const passwordArb = fc.string({ minLength: 8, maxLength: 50 })
 const emailArb = fc.emailAddress()
 const nameArb = fc.string({ minLength: 2, maxLength: 50 })
@@ -104,8 +109,8 @@ const userArb = fc.record({
 describe('Property: Authentication Flow Integrity', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    // Reset auth store state
-    useAuthStore.getState().logout()
+    // Reset store directly — avoids calling authService.logout() which requires ky mock
+    useAuthStore.getState().setUser(null)
   })
 
   afterEach(() => {
@@ -190,7 +195,7 @@ describe('Property: Authentication Flow Integrity', () => {
         expect(isValid1).toBe(isValid2)
 
         // Assert: Valid matricules should match expected format
-        const expectedValid = /^[A-Z0-9]{6,12}$/.test(
+        const expectedValid = /^K48-B[0-9]+-[0-9]+$/.test(
           matricule.trim().toUpperCase()
         )
         expect(isValid1).toBe(expectedValid)
@@ -283,7 +288,7 @@ describe('Property: Authentication Flow Integrity', () => {
 describe('Property: Token Refresh Automation', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    useAuthStore.getState().logout()
+    useAuthStore.getState().setUser(null)
   })
 
   afterEach(() => {
@@ -353,31 +358,34 @@ describe('Property: Token Refresh Automation', () => {
   it('Property 2.3: Authentication state should be consistent across store operations', () => {
     fc.assert(
       fc.property(userArb, user => {
-        const store = useAuthStore.getState()
+        // Reset between fast-check iterations
+        useAuthStore.getState().setUser(null)
 
         // Act: Set user in store
-        store.setUser(user)
+        useAuthStore.getState().setUser(user)
 
         // Assert: Store state should be consistent
-        expect(store.user).toEqual(user)
-        expect(store.isAuthenticated).toBe(true)
-        expect(store.isAdmin()).toBe(user.role === UserRole.ADMIN)
-        expect(store.isSystemOperator()).toBe(
+        const afterSet = useAuthStore.getState()
+        expect(afterSet.user).toEqual(user)
+        expect(afterSet.isAuthenticated).toBe(true)
+        expect(afterSet.isAdmin()).toBe(user.role === UserRole.ADMIN)
+        expect(afterSet.isSystemOperator()).toBe(
           user.role === UserRole.SYSTEM_OPERATOR
         )
-        expect(store.hasAdminAccess()).toBe(
+        expect(afterSet.hasAdminAccess()).toBe(
           user.role === UserRole.ADMIN || user.role === UserRole.SYSTEM_OPERATOR
         )
 
         // Act: Clear user from store
-        store.setUser(null)
+        useAuthStore.getState().setUser(null)
 
         // Assert: Store should be cleared
-        expect(store.user).toBe(null)
-        expect(store.isAuthenticated).toBe(false)
-        expect(store.isAdmin()).toBe(false)
-        expect(store.isSystemOperator()).toBe(false)
-        expect(store.hasAdminAccess()).toBe(false)
+        const afterClear = useAuthStore.getState()
+        expect(afterClear.user).toBe(null)
+        expect(afterClear.isAuthenticated).toBe(false)
+        expect(afterClear.isAdmin()).toBe(false)
+        expect(afterClear.isSystemOperator()).toBe(false)
+        expect(afterClear.hasAdminAccess()).toBe(false)
       }),
       propertyTestConfig
     )

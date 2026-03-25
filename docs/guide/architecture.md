@@ -219,6 +219,68 @@ All route strings are defined as constants in `lib/routes.ts` — the middleware
 
 ---
 
+## Validation
+
+### Matricule format
+
+All matricule values across the app must match the backend-enforced format:
+
+```text
+^K48-B[0-9]+-[0-9]+$
+```
+
+Examples: `K48-B1-1`, `K48-B1-12`, `K48-B10-999`
+
+The batch embedded in the matricule must match the user's `batch` field:
+
+| matricule      | batch | result                                                     |
+| -------------- | ----- | ---------------------------------------------------------- |
+| `K48-B1-12`    | `B1`  | ✅ valid                                                   |
+| `K48-B2-5`     | `B1`  | ❌ `"Matricule prefix 'K48-B2' does not match batch 'B1'"` |
+| `K48-2024-001` | any   | ❌ `"does not match required format K48-B{n}-{seq}"`       |
+
+### Where validation lives
+
+| Concern                        | Location                                         | Function                                                  |
+| ------------------------------ | ------------------------------------------------ | --------------------------------------------------------- |
+| Matricule format + batch check | `lib/csv-parser.ts`                              | `validateMatricule(matricule, batch?)` → `string \| null` |
+| Batch-aware helper text        | `lib/csv-parser.ts`                              | `getMatriculeHelperText(batch)` → `string`                |
+| Zod schemas (forms)            | `lib/validations.ts`                             | `loginSchema`, `userSchema`, `csvUserSchema`, etc.        |
+| CSV row validation             | `components/modules/csv-import/csv-dropzone.tsx` | `validateRow()` — calls `validateMatricule`               |
+
+### Error message contract
+
+The error message from `validateMatricule` **must match the backend exactly** — the frontend and backend share the same string so error messages are consistent whether validation fires client-side or server-side:
+
+```text
+"Matricule prefix 'K48-B2' does not match batch 'B1'"
+```
+
+### Form validation pattern
+
+All forms use React Hook Form + Zod via `zodResolver`:
+
+```tsx
+const form = useForm<FormData>({ resolver: zodResolver(schema) })
+
+// Inline error display — always this exact pattern
+{
+  form.formState.errors.field && (
+    <p className="text-destructive text-sm">
+      {form.formState.errors.field.message}
+    </p>
+  )
+}
+```
+
+Default form mode: `onBlur` validate, `onChange` re-validate (configured in `lib/form-config.ts`).
+
+### CSV row error display
+
+Invalid rows are highlighted amber (`bg-yellow-50`) with a destructive badge showing the error message. The import button is disabled while any row has `hasError: true`.
+
+---
+
 ## Error Handling
 
 ### Backend error format

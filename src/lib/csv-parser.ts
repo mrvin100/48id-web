@@ -3,6 +3,8 @@
 import { User } from '@/types/auth.types'
 import { CSVValidationResult, CSVError } from '@/types/csv.types'
 
+// ── CSV parsing stubs ─────────────────────────────────────────────────────────
+
 export interface CSVParseOptions {
   delimiter?: string
   quote?: string

@@ -31,6 +31,7 @@ import {
   FieldError,
 } from '@/components/ui/field'
 import { createFormConfig } from '@/lib/form-config'
+import { matriculePattern } from '@/lib/validations'
 import { useAuthStore } from '@/stores/auth-store'
 import { LoginCredentials } from '@/types/auth.types'
 import { ROUTES } from '@/lib/routes'
@@ -41,8 +42,8 @@ const loginSchema = z.object({
     .string()
     .min(1, 'Matricule is required')
     .regex(
-      /^K48-\d{4}-\d{3}$/,
-      'Matricule must be in format K48-YYYY-XXX (e.g., K48-2024-001)'
+      matriculePattern,
+      'Matricule must be in format K48-B{n}-{seq} (e.g., K48-B1-1)'
     ),
   password: z
     .string()
@@ -149,8 +150,8 @@ export function LoginModule() {
                     }
                   />
                   <FieldDescription>
-                    Enter your matricule in format K48-YYYY-XXX (e.g.,
-                    K48-2024-001)
+                    Enter your matricule in format K48-B{'{n}'}-{'{seq}'} (e.g.,
+                    K48-B1-1)
                   </FieldDescription>
                   {fieldState.invalid && (
                     <FieldError errors={[fieldState.error]} />

@@ -16,6 +16,7 @@ import { Upload, FileText, X, CheckCircle2, AlertCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { validateMatricule, getMatriculeHelperText } from '@/lib/validations'
 
 interface CsvDropzoneProps {
   onFileSelect: (file: File, preview: CsvPreviewRow[]) => void
@@ -173,6 +174,24 @@ export function CsvDropzone({
       }
     }
 
+    // Validate matricule format and batch prefix (E-BE-01 contract)
+    const matriculeError = validateMatricule(matricule, batch || undefined)
+    if (matriculeError) {
+      return {
+        row: {
+          rowNumber,
+          matricule,
+          email,
+          name,
+          phone,
+          batch,
+          specialization,
+        },
+        hasError: true,
+        errorMessage: matriculeError,
+      }
+    }
+
     return {
       row: {
         rowNumber,
@@ -233,8 +252,14 @@ export function CsvDropzone({
             const {
               row: parsedRow,
               hasError,
-              errorMessage: _errorMessage,
+              errorMessage,
             } = validateRow(row as string[], i + 1)
+
+            // Apply validation result to parsedRow
+            if (hasError) {
+              parsedRow.hasError = true
+              parsedRow.errorMessage = errorMessage
+            }
 
             // Check for duplicate matricules
             if (!hasError && matricules.has(parsedRow.matricule)) {
@@ -303,6 +328,7 @@ export function CsvDropzone({
   if (selectedFile && preview.length > 0) {
     const errorCount = preview.filter(r => r.hasError).length
     const successCount = preview.length - errorCount
+    const detectedBatch = preview.find(r => r.batch)?.batch ?? ''
 
     return (
       <Card>
@@ -345,6 +371,13 @@ export function CsvDropzone({
               )}
             </Badge>
           </div>
+
+          {/* FE-05: Batch-aware matricule format hint */}
+          {detectedBatch && (
+            <p className="text-muted-foreground text-xs">
+              {getMatriculeHelperText(detectedBatch)}
+            </p>
+          )}
 
           {/* Preview Table - First 5 rows */}
           <div className="max-h-64 overflow-auto rounded-md border">

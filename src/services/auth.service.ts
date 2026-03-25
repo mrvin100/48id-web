@@ -8,6 +8,7 @@
  */
 
 import ky, { HTTPError } from 'ky'
+import { isValidMatriculeFormat } from '@/lib/validations'
 import {
   LoginCredentials,
   AuthResponse,
@@ -150,9 +151,7 @@ export class AuthService {
    * Validate matricule format
    */
   validateMatricule(matricule: string): boolean {
-    // Matricule should be 6-12 alphanumeric characters
-    const matriculeRegex = /^[A-Z0-9]{6,12}$/
-    return matriculeRegex.test(matricule.trim().toUpperCase())
+    return isValidMatriculeFormat(matricule.trim().toUpperCase())
   }
 
   /**

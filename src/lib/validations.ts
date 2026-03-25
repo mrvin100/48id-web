@@ -12,9 +12,9 @@ import { UserRole, UserStatus } from '@/types/auth.types'
  */
 
 // Common validation patterns
-const matriculePattern = /^[A-Z0-9]{6,12}$/
+export const matriculePattern = /^K48-B[0-9]+-[0-9]+$/
 const phonePattern = /^(\+237|0)[1-9](\d{8})$/
-const batchPattern = /^(20\d{2})$/
+const batchPattern = /^B[0-9]+$/
 
 /**
  * Authentication schemas
@@ -48,7 +48,10 @@ export const userSchema = z.object({
   matricule: z
     .string()
     .min(1, 'Matricule is required')
-    .regex(matriculePattern, 'Matricule must be in format K48-YYYY-XXX'),
+    .regex(
+      matriculePattern,
+      'Matricule must be in format K48-B{n}-{seq} (e.g. K48-B1-1)'
+    ),
   email: z
     .string()
     .min(1, 'Email is required')
@@ -73,7 +76,7 @@ export const userSchema = z.object({
   batch: z
     .string()
     .min(1, 'Batch is required')
-    .regex(batchPattern, 'Batch must be a valid year (20XX)'),
+    .regex(batchPattern, 'Batch must be in format B{n} (e.g. B1, B2)'),
   specialization: z
     .string()
     .min(1, 'Specialization is required')
@@ -238,8 +241,45 @@ export type SearchFormData = z.infer<typeof searchSchema>
 
 /**
  * Form validation helpers
+ *
+ * These are the single source of truth for all field-level validation logic.
+ * Add new validators here — never inline regex or validation logic in components.
  */
-export const validateMatricule = (matricule: string): boolean => {
+
+/**
+ * Validates a matricule against the K48-B{n}-{seq} format and optional batch prefix.
+ * Error messages match the backend exactly (MatriculeValidator.java).
+ *
+ * @returns null if valid, error string if invalid
+ */
+export const validateMatricule = (
+  matricule: string,
+  batch?: string
+): string | null => {
+  if (!matriculePattern.test(matricule)) {
+    return `Matricule '${matricule}' does not match required format K48-B{n}-{seq}`
+  }
+  if (batch) {
+    const expectedPrefix = `K48-${batch}-`
+    if (!matricule.startsWith(expectedPrefix)) {
+      const actualPrefix = matricule.substring(0, matricule.lastIndexOf('-'))
+      return `Matricule prefix '${actualPrefix}' does not match batch '${batch}'`
+    }
+  }
+  return null
+}
+
+/**
+ * Returns a helper text string showing expected matricule examples for a given batch.
+ */
+export const getMatriculeHelperText = (batch: string): string => {
+  if (!batch)
+    return 'Expected format: K48-B{n}-{seq} (e.g. K48-B1-1, K48-B1-12)'
+  return `Expected format: K48-${batch}-1, K48-${batch}-12, …`
+}
+
+/** @deprecated Use validateMatricule() instead */
+export const isValidMatriculeFormat = (matricule: string): boolean => {
   return matriculePattern.test(matricule)
 }
 

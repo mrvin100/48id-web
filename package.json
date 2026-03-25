@@ -14,7 +14,7 @@
     "type-check": "tsc --noEmit",
     "test": "vitest run --exclude=\"**/*.property.test.{ts,tsx}\"",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage",
+    "test:coverage": "vitest run --coverage --exclude=\"**/*.property.test.{ts,tsx}\"",
     "test:property": "vitest run **/*.property.test.{ts,tsx}",
     "test:unit": "vitest run --exclude=\"**/*.property.test.{ts,tsx}\"",
     "test:ci": "vitest run --coverage --exclude=\"**/*.property.test.{ts,tsx}\"",
