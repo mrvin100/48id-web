@@ -29,6 +29,10 @@ export const ROUTES = {
   // API keys routes
   API_KEYS: '/api-keys',
 
+  // Operator accounts routes
+  OPERATOR_ACCOUNTS: '/operator-accounts',
+  OPERATOR_ACCOUNT_TRAFFIC: (id: string) => `/operator-accounts/${id}/traffic`,
+
   // API routes
   API: {
     AUTH: {
@@ -44,6 +48,7 @@ export const ROUTES = {
     },
     DASHBOARD: {
       METRICS: '/api/dashboard/metrics',
+      TRAFFIC: '/api/admin/dashboard/traffic',
     },
     CSV: {
       IMPORT: '/api/csv/import',

@@ -14,12 +14,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import fc from 'fast-check'
 import { authService } from '@/services/auth.service'
 import { useAuthStore } from '@/stores/auth-store'
-import {
-  LoginCredentials,
-  User,
-  UserRole,
-  UserStatus,
-} from '@/types/auth.types'
+import { UserRole, UserStatus } from '@/types/auth.types'
 
 // Mock ky for testing
 vi.mock('ky', () => ({

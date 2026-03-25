@@ -130,8 +130,11 @@ Cypress.Commands.add('mockUsersList', (users?: unknown[]) => {
 // Custom command: Verify no tokens in localStorage
 Cypress.Commands.add('verifyNoTokens', () => {
   cy.window().then(win => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
     expect(win.localStorage.getItem('token')).to.be.null
+    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
     expect(win.localStorage.getItem('refresh_token')).to.be.null
+    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
     expect(win.localStorage.getItem('access_token')).to.be.null
   })
 })

@@ -20,20 +20,12 @@ import { User } from '@/types/auth.types'
 export function UsersModule() {
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
   const [sheetOpen, setSheetOpen] = useState(false)
-  const [sheetMode, setSheetMode] = useState<'view' | 'edit'>('view')
 
   const { users, totalUsers, isLoading, isError, error } = useUserManagement()
 
   const handleViewDetails = (user: User) => {
     setSelectedUser(user)
     setSheetOpen(true)
-    setSheetMode('view')
-  }
-
-  const handleEditUser = (user: User) => {
-    setSelectedUser(user)
-    setSheetOpen(true)
-    setSheetMode('edit')
   }
 
   if (isLoading) {
