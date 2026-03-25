@@ -14,15 +14,12 @@ export async function GET() {
       )
     }
 
-    const response = await fetch(
-      `${config.backend.apiUrl}/operator/traffic`,
-      {
-        headers: {
-          Authorization: `Bearer ${jwtToken}`,
-          'Content-Type': 'application/json',
-        },
-      }
-    )
+    const response = await fetch(`${config.backend.apiUrl}/operator/traffic`, {
+      headers: {
+        Authorization: `Bearer ${jwtToken}`,
+        'Content-Type': 'application/json',
+      },
+    })
 
     if (!response.ok) {
       return NextResponse.json(

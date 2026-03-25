@@ -10,7 +10,10 @@ async function getToken() {
 export async function GET() {
   const jwtToken = await getToken()
   if (!jwtToken)
-    return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
+    return NextResponse.json(
+      { error: 'Authentication required' },
+      { status: 401 }
+    )
 
   const response = await fetch(`${config.backend.apiUrl}/operator/api-keys`, {
     headers: { Authorization: `Bearer ${jwtToken}` },
@@ -28,7 +31,10 @@ export async function GET() {
 export async function POST() {
   const jwtToken = await getToken()
   if (!jwtToken)
-    return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
+    return NextResponse.json(
+      { error: 'Authentication required' },
+      { status: 401 }
+    )
 
   const response = await fetch(`${config.backend.apiUrl}/operator/api-keys`, {
     method: 'POST',
@@ -47,7 +53,10 @@ export async function POST() {
 export async function PUT(request: NextRequest) {
   const jwtToken = await getToken()
   if (!jwtToken)
-    return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
+    return NextResponse.json(
+      { error: 'Authentication required' },
+      { status: 401 }
+    )
 
   const url = new URL(request.url)
   const rotate = url.searchParams.get('action') === 'rotate'
@@ -72,7 +81,10 @@ export async function PUT(request: NextRequest) {
 export async function DELETE() {
   const jwtToken = await getToken()
   if (!jwtToken)
-    return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
+    return NextResponse.json(
+      { error: 'Authentication required' },
+      { status: 401 }
+    )
 
   const response = await fetch(`${config.backend.apiUrl}/operator/api-keys`, {
     method: 'DELETE',
