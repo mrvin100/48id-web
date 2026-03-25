@@ -14,14 +14,12 @@ import {
   Users,
   Activity,
   UserCheck,
-  Server,
   TrendingUp,
   Calendar,
   AlertCircle,
   Clock as ClockIcon,
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { PageHeader } from '@/components/global'
 import {
@@ -98,9 +96,6 @@ export function DashboardModule() {
   const { metrics, loginActivity, recentActivity, isLoading, isError, error } =
     useDashboard()
 
-  // Determine backend status
-  const backendStatus = isError ? 'error' : metrics ? 'available' : 'loading'
-
   // Create user status distribution data from real backend metrics with explicit colors
   const userStatusData = metrics
     ? [
@@ -148,7 +143,7 @@ export function DashboardModule() {
       </PageHeader>
 
       {/* Backend Status Alert */}
-      {backendStatus === 'error' && (
+      {isError && (
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>Backend Connection Error</AlertTitle>
@@ -241,31 +236,6 @@ export function DashboardModule() {
           </CardContent>
         </Card>
       </div>
-
-      {/* System Health Card */}
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">System Health</CardTitle>
-          <Server className="text-muted-foreground h-4 w-4" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold text-green-600">
-            {isLoading ? '...' : backendStatus === 'available' ? 'UP' : 'DOWN'}
-          </div>
-          <div className="flex items-center space-x-2">
-            <Badge
-              variant="outline"
-              className={
-                backendStatus === 'available'
-                  ? 'border-green-600 text-green-600'
-                  : 'border-red-600 text-red-600'
-              }
-            >
-              {backendStatus === 'available' ? 'Operational' : 'Error'}
-            </Badge>
-          </div>
-        </CardContent>
-      </Card>
 
       {/* Charts Section */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
@@ -372,17 +342,6 @@ export function DashboardModule() {
           </div>
         </CardContent>
       </Card>
-
-      {/* System Status Alert */}
-      <Alert>
-        <AlertCircle className="h-4 w-4" />
-        <AlertTitle>System Status</AlertTitle>
-        <AlertDescription>
-          {backendStatus === 'available'
-            ? 'All systems are operational. Next maintenance window is scheduled for Sunday, 2:00 AM - 4:00 AM UTC.'
-            : 'System is experiencing issues. Please check backend connectivity.'}
-        </AlertDescription>
-      </Alert>
     </div>
   )
 }

@@ -14,7 +14,7 @@ export interface DashboardMetrics {
   activeSessions: number
   pendingActivations: number
   suspendedUsers: number
-  systemHealth: 'operational' | 'degraded' | 'down'
+  systemHealth?: 'operational' | 'degraded' | 'down'
 }
 
 export interface LoginActivityData {
