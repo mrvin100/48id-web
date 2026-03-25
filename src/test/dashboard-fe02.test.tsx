@@ -41,6 +41,7 @@ function wrapper({ children }: { children: React.ReactNode }) {
 }
 
 beforeEach(() => {
+  mockReplace.mockClear()
   vi.mocked(useSearchParams).mockReturnValue(p())
   vi.mocked(useDashboard).mockReturnValue({
     metrics: {
