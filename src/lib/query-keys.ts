@@ -68,3 +68,11 @@ export const provisioningKeys = {
   all: ['provisioning'] as const,
   importResult: () => [...provisioningKeys.all, 'import-result'] as const,
 }
+
+/**
+ * Query key factory for admin dashboard traffic
+ */
+export const dashboardTrafficKeys = {
+  all: ['dashboard-traffic'] as const,
+  aggregated: () => [...dashboardTrafficKeys.all, 'aggregated'] as const,
+}

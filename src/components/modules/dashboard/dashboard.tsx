@@ -24,6 +24,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { PageHeader } from '@/components/global'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
+import { TrafficTab } from './traffic-tab'
 import {
   ChartContainer,
   ChartTooltip,
@@ -375,10 +376,7 @@ export function DashboardModule() {
         </TabsContent>
 
         <TabsContent value="traffic">
-          <div className="text-muted-foreground py-12 text-center text-sm">
-            Traffic data will be available once operator accounts are
-            configured.
-          </div>
+          <TrafficTab />
         </TabsContent>
       </Tabs>
     </div>
