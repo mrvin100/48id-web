@@ -63,22 +63,20 @@ export function TrafficTab() {
       </TableHeader>
       <TableBody>
         {data.accounts.map(account => (
-          <TableRow
-            key={account.accountId}
-            className="focus-visible:ring-ring cursor-pointer focus-visible:ring-2 focus-visible:outline-none"
-            tabIndex={0}
-            role="button"
-            onClick={() =>
-              router.push(ROUTES.OPERATOR_ACCOUNT_TRAFFIC(account.accountId))
-            }
-            onKeyDown={e => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault()
-                router.push(ROUTES.OPERATOR_ACCOUNT_TRAFFIC(account.accountId))
-              }
-            }}
-          >
-            <TableCell className="font-medium">{account.accountName}</TableCell>
+          <TableRow key={account.accountId}>
+            <TableCell>
+              <button
+                className="focus-visible:ring-ring cursor-pointer font-medium focus-visible:ring-2 focus-visible:outline-none"
+                aria-label={`View traffic for ${account.accountName}`}
+                onClick={() =>
+                  router.push(
+                    ROUTES.OPERATOR_ACCOUNT_TRAFFIC(account.accountId)
+                  )
+                }
+              >
+                {account.accountName}
+              </button>
+            </TableCell>
             <TableCell>{account.apiKeyTraffic.totalCalls}</TableCell>
             <TableCell>{account.apiKeyTraffic.last24h}</TableCell>
             <TableCell>{fmt(account.apiKeyTraffic.lastCalledAt)}</TableCell>

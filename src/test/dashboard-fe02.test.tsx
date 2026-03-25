@@ -6,7 +6,6 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import type { ReadonlyURLSearchParams } from 'next/dist/client/components/navigation.react-server'
 
 vi.mock('recharts', async () => {
   const actual = await vi.importActual<typeof import('recharts')>('recharts')
@@ -32,8 +31,7 @@ import { useSearchParams } from 'next/navigation'
 import { useDashboard } from '@/hooks/use-dashboard'
 import { DashboardModule } from '@/components/modules/dashboard'
 
-const p = (init?: string) =>
-  new URLSearchParams(init) as unknown as ReadonlyURLSearchParams
+const p = (init?: string) => new URLSearchParams(init) as unknown
 
 function wrapper({ children }: { children: React.ReactNode }) {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } })
