@@ -63,7 +63,12 @@ vi.mock('ky', () => {
 
 // Global test setup
 beforeAll(() => {
-  // Setup any global test configuration
+  // ResizeObserver is not implemented in jsdom — required by recharts
+  global.ResizeObserver = class ResizeObserver {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  }
 })
 
 afterEach(() => {
