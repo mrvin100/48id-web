@@ -34,7 +34,6 @@ const mockMetrics = {
   activeSessions: 10,
   pendingActivations: 5,
   suspendedUsers: 2,
-  systemHealth: 'operational' as const,
 }
 
 beforeEach(() => {
