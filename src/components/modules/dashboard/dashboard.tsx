@@ -196,7 +196,7 @@ export function DashboardModule() {
                       : (metrics?.totalUsers?.toLocaleString() ?? '0')}
                   </div>
                   <p className="text-muted-foreground text-xs">
-                    <span className="text-green-600">+12%</span> from last month
+                    No comparison data
                   </p>
                 </CardContent>
               </Card>
@@ -216,7 +216,7 @@ export function DashboardModule() {
                       : (metrics?.activeUsers?.toLocaleString() ?? '0')}
                   </div>
                   <p className="text-muted-foreground text-xs">
-                    <span className="text-green-600">+8%</span> from last month
+                    No comparison data
                   </p>
                 </CardContent>
               </Card>
@@ -236,7 +236,7 @@ export function DashboardModule() {
                       : (metrics?.activeSessions?.toLocaleString() ?? '0')}
                   </div>
                   <p className="text-muted-foreground text-xs">
-                    <span className="text-green-600">+5%</span> from yesterday
+                    No comparison data
                   </p>
                 </CardContent>
               </Card>
@@ -256,7 +256,7 @@ export function DashboardModule() {
                       : (metrics?.pendingActivations?.toLocaleString() ?? '0')}
                   </div>
                   <p className="text-muted-foreground text-xs">
-                    <span className="text-orange-600">+3</span> new today
+                    No comparison data
                   </p>
                 </CardContent>
               </Card>
