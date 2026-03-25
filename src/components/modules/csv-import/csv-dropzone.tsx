@@ -230,10 +230,10 @@ export function CsvDropzone({
             const row: unknown = results.data[i]
             if (!Array.isArray(row) || (row.length === 1 && !row[0])) continue
 
-            const {
-              row: parsedRow,
-              hasError,
-            } = validateRow(row as string[], i + 1)
+            const { row: parsedRow, hasError } = validateRow(
+              row as string[],
+              i + 1
+            )
 
             // Check for duplicate matricules
             if (!hasError && matricules.has(parsedRow.matricule)) {
