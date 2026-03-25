@@ -15,19 +15,22 @@ export const ROUTES = {
   ACTIVATE_ACCOUNT: '/activate-account',
   RESET_PASSWORD: '/reset-password',
 
-  // Dashboard routes
+  // Dashboard routes (ADMIN)
   DASHBOARD: '/dashboard',
   USERS: '/users',
   USER_DETAIL: (id: string) => `/users/${id}`,
-
-  // CSV import routes
   CSV_IMPORT: '/csv-import',
-
-  // Audit routes
   AUDIT: '/audit',
-
-  // API keys routes
   API_KEYS: '/api-keys',
+
+  // Operator routes
+  OPERATOR: {
+    DASHBOARD: '/operator/dashboard',
+    USERS: '/operator/users',
+    AUDIT: '/operator/audit',
+    TRAFFIC: '/operator/traffic',
+    API_KEY: '/operator/api-key',
+  },
 
   // API routes
   API: {
@@ -56,39 +59,42 @@ export const ROUTES = {
     API_KEYS: {
       LIST: '/api/api-keys',
     },
+    OPERATOR: {
+      USERS: '/api/operator/users',
+      AUDIT_LOG: '/api/operator/audit-log',
+      TRAFFIC: '/api/operator/traffic',
+      API_KEYS: '/api/operator/api-keys',
+    },
   },
 } as const
 
 /**
- * Navigation items for the sidebar
+ * Navigation items per role
  */
-export const NAVIGATION_ITEMS = [
+export const ADMIN_NAVIGATION_ITEMS = [
+  { title: 'Dashboard', href: ROUTES.DASHBOARD, icon: 'LayoutDashboard' },
+  { title: 'Users', href: ROUTES.USERS, icon: 'Users' },
+  { title: 'CSV Import', href: ROUTES.CSV_IMPORT, icon: 'Upload' },
+  { title: 'Audit Logs', href: ROUTES.AUDIT, icon: 'FileText' },
+  { title: 'API Keys', href: ROUTES.API_KEYS, icon: 'Key' },
+] as const
+
+export const OPERATOR_NAVIGATION_ITEMS = [
   {
     title: 'Dashboard',
-    href: ROUTES.DASHBOARD,
+    href: ROUTES.OPERATOR.DASHBOARD,
     icon: 'LayoutDashboard',
   },
-  {
-    title: 'Users',
-    href: ROUTES.USERS,
-    icon: 'Users',
-  },
-  {
-    title: 'CSV Import',
-    href: ROUTES.CSV_IMPORT,
-    icon: 'Upload',
-  },
-  {
-    title: 'Audit Logs',
-    href: ROUTES.AUDIT,
-    icon: 'FileText',
-  },
-  {
-    title: 'API Keys',
-    href: ROUTES.API_KEYS,
-    icon: 'Key',
-  },
+  { title: 'Users', href: ROUTES.OPERATOR.USERS, icon: 'Users' },
+  { title: 'Audit Logs', href: ROUTES.OPERATOR.AUDIT, icon: 'FileText' },
+  { title: 'Traffic', href: ROUTES.OPERATOR.TRAFFIC, icon: 'Activity' },
+  { title: 'API Key', href: ROUTES.OPERATOR.API_KEY, icon: 'Key' },
 ] as const
+
+/**
+ * @deprecated Use ADMIN_NAVIGATION_ITEMS or OPERATOR_NAVIGATION_ITEMS
+ */
+export const NAVIGATION_ITEMS = ADMIN_NAVIGATION_ITEMS
 
 /**
  * Helper function to check if a route is active
@@ -108,15 +114,20 @@ export const isRouteActive = (
  */
 export const getPageTitle = (pathname: string): string => {
   const titles: Record<string, string> = {
-    [ROUTES.HOME]: '48ID Admin Portal',
-    [ROUTES.LOGIN]: 'Login - 48ID Admin Portal',
-    [ROUTES.ACCESS_DENIED]: 'Access Denied - 48ID Admin Portal',
+    [ROUTES.HOME]: '48ID Portal',
+    [ROUTES.LOGIN]: 'Login - 48ID Portal',
+    [ROUTES.ACCESS_DENIED]: 'Access Denied - 48ID Portal',
     [ROUTES.DASHBOARD]: 'Dashboard - 48ID Admin Portal',
     [ROUTES.USERS]: 'Users - 48ID Admin Portal',
     [ROUTES.CSV_IMPORT]: 'CSV Import - 48ID Admin Portal',
     [ROUTES.AUDIT]: 'Audit Logs - 48ID Admin Portal',
     [ROUTES.API_KEYS]: 'API Keys - 48ID Admin Portal',
+    [ROUTES.OPERATOR.DASHBOARD]: 'Dashboard - 48ID Operator Portal',
+    [ROUTES.OPERATOR.USERS]: 'Users - 48ID Operator Portal',
+    [ROUTES.OPERATOR.AUDIT]: 'Audit Logs - 48ID Operator Portal',
+    [ROUTES.OPERATOR.TRAFFIC]: 'Traffic - 48ID Operator Portal',
+    [ROUTES.OPERATOR.API_KEY]: 'API Key - 48ID Operator Portal',
   }
 
-  return titles[pathname] || '48ID Admin Portal'
+  return titles[pathname] || '48ID Portal'
 }

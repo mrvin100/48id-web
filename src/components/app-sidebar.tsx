@@ -1,8 +1,9 @@
 /**
  * App Sidebar Component
  *
- * Main navigation sidebar for the 48ID Admin Portal.
- * Uses shadcn sidebar components with proper navigation structure.
+ * Main navigation sidebar for the 48ID Portal.
+ * Renders role-specific navigation items while keeping the same layout
+ * for all roles (ADMIN, OPERATOR, etc.).
  */
 
 'use client'
@@ -17,6 +18,7 @@ import {
   Key,
   User,
   LogOut,
+  Activity,
 } from 'lucide-react'
 
 import {
@@ -32,16 +34,20 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from '@/components/ui/sidebar'
-import { NAVIGATION_ITEMS, ROUTES } from '@/lib/routes'
+import {
+  ADMIN_NAVIGATION_ITEMS,
+  OPERATOR_NAVIGATION_ITEMS,
+  ROUTES,
+} from '@/lib/routes'
 import { useAuthStore } from '@/stores/auth-store'
 
-// Map icon names to components
 const iconMap = {
   LayoutDashboard,
   Users,
   Upload,
   FileText,
   Key,
+  Activity,
 }
 
 export function AppSidebar() {
@@ -49,13 +55,17 @@ export function AppSidebar() {
   const router = useRouter()
   const { user, logout } = useAuthStore()
 
+  const role =
+    (Array.isArray(user?.roles) ? user.roles[0] : user?.roles) ?? user?.role
+
+  const navItems =
+    role === 'OPERATOR' ? OPERATOR_NAVIGATION_ITEMS : ADMIN_NAVIGATION_ITEMS
+
   const handleLogout = async () => {
     try {
       await logout()
       router.push(ROUTES.LOGIN)
-    } catch (error) {
-      console.error('Logout error:', error)
-      // Even if logout fails, redirect to login for security
+    } catch {
       router.push(ROUTES.LOGIN)
     }
   }
@@ -68,9 +78,9 @@ export function AppSidebar() {
             <span className="text-sm font-bold">48</span>
           </div>
           <div className="grid flex-1 text-left text-sm leading-tight">
-            <span className="truncate font-semibold">48ID Admin</span>
-            <span className="text-muted-foreground truncate text-xs">
-              Portal
+            <span className="truncate font-semibold">48ID Portal</span>
+            <span className="text-muted-foreground truncate text-xs capitalize">
+              {role === 'OPERATOR' ? 'Operator' : 'Admin'}
             </span>
           </div>
         </div>
@@ -81,7 +91,7 @@ export function AppSidebar() {
           <SidebarGroupLabel>Navigation</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {NAVIGATION_ITEMS.map(item => {
+              {navItems.map(item => {
                 const Icon = iconMap[item.icon as keyof typeof iconMap]
                 const isActive = pathname === item.href
 

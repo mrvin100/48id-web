@@ -19,6 +19,7 @@ export enum UserStatus {
 // User Role Enum
 export enum UserRole {
   ADMIN = 'ADMIN',
+  OPERATOR = 'OPERATOR',
   SYSTEM_OPERATOR = 'SYSTEM_OPERATOR',
   STUDENT = 'STUDENT',
 }

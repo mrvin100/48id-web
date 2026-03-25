@@ -68,3 +68,14 @@ export const provisioningKeys = {
   all: ['provisioning'] as const,
   importResult: () => [...provisioningKeys.all, 'import-result'] as const,
 }
+
+/**
+ * Query key factory for operator module
+ */
+export const operatorKeys = {
+  all: ['operator'] as const,
+  users: () => [...operatorKeys.all, 'users'] as const,
+  auditLog: () => [...operatorKeys.all, 'audit-log'] as const,
+  traffic: () => [...operatorKeys.all, 'traffic'] as const,
+  apiKey: () => [...operatorKeys.all, 'api-key'] as const,
+}
