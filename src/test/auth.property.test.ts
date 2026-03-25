@@ -15,8 +15,6 @@ import fc from 'fast-check'
 import { authService } from '@/services/auth.service'
 import { useAuthStore } from '@/stores/auth-store'
 import {
-  LoginCredentials,
-  User,
   UserRole,
   UserStatus,
 } from '@/types/auth.types'

@@ -91,7 +91,7 @@ export function SettingsModule() {
     },
   })
 
-  const onSubmit = async (data: ProfileFormData) => {
+  const onSubmit = async (_data: ProfileFormData) => {
     try {
       // TODO: Implement PUT /me endpoint when available
       toast.success('Profile updated successfully')
@@ -101,7 +101,7 @@ export function SettingsModule() {
     }
   }
 
-  const onPasswordSubmit = async (data: PasswordFormData) => {
+  const onPasswordSubmit = async (_data: PasswordFormData) => {
     try {
       // TODO: Implement POST /auth/change-password endpoint when available
       toast.success('Password changed successfully')

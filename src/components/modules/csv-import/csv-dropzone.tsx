@@ -233,7 +233,6 @@ export function CsvDropzone({
             const {
               row: parsedRow,
               hasError,
-              errorMessage: _errorMessage,
             } = validateRow(row as string[], i + 1)
 
             // Check for duplicate matricules
