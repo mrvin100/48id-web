@@ -7,4 +7,3 @@
  */
 
 export { DashboardModule } from './dashboard'
-export { TrafficTab } from './traffic-tab'

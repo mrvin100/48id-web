@@ -24,7 +24,18 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { PageHeader } from '@/components/global'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
-import { TrafficTab } from './traffic-tab'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
+import { Skeleton } from '@/components/ui/skeleton'
+import { useDashboard } from '@/hooks/use-dashboard'
+import { useDashboardTraffic } from '@/hooks/use-dashboard-traffic'
+import { ROUTES } from '@/lib/routes'
 import {
   ChartContainer,
   ChartTooltip,
@@ -43,7 +54,12 @@ import {
   Pie,
   Cell,
 } from 'recharts'
-import { useDashboard } from '@/hooks/use-dashboard'
+
+// Format ISO date for display
+function fmt(iso: string | null): string {
+  if (!iso) return '—'
+  return new Date(iso).toLocaleString()
+}
 
 // Chart configuration with explicit colors
 const chartConfig = {
@@ -109,6 +125,12 @@ export function DashboardModule() {
 
   const { metrics, loginActivity, recentActivity, isLoading, isError, error } =
     useDashboard()
+
+  const {
+    data: trafficData,
+    isLoading: trafficLoading,
+    isError: trafficError,
+  } = useDashboardTraffic()
 
   // Create user status distribution data from real backend metrics with explicit colors
   const userStatusData = metrics
@@ -376,7 +398,83 @@ export function DashboardModule() {
         </TabsContent>
 
         <TabsContent value="traffic">
-          <TrafficTab />
+          {trafficLoading && (
+            <div className="space-y-2">
+              {[...Array(3)].map((_, i) => (
+                <Skeleton key={i} className="h-10 w-full" />
+              ))}
+            </div>
+          )}
+          {trafficError && (
+            <p className="text-destructive py-8 text-center text-sm">
+              Failed to load traffic data.
+            </p>
+          )}
+          {!trafficLoading &&
+            !trafficError &&
+            !trafficData?.accounts?.length && (
+              <p className="text-muted-foreground py-12 text-center text-sm">
+                No operator accounts with traffic yet.
+              </p>
+            )}
+          {!trafficLoading &&
+            !trafficError &&
+            !!trafficData?.accounts?.length && (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Account Name</TableHead>
+                    <TableHead>API Key Calls (total)</TableHead>
+                    <TableHead>API Key Calls (24h)</TableHead>
+                    <TableHead>Last API Call</TableHead>
+                    <TableHead>Member Actions (total)</TableHead>
+                    <TableHead>Member Actions (24h)</TableHead>
+                    <TableHead>Last Member Action</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {trafficData.accounts.map(account => (
+                    <TableRow
+                      key={account.accountId}
+                      className="cursor-pointer"
+                      onClick={() =>
+                        router.push(
+                          ROUTES.OPERATOR_ACCOUNT_TRAFFIC(account.accountId)
+                        )
+                      }
+                      onKeyDown={e => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault()
+                          router.push(
+                            ROUTES.OPERATOR_ACCOUNT_TRAFFIC(account.accountId)
+                          )
+                        }
+                      }}
+                      tabIndex={0}
+                      aria-label={`View traffic for ${account.accountName}`}
+                    >
+                      <TableCell className="font-medium">
+                        {account.accountName}
+                      </TableCell>
+                      <TableCell>
+                        {account.apiKeyTraffic.totalCalls}
+                      </TableCell>
+                      <TableCell>{account.apiKeyTraffic.last24h}</TableCell>
+                      <TableCell>
+                        {fmt(account.apiKeyTraffic.lastCalledAt)}
+                      </TableCell>
+                      <TableCell>
+                        {account.memberActivity.totalActions}
+                      </TableCell>
+                      <TableCell>{account.memberActivity.last24h}</TableCell>
+                      <TableCell>
+                        {fmt(account.memberActivity.lastActionAt)}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
         </TabsContent>
       </Tabs>
     </div>
