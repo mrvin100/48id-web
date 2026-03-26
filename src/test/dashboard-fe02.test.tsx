@@ -31,8 +31,7 @@ import { useSearchParams } from 'next/navigation'
 import { useDashboard } from '@/hooks/use-dashboard'
 import { DashboardModule } from '@/components/modules/dashboard'
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const p = (init?: string) => new URLSearchParams(init) as any
+const p = (init?: string) => new URLSearchParams(init) as unknown
 
 function wrapper({ children }: { children: React.ReactNode }) {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } })
@@ -41,7 +40,7 @@ function wrapper({ children }: { children: React.ReactNode }) {
 
 beforeEach(() => {
   mockReplace.mockClear()
-  vi.mocked(useSearchParams).mockReturnValue(p())
+  vi.mocked(useSearchParams).mockReturnValue(p() as never)
   vi.mocked(useDashboard).mockReturnValue({
     metrics: {
       totalUsers: 10,
@@ -72,7 +71,7 @@ describe('WEB-S4-FE-02 — Dashboard tab layout', () => {
   })
 
   it('shows traffic tab content when ?tab=traffic', () => {
-    vi.mocked(useSearchParams).mockReturnValue(p('tab=traffic'))
+    vi.mocked(useSearchParams).mockReturnValue(p('tab=traffic') as never)
     render(<DashboardModule />, { wrapper })
     expect(screen.getByRole('tab', { name: 'Traffic' })).toHaveAttribute(
       'data-state',
@@ -88,7 +87,7 @@ describe('WEB-S4-FE-02 — Dashboard tab layout', () => {
   })
 
   it('calls router.replace with ?tab=overview on overview tab click', async () => {
-    vi.mocked(useSearchParams).mockReturnValue(p('tab=traffic'))
+    vi.mocked(useSearchParams).mockReturnValue(p('tab=traffic') as never)
     const user = userEvent.setup()
     render(<DashboardModule />, { wrapper })
     await user.click(screen.getByRole('tab', { name: 'Overview' }))
