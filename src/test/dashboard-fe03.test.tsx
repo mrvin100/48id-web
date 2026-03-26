@@ -29,7 +29,7 @@ const mockPush = vi.fn()
 const mockReplace = vi.fn()
 vi.mock('next/navigation', () => ({
   useRouter: () => ({ push: mockPush, replace: mockReplace }),
-  useSearchParams: vi.fn(() => new URLSearchParams('tab=traffic') as any),
+  useSearchParams: vi.fn(() => new URLSearchParams('tab=traffic') as unknown),
   usePathname: () => '/dashboard',
 }))
 
@@ -125,8 +125,6 @@ describe('WEB-S4-FE-03 — Traffic tab (inlined)', () => {
       error: new Error('Network error'),
     } as unknown as ReturnType<typeof useDashboardTraffic>)
     render(<DashboardModule />, { wrapper })
-    expect(
-      screen.getByText('Failed to load traffic data.')
-    ).toBeInTheDocument()
+    expect(screen.getByText('Failed to load traffic data.')).toBeInTheDocument()
   })
 })

@@ -456,9 +456,7 @@ export function DashboardModule() {
                       <TableCell className="font-medium">
                         {account.accountName}
                       </TableCell>
-                      <TableCell>
-                        {account.apiKeyTraffic.totalCalls}
-                      </TableCell>
+                      <TableCell>{account.apiKeyTraffic.totalCalls}</TableCell>
                       <TableCell>{account.apiKeyTraffic.last24h}</TableCell>
                       <TableCell>
                         {fmt(account.apiKeyTraffic.lastCalledAt)}
