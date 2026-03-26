@@ -33,16 +33,13 @@ export interface User {
   batch?: string
   specialization?: string
   status: string
-  roles: string[] | string
+  roles: string[]
   profileCompleted: boolean
   lastLoginAt?: string
   createdAt: string
   updatedAt: string
-
-  // Computed fields for frontend compatibility
   firstName?: string
   lastName?: string
-  role?: string
   isEmailVerified?: boolean
   profilePicture?: string
 }

@@ -1,22 +1,61 @@
 /**
- * Operator Hooks
- *
- * TanStack Query hooks for the operator module.
+ * Operator Hooks — all account-scoped per backend contract.
  */
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { operatorApi } from '@/lib/api/operator'
 import { operatorKeys } from '@/lib/query-keys'
 
-export function useOperatorUsers(params?: { page?: number; size?: number }) {
+export function useOperatorAccounts() {
   return useQuery({
-    queryKey: operatorKeys.users(),
-    queryFn: () => operatorApi.getUsers(params),
+    queryKey: operatorKeys.accounts(),
+    queryFn: operatorApi.getAccounts,
     staleTime: 2 * 60 * 1000,
   })
 }
 
-export function useOperatorAuditLog(params?: {
+export function useCreateOperatorAccount() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: operatorApi.createAccount,
+    onSuccess: () => qc.invalidateQueries({ queryKey: operatorKeys.accounts() }),
+  })
+}
+
+export function useDeleteOperatorAccount() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (accountId: string) => operatorApi.deleteAccount(accountId),
+    onSuccess: () => qc.invalidateQueries({ queryKey: operatorKeys.accounts() }),
+  })
+}
+
+export function useInviteOperatorMember(accountId: string) {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (matricule: string) => operatorApi.inviteMember(accountId, matricule),
+    onSuccess: () => qc.invalidateQueries({ queryKey: operatorKeys.accounts() }),
+  })
+}
+
+export function useRemoveOperatorMember(accountId: string) {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (memberId: string) => operatorApi.removeMember(accountId, memberId),
+    onSuccess: () => qc.invalidateQueries({ queryKey: operatorKeys.accounts() }),
+  })
+}
+
+export function useOperatorUsers(accountId: string, params?: { page?: number; size?: number }) {
+  return useQuery({
+    queryKey: operatorKeys.users(accountId),
+    queryFn: () => operatorApi.getUsers(accountId, params),
+    staleTime: 2 * 60 * 1000,
+    enabled: !!accountId,
+  })
+}
+
+export function useOperatorAuditLog(accountId: string, params?: {
   eventType?: string
   dateFrom?: string
   dateTo?: string
@@ -24,9 +63,10 @@ export function useOperatorAuditLog(params?: {
   size?: number
 }) {
   return useQuery({
-    queryKey: [...operatorKeys.auditLog(), params],
-    queryFn: () => operatorApi.getAuditLog(params),
+    queryKey: [...operatorKeys.auditLog(accountId), params],
+    queryFn: () => operatorApi.getAuditLog(accountId, params),
     staleTime: 2 * 60 * 1000,
+    enabled: !!accountId,
   })
 }
 
@@ -40,34 +80,36 @@ export function useOperatorTraffic() {
   })
 }
 
-export function useOperatorApiKey() {
+export function useOperatorApiKey(accountId: string) {
   return useQuery({
-    queryKey: operatorKeys.apiKey(),
-    queryFn: operatorApi.getApiKey,
+    queryKey: operatorKeys.apiKey(accountId),
+    queryFn: () => operatorApi.getApiKey(accountId),
     staleTime: 5 * 60 * 1000,
+    enabled: !!accountId,
   })
 }
 
-export function useCreateApiKey() {
-  const queryClient = useQueryClient()
+export function useCreateApiKey(accountId: string) {
+  const qc = useQueryClient()
   return useMutation({
-    mutationFn: operatorApi.createApiKey,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: operatorKeys.apiKey() }),
+    mutationFn: (body: { applicationName: string; description?: string }) =>
+      operatorApi.createApiKey(accountId, body),
+    onSuccess: () => qc.invalidateQueries({ queryKey: operatorKeys.apiKey(accountId) }),
   })
 }
 
-export function useRotateApiKey() {
-  const queryClient = useQueryClient()
+export function useRotateApiKey(accountId: string) {
+  const qc = useQueryClient()
   return useMutation({
-    mutationFn: operatorApi.rotateApiKey,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: operatorKeys.apiKey() }),
+    mutationFn: () => operatorApi.rotateApiKey(accountId),
+    onSuccess: () => qc.invalidateQueries({ queryKey: operatorKeys.apiKey(accountId) }),
   })
 }
 
-export function useDeleteApiKey() {
-  const queryClient = useQueryClient()
+export function useDeleteApiKey(accountId: string) {
+  const qc = useQueryClient()
   return useMutation({
-    mutationFn: operatorApi.deleteApiKey,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: operatorKeys.apiKey() }),
+    mutationFn: () => operatorApi.deleteApiKey(accountId),
+    onSuccess: () => qc.invalidateQueries({ queryKey: operatorKeys.apiKey(accountId) }),
   })
 }

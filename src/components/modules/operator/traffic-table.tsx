@@ -34,7 +34,10 @@ export function TrafficTable() {
   if (error) {
     return (
       <div className="space-y-6">
-        <PageHeader title="Traffic" description="API key calls and member actions" />
+        <PageHeader
+          title="Traffic"
+          description="API key calls and member actions"
+        />
         <div className="text-destructive py-8 text-center">
           Failed to load traffic data: {error.message}
         </div>
@@ -96,12 +99,18 @@ export function TrafficTable() {
                     <TableCell className="text-sm">
                       {new Date(call.timestamp).toLocaleString()}
                     </TableCell>
-                    <TableCell className="font-mono text-sm">{call.ip}</TableCell>
-                    <TableCell className="font-mono text-sm">{call.endpoint}</TableCell>
+                    <TableCell className="font-mono text-sm">
+                      {call.ip}
+                    </TableCell>
+                    <TableCell className="font-mono text-sm">
+                      {call.endpoint}
+                    </TableCell>
                     <TableCell>
                       <Badge variant="outline">{call.method}</Badge>
                     </TableCell>
-                    <TableCell className="text-sm">{call.totalInWindow}</TableCell>
+                    <TableCell className="text-sm">
+                      {call.totalInWindow}
+                    </TableCell>
                   </TableRow>
                 ))
               )}

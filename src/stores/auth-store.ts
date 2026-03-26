@@ -198,12 +198,16 @@ export const useAuthStore = create<AuthStoreState>()(
         // Computed getters
         isAdmin: () => {
           const { user } = get()
-          return user?.role === 'ADMIN'
+          return Array.isArray(user?.roles)
+            ? user.roles.includes('ADMIN')
+            : false
         },
 
         hasAdminAccess: () => {
           const { user } = get()
-          return user?.role === 'ADMIN'
+          return Array.isArray(user?.roles)
+            ? user.roles.includes('ADMIN')
+            : false
         },
 
         getUserDisplayName: () => {
@@ -236,7 +240,6 @@ export const useAuthStore = create<AuthStoreState>()(
                 name:
                   state.user.name ||
                   `${state.user.firstName} ${state.user.lastName}`,
-                phone: state.user.phone,
                 batch: state.user.batch,
                 specialization: state.user.specialization,
                 status: state.user.status,
@@ -250,8 +253,6 @@ export const useAuthStore = create<AuthStoreState>()(
                 updatedAt: state.user.updatedAt,
                 firstName: state.user.firstName,
                 lastName: state.user.lastName,
-                role: state.user.role,
-                isEmailVerified: state.user.isEmailVerified,
                 profilePicture: state.user.profilePicture,
               }
             : null,

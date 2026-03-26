@@ -7,95 +7,63 @@ async function getToken() {
   return cookieStore.get(config.auth.jwtCookieName)?.value
 }
 
-export async function GET() {
+function requireAccountId(request: NextRequest) {
+  return new URL(request.url).searchParams.get('accountId')
+}
+
+export async function GET(request: NextRequest) {
   const jwtToken = await getToken()
-  if (!jwtToken)
-    return NextResponse.json(
-      { error: 'Authentication required' },
-      { status: 401 }
-    )
+  if (!jwtToken) return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
+  const accountId = requireAccountId(request)
+  if (!accountId) return NextResponse.json({ error: 'accountId is required' }, { status: 400 })
 
-  const response = await fetch(`${config.backend.apiUrl}/operator/api-keys`, {
-    headers: { Authorization: `Bearer ${jwtToken}` },
-  })
-
-  if (!response.ok)
-    return NextResponse.json(
-      { error: `Backend error: ${response.status}` },
-      { status: response.status }
-    )
-
+  const response = await fetch(
+    `${config.backend.apiUrl}/operator/api-keys?accountId=${accountId}`,
+    { headers: { Authorization: `Bearer ${jwtToken}` } }
+  )
+  if (!response.ok) return NextResponse.json({ error: `Backend error: ${response.status}` }, { status: response.status })
   return NextResponse.json(await response.json())
 }
 
-export async function POST() {
+export async function POST(request: NextRequest) {
   const jwtToken = await getToken()
-  if (!jwtToken)
-    return NextResponse.json(
-      { error: 'Authentication required' },
-      { status: 401 }
-    )
+  if (!jwtToken) return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
+  const accountId = requireAccountId(request)
+  if (!accountId) return NextResponse.json({ error: 'accountId is required' }, { status: 400 })
 
-  const response = await fetch(`${config.backend.apiUrl}/operator/api-keys`, {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${jwtToken}` },
-  })
-
-  if (!response.ok)
-    return NextResponse.json(
-      { error: `Backend error: ${response.status}` },
-      { status: response.status }
-    )
-
+  const body = await request.json().catch(() => ({}))
+  const response = await fetch(
+    `${config.backend.apiUrl}/operator/api-keys?accountId=${accountId}`,
+    { method: 'POST', headers: { Authorization: `Bearer ${jwtToken}`, 'Content-Type': 'application/json' }, body: JSON.stringify(body) }
+  )
+  if (!response.ok) return NextResponse.json({ error: `Backend error: ${response.status}` }, { status: response.status })
   return NextResponse.json(await response.json(), { status: 201 })
 }
 
 export async function PUT(request: NextRequest) {
   const jwtToken = await getToken()
-  if (!jwtToken)
-    return NextResponse.json(
-      { error: 'Authentication required' },
-      { status: 401 }
-    )
-
-  const url = new URL(request.url)
-  const rotate = url.searchParams.get('action') === 'rotate'
+  if (!jwtToken) return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
+  const accountId = requireAccountId(request)
+  if (!accountId) return NextResponse.json({ error: 'accountId is required' }, { status: 400 })
 
   const response = await fetch(
-    `${config.backend.apiUrl}/operator/api-keys${rotate ? '/rotate' : ''}`,
-    {
-      method: 'PUT',
-      headers: { Authorization: `Bearer ${jwtToken}` },
-    }
+    `${config.backend.apiUrl}/operator/api-keys/rotate?accountId=${accountId}`,
+    { method: 'PUT', headers: { Authorization: `Bearer ${jwtToken}` } }
   )
-
-  if (!response.ok)
-    return NextResponse.json(
-      { error: `Backend error: ${response.status}` },
-      { status: response.status }
-    )
-
+  if (!response.ok) return NextResponse.json({ error: `Backend error: ${response.status}` }, { status: response.status })
   return NextResponse.json(await response.json())
 }
 
-export async function DELETE() {
+export async function DELETE(request: NextRequest) {
   const jwtToken = await getToken()
-  if (!jwtToken)
-    return NextResponse.json(
-      { error: 'Authentication required' },
-      { status: 401 }
-    )
+  if (!jwtToken) return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
+  const accountId = requireAccountId(request)
+  if (!accountId) return NextResponse.json({ error: 'accountId is required' }, { status: 400 })
 
-  const response = await fetch(`${config.backend.apiUrl}/operator/api-keys`, {
-    method: 'DELETE',
-    headers: { Authorization: `Bearer ${jwtToken}` },
-  })
-
-  if (!response.ok)
-    return NextResponse.json(
-      { error: `Backend error: ${response.status}` },
-      { status: response.status }
-    )
-
+  const response = await fetch(
+    `${config.backend.apiUrl}/operator/api-keys?accountId=${accountId}`,
+    { method: 'DELETE', headers: { Authorization: `Bearer ${jwtToken}` } }
+  )
+  if (!response.ok) return NextResponse.json({ error: `Backend error: ${response.status}` }, { status: response.status })
   return new NextResponse(null, { status: 204 })
 }

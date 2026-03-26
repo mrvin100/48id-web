@@ -83,26 +83,13 @@ const userArb = fc.record({
   batch: fc.option(fc.string(), { nil: undefined }),
   specialization: fc.option(fc.string(), { nil: undefined }),
   status: userStatusArb.map(s => s.toString()),
-  roles: fc.oneof(
-    fc.array(
-      userRoleArb.map(r => r.toString()),
-      { minLength: 1 }
-    ),
-    userRoleArb.map(r => r.toString())
-  ),
+  roles: fc.array(userRoleArb.map(r => r.toString()), { minLength: 1 }),
   profileCompleted: fc.boolean(),
-  lastLoginAt: fc.option(
-    fc.date().map(d => d.toISOString()),
-    { nil: undefined }
-  ),
+  lastLoginAt: fc.option(fc.date().map(d => d.toISOString()), { nil: undefined }),
   createdAt: fc.date().map(d => d.toISOString()),
   updatedAt: fc.date().map(d => d.toISOString()),
-
-  // Computed fields for compatibility
   firstName: nameArb,
   lastName: nameArb,
-  role: userRoleArb,
-  isEmailVerified: fc.boolean(),
   profilePicture: fc.option(fc.webUrl(), { nil: undefined }),
 })
 
@@ -264,12 +251,12 @@ describe('Property: Authentication Flow Integrity', () => {
   it('Property 1.5: Role-based access control should be enforced consistently', () => {
     fc.assert(
       fc.property(userArb, user => {
-        const hasAdminAccess1 = user.role === UserRole.ADMIN
-        const hasAdminAccess2 = user.role === UserRole.ADMIN
+        const hasAdminAccess1 = user.roles.includes(UserRole.ADMIN)
+        const hasAdminAccess2 = user.roles.includes(UserRole.ADMIN)
 
         expect(hasAdminAccess1).toBe(hasAdminAccess2)
 
-        if (user.role === UserRole.ADMIN) {
+        if (user.roles.includes(UserRole.ADMIN)) {
           expect(hasAdminAccess1).toBe(true)
         } else {
           expect(hasAdminAccess1).toBe(false)
@@ -363,8 +350,8 @@ describe('Property: Token Refresh Automation', () => {
         const afterSet = useAuthStore.getState()
         expect(afterSet.user).toEqual(user)
         expect(afterSet.isAuthenticated).toBe(true)
-        expect(afterSet.isAdmin()).toBe(user.role === UserRole.ADMIN)
-        expect(afterSet.hasAdminAccess()).toBe(user.role === UserRole.ADMIN)
+        expect(afterSet.isAdmin()).toBe(user.roles.includes(UserRole.ADMIN))
+        expect(afterSet.hasAdminAccess()).toBe(user.roles.includes(UserRole.ADMIN))
 
         // Act: Clear user from store
         useAuthStore.getState().setUser(null)

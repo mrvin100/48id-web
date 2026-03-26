@@ -54,11 +54,9 @@ export async function POST(request: NextRequest) {
           id: string
           matricule: string
           name: string
-          email: string
-          role: string
+          roles: string[]
           batch?: string
           specialization?: string
-          phone?: string
           status: string
           profileCompleted: boolean
           lastLoginAt?: string
@@ -78,33 +76,27 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Transform backend user data to frontend User interface
     const user: User = {
       id: backendResponse.user.id,
       matricule: backendResponse.user.matricule,
-      email: backendResponse.user.email,
+      email: '',
       name: backendResponse.user.name,
-      phone: backendResponse.user.phone,
       batch: backendResponse.user.batch,
       specialization: backendResponse.user.specialization,
       status: backendResponse.user.status,
-      roles: [backendResponse.user.role],
+      roles: backendResponse.user.roles,
       profileCompleted: backendResponse.user.profileCompleted,
       lastLoginAt: backendResponse.user.lastLoginAt,
       createdAt: backendResponse.user.createdAt,
       updatedAt: backendResponse.user.updatedAt,
       firstName: backendResponse.user.name?.split(' ')[0] || '',
       lastName: backendResponse.user.name?.split(' ').slice(1).join(' ') || '',
-      role: backendResponse.user.role as UserRole,
-      isEmailVerified: backendResponse.user.profileCompleted,
       profilePicture: backendResponse.user.profilePicture,
     }
 
-    // Redirect each role to their home route
-    const redirectUrl =
-      user.role === UserRole.OPERATOR
-        ? ROUTES.OPERATOR.DASHBOARD
-        : ROUTES.DASHBOARD
+    const redirectUrl = user.roles.includes(UserRole.OPERATOR)
+      ? ROUTES.OPERATOR.DASHBOARD
+      : ROUTES.DASHBOARD
 
     // Create response
     const response = NextResponse.json(

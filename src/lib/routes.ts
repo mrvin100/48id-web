@@ -64,6 +64,12 @@ export const ROUTES = {
       AUDIT_LOG: '/api/operator/audit-log',
       TRAFFIC: '/api/operator/traffic',
       API_KEYS: '/api/operator/api-keys',
+      DASHBOARD: '/api/operator/dashboard',
+      ACCOUNTS: '/api/operator/accounts',
+      ACCOUNT: (id: string) => `/api/operator/accounts/${id}`,
+      ACCOUNT_INVITE: (id: string) => `/api/operator/accounts/${id}/invite`,
+      ACCOUNT_MEMBER: (id: string, memberId: string) =>
+        `/api/operator/accounts/${id}/members/${memberId}`,
     },
   },
 } as const

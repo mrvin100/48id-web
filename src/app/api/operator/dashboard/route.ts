@@ -8,19 +8,12 @@ export async function GET(request: NextRequest) {
   if (!jwtToken)
     return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
 
-  const { searchParams } = new URL(request.url)
-  const accountId = searchParams.get('accountId')
+  const accountId = new URL(request.url).searchParams.get('accountId')
   if (!accountId)
     return NextResponse.json({ error: 'accountId is required' }, { status: 400 })
 
-  const params = new URLSearchParams({ accountId })
-  const page = searchParams.get('page') || '0'
-  const size = searchParams.get('size') || '20'
-  params.set('page', page)
-  params.set('size', size)
-
   const response = await fetch(
-    `${config.backend.apiUrl}/operator/users?${params}`,
+    `${config.backend.apiUrl}/operator/dashboard/metrics?accountId=${accountId}`,
     { headers: { Authorization: `Bearer ${jwtToken}` } }
   )
   if (!response.ok)

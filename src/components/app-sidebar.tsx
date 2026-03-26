@@ -33,9 +33,13 @@ export function AppSidebar() {
   const router = useRouter()
   const { user, logout } = useAuthStore()
 
-  const role = (
-    Array.isArray(user?.roles) ? user.roles[0] : (user?.roles ?? user?.role)
-  ) as UserRole | undefined
+  const role = (Array.isArray(user?.roles)
+    ? user.roles.includes('OPERATOR')
+      ? 'OPERATOR'
+      : user.roles.includes('ADMIN')
+        ? 'ADMIN'
+        : 'STUDENT'
+    : 'STUDENT') as UserRole
 
   const navItems = role ? getNavigationForRole(role) : []
 

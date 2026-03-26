@@ -101,11 +101,11 @@ async function verifyToken(token: string): Promise<TokenPayload | null> {
 }
 
 function hasAdminAccess(role: string): boolean {
-  return role === 'ADMIN'
+  return role.split(',').some(r => r.trim() === 'ROLE_ADMIN' || r.trim() === 'ADMIN')
 }
 
 function hasOperatorAccess(role: string): boolean {
-  return role === 'OPERATOR'
+  return role.split(',').some(r => r.trim() === 'ROLE_OPERATOR' || r.trim() === 'OPERATOR')
 }
 
 function isProtectedRoute(pathname: string): boolean {

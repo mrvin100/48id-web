@@ -74,8 +74,9 @@ export const provisioningKeys = {
  */
 export const operatorKeys = {
   all: ['operator'] as const,
-  users: () => [...operatorKeys.all, 'users'] as const,
-  auditLog: () => [...operatorKeys.all, 'audit-log'] as const,
+  accounts: () => [...operatorKeys.all, 'accounts'] as const,
+  users: (accountId: string) => [...operatorKeys.all, 'users', accountId] as const,
+  auditLog: (accountId: string) => [...operatorKeys.all, 'audit-log', accountId] as const,
   traffic: () => [...operatorKeys.all, 'traffic'] as const,
-  apiKey: () => [...operatorKeys.all, 'api-key'] as const,
+  apiKey: (accountId: string) => [...operatorKeys.all, 'api-key', accountId] as const,
 }

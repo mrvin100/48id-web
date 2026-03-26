@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import ky from 'ky'
-import { RefreshTokenResponse, User, UserRole } from '@/types/auth.types'
+import { RefreshTokenResponse, User } from '@/types/auth.types'
 import { config } from '@/lib/env'
 
 interface BackendRefreshResponse {
@@ -9,21 +9,18 @@ interface BackendRefreshResponse {
   user?: {
     id: string
     matricule: string
-    email: string
-    firstName: string
-    lastName: string
+    email?: string
+    firstName?: string
+    lastName?: string
+    name?: string
     status: string
-    role: string
+    roles: string[]
     createdAt: string
     updatedAt: string
     lastLoginAt?: string
-    isEmailVerified?: boolean
     profilePicture?: string
-    name?: string
-    phone?: string
     batch?: string
     specialization?: string
-    roles?: string[]
     profileCompleted?: boolean
   }
   token?: string
@@ -82,30 +79,21 @@ export async function POST(_request: NextRequest) {
         )
       }
 
-      // Transform backend user data to frontend User interface
       const user: User = {
         id: backendResponse.user.id,
         matricule: backendResponse.user.matricule,
-        email: backendResponse.user.email,
-        name:
-          backendResponse.user.name ||
-          `${backendResponse.user.firstName} ${backendResponse.user.lastName}`,
-        phone: backendResponse.user.phone,
+        email: backendResponse.user.email ?? '',
+        name: backendResponse.user.name ?? `${backendResponse.user.firstName ?? ''} ${backendResponse.user.lastName ?? ''}`.trim(),
         batch: backendResponse.user.batch,
         specialization: backendResponse.user.specialization,
         status: backendResponse.user.status,
-        roles: backendResponse.user.roles || [backendResponse.user.role],
-        profileCompleted:
-          backendResponse.user.profileCompleted ??
-          backendResponse.user.isEmailVerified ??
-          false,
+        roles: backendResponse.user.roles,
+        profileCompleted: backendResponse.user.profileCompleted ?? false,
         lastLoginAt: backendResponse.user.lastLoginAt,
         createdAt: backendResponse.user.createdAt,
         updatedAt: backendResponse.user.updatedAt,
         firstName: backendResponse.user.firstName,
         lastName: backendResponse.user.lastName,
-        role: backendResponse.user.role as UserRole,
-        isEmailVerified: backendResponse.user.isEmailVerified || false,
         profilePicture: backendResponse.user.profilePicture,
       }
 
