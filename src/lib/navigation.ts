@@ -12,6 +12,8 @@ import {
   FileText,
   Key,
   Activity,
+  Building2,
+  UserCircle2,
   type LucideIcon,
 } from 'lucide-react'
 import { ROUTES } from '@/lib/routes'
@@ -52,45 +54,86 @@ export const navigationConfig: NavigationItem[] = [
     roles: [UserRole.ADMIN],
   },
   {
-    title: 'API Keys',
-    href: ROUTES.API_KEYS,
-    icon: Key,
+    title: 'Traffic',
+    href: ROUTES.TRAFFIC,
+    icon: Activity,
     roles: [UserRole.ADMIN],
   },
-
   // ── OPERATOR ───────────────────────────────────────────────────────────
   {
     title: 'Dashboard',
-    href: ROUTES.OPERATOR.DASHBOARD,
+    href: ROUTES.DASHBOARD,
     icon: LayoutDashboard,
     roles: [UserRole.OPERATOR],
   },
   {
     title: 'Users',
-    href: ROUTES.OPERATOR.USERS,
+    href: ROUTES.USERS,
     icon: Users,
     roles: [UserRole.OPERATOR],
   },
   {
-    title: 'Audit Logs',
-    href: ROUTES.OPERATOR.AUDIT,
-    icon: FileText,
-    roles: [UserRole.OPERATOR],
-  },
-  {
     title: 'Traffic',
-    href: ROUTES.OPERATOR.TRAFFIC,
+    href: ROUTES.TRAFFIC,
     icon: Activity,
     roles: [UserRole.OPERATOR],
   },
   {
     title: 'API Key',
-    href: ROUTES.OPERATOR.API_KEY,
+    href: ROUTES.API_KEY,
     icon: Key,
     roles: [UserRole.OPERATOR],
+  },
+
+  // ── STUDENT ────────────────────────────────────────────────────────────
+  {
+    title: 'Dashboard',
+    href: ROUTES.STUDENT.DASHBOARD,
+    icon: LayoutDashboard,
+    roles: [UserRole.STUDENT],
+  },
+  {
+    title: 'Profile',
+    href: ROUTES.STUDENT.PROFILE,
+    icon: UserCircle2,
+    roles: [UserRole.STUDENT],
+  },
+  {
+    title: 'Operators',
+    href: ROUTES.STUDENT.OPERATORS,
+    icon: Building2,
+    roles: [UserRole.STUDENT],
   },
 ]
 
 export function getNavigationForRole(role: UserRole): NavigationItem[] {
   return navigationConfig.filter(item => item.roles.includes(role))
+}
+
+/**
+ * Get navigation items for student, with optional operator mode.
+ * When in operator mode, returns operator navigation items with accountId
+ * embedded as a query param so server pages can scope data to the account.
+ *
+ * @param isOperatorMode - Whether the student is viewing as an operator
+ * @param operatorId - The selected operator account ID (required in operator mode)
+ * @param isOwner - Whether the student is the owner of the operator account
+ * @returns Navigation items for the current mode
+ */
+export function getNavigationForStudent(
+  isOperatorMode: boolean = false,
+  operatorId?: string | null,
+  isOwner?: boolean
+): NavigationItem[] {
+  if (isOperatorMode && operatorId) {
+    // Build operator nav items with accountId + isOwner embedded in the href
+    return navigationConfig
+      .filter(item => item.roles.includes(UserRole.OPERATOR))
+      .map(item => ({
+        ...item,
+        href: `${item.href}?accountId=${operatorId}${item.href === ROUTES.API_KEY ? `&isOwner=${isOwner ?? false}` : ''}`,
+      }))
+  }
+  // Return student navigation by default
+  return navigationConfig.filter(item => item.roles.includes(UserRole.STUDENT))
 }

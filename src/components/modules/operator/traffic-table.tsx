@@ -28,8 +28,8 @@ import {
   EmptyDescription,
 } from '@/components/ui/empty'
 
-export function TrafficTable() {
-  const { data, isLoading, error } = useOperatorTraffic()
+export function TrafficTable({ accountId }: { accountId: string }) {
+  const { data, isLoading, error } = useOperatorTraffic(accountId)
 
   if (error) {
     return (

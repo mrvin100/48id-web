@@ -26,3 +26,6 @@ export * from './api-keys'
 
 // Settings modules
 export * from './settings'
+
+// Student modules
+export * from './student'

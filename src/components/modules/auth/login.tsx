@@ -80,7 +80,11 @@ export function LoginModule() {
 
       if (response.success) {
         const roles = useAuthStore.getState().user?.roles ?? []
-        router.push(roles.includes('OPERATOR') ? ROUTES.OPERATOR.DASHBOARD : ROUTES.DASHBOARD)
+        router.push(
+          roles.includes('OPERATOR')
+            ? ROUTES.OPERATOR.DASHBOARD
+            : ROUTES.DASHBOARD
+        )
       } else {
         setError({
           code: 'LOGIN_FAILED',

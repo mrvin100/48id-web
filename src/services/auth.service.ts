@@ -30,7 +30,7 @@ export class AuthService {
       timeout: config.backend.timeout,
       retry: {
         limit: config.backend.retryLimit,
-        methods: ['get', 'post'],
+        methods: ['get'], // Do not retry POST — avoids duplicate login attempts and re-triggering timeouts
         statusCodes: [408, 413, 429, 500, 502, 503, 504],
       },
       hooks: {

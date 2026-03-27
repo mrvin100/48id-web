@@ -7,3 +7,6 @@
  */
 
 export { DashboardModule } from './dashboard'
+export { OperatorDashboardModule } from './operator-dashboard'
+export { StudentDashboardModule } from './student-dashboard'
+export { StudentDashboardWrapper } from './student-dashboard-wrapper'

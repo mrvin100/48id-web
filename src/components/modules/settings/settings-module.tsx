@@ -12,16 +12,15 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod/v4'
-import { useTheme } from 'next-themes'
 import {
-  Moon,
-  Sun,
   User as UserIcon,
   Mail,
   Phone,
   IdCard,
   Lock,
   KeyRound,
+  Eye,
+  EyeOff,
 } from 'lucide-react'
 import { PageHeader } from '@/components/global'
 import { useAuthStore } from '@/stores/auth-store'
@@ -69,9 +68,11 @@ type PasswordFormData = z.infer<typeof passwordSchema>
 
 export function SettingsModule() {
   const user = useAuthStore(state => state.user)
-  const { theme, setTheme } = useTheme()
   const [isEditing, setIsEditing] = useState(false)
   const [showPasswordDialog, setShowPasswordDialog] = useState(false)
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false)
+  const [showNewPassword, setShowNewPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
   const form = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema as never),
@@ -183,7 +184,12 @@ export function SettingsModule() {
                   id="batch"
                   {...form.register('batch')}
                   placeholder="2024"
+                  disabled
+                  className="cursor-not-allowed opacity-60"
                 />
+                <p className="text-muted-foreground text-xs">
+                  Batch cannot be changed. Contact an admin if needed.
+                </p>
               </div>
 
               <div className="grid gap-2">
@@ -242,47 +248,19 @@ export function SettingsModule() {
         </CardContent>
       </Card>
 
-      {/* Appearance Card */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center gap-2">
-            <Sun className="h-5 w-5" />
-            <CardTitle>Appearance</CardTitle>
-          </div>
-          <CardDescription>Customize how the portal looks</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-between">
-            <div className="space-y-0.5">
-              <Label>Theme</Label>
-              <p className="text-muted-foreground text-sm">
-                Choose between light and dark mode
-              </p>
-            </div>
-            <div className="flex gap-2">
-              <Button
-                variant={theme === 'light' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setTheme('light')}
-              >
-                <Sun className="mr-2 h-4 w-4" />
-                Light
-              </Button>
-              <Button
-                variant={theme === 'dark' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setTheme('dark')}
-              >
-                <Moon className="mr-2 h-4 w-4" />
-                Dark
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
       {/* Change Password Dialog */}
-      <Dialog open={showPasswordDialog} onOpenChange={setShowPasswordDialog}>
+      <Dialog
+        open={showPasswordDialog}
+        onOpenChange={open => {
+          setShowPasswordDialog(open)
+          if (!open) {
+            passwordForm.reset()
+            setShowCurrentPassword(false)
+            setShowNewPassword(false)
+            setShowConfirmPassword(false)
+          }
+        }}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Change Password</DialogTitle>
@@ -294,11 +272,29 @@ export function SettingsModule() {
             <div className="grid gap-4 py-4">
               <div className="grid gap-2">
                 <Label htmlFor="currentPassword">Current Password</Label>
-                <Input
-                  id="currentPassword"
-                  type="password"
-                  {...passwordForm.register('currentPassword')}
-                />
+                <div className="relative">
+                  <Input
+                    id="currentPassword"
+                    type={showCurrentPassword ? 'text' : 'password'}
+                    {...passwordForm.register('currentPassword')}
+                    className="pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowCurrentPassword(v => !v)}
+                    className="text-muted-foreground hover:text-foreground absolute top-2.5 right-3"
+                    tabIndex={-1}
+                    aria-label={
+                      showCurrentPassword ? 'Hide password' : 'Show password'
+                    }
+                  >
+                    {showCurrentPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </button>
+                </div>
                 {passwordForm.formState.errors.currentPassword && (
                   <p className="text-destructive text-sm">
                     {passwordForm.formState.errors.currentPassword.message}
@@ -308,11 +304,29 @@ export function SettingsModule() {
 
               <div className="grid gap-2">
                 <Label htmlFor="newPassword">New Password</Label>
-                <Input
-                  id="newPassword"
-                  type="password"
-                  {...passwordForm.register('newPassword')}
-                />
+                <div className="relative">
+                  <Input
+                    id="newPassword"
+                    type={showNewPassword ? 'text' : 'password'}
+                    {...passwordForm.register('newPassword')}
+                    className="pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowNewPassword(v => !v)}
+                    className="text-muted-foreground hover:text-foreground absolute top-2.5 right-3"
+                    tabIndex={-1}
+                    aria-label={
+                      showNewPassword ? 'Hide password' : 'Show password'
+                    }
+                  >
+                    {showNewPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </button>
+                </div>
                 {passwordForm.formState.errors.newPassword && (
                   <p className="text-destructive text-sm">
                     {passwordForm.formState.errors.newPassword.message}
@@ -322,11 +336,29 @@ export function SettingsModule() {
 
               <div className="grid gap-2">
                 <Label htmlFor="confirmPassword">Confirm New Password</Label>
-                <Input
-                  id="confirmPassword"
-                  type="password"
-                  {...passwordForm.register('confirmPassword')}
-                />
+                <div className="relative">
+                  <Input
+                    id="confirmPassword"
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    {...passwordForm.register('confirmPassword')}
+                    className="pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(v => !v)}
+                    className="text-muted-foreground hover:text-foreground absolute top-2.5 right-3"
+                    tabIndex={-1}
+                    aria-label={
+                      showConfirmPassword ? 'Hide password' : 'Show password'
+                    }
+                  >
+                    {showConfirmPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </button>
+                </div>
                 {passwordForm.formState.errors.confirmPassword && (
                   <p className="text-destructive text-sm">
                     {passwordForm.formState.errors.confirmPassword.message}

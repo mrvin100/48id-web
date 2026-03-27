@@ -18,7 +18,8 @@ export function useCreateOperatorAccount() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: operatorApi.createAccount,
-    onSuccess: () => qc.invalidateQueries({ queryKey: operatorKeys.accounts() }),
+    onSuccess: () =>
+      qc.invalidateQueries({ queryKey: operatorKeys.accounts() }),
   })
 }
 
@@ -26,27 +27,54 @@ export function useDeleteOperatorAccount() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: (accountId: string) => operatorApi.deleteAccount(accountId),
-    onSuccess: () => qc.invalidateQueries({ queryKey: operatorKeys.accounts() }),
+    onSuccess: () =>
+      qc.invalidateQueries({ queryKey: operatorKeys.accounts() }),
+  })
+}
+
+export function useOperatorMembers(accountId: string) {
+  return useQuery({
+    queryKey: operatorKeys.members(accountId),
+    queryFn: () => operatorApi.getMembers(accountId),
+    staleTime: 60 * 1000,
+    enabled: !!accountId,
   })
 }
 
 export function useInviteOperatorMember(accountId: string) {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: (matricule: string) => operatorApi.inviteMember(accountId, matricule),
-    onSuccess: () => qc.invalidateQueries({ queryKey: operatorKeys.accounts() }),
+    mutationFn: (matricule: string) =>
+      operatorApi.inviteMember(accountId, matricule),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: operatorKeys.members(accountId) })
+      qc.invalidateQueries({ queryKey: operatorKeys.accounts() })
+    },
   })
 }
 
 export function useRemoveOperatorMember(accountId: string) {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: (memberId: string) => operatorApi.removeMember(accountId, memberId),
-    onSuccess: () => qc.invalidateQueries({ queryKey: operatorKeys.accounts() }),
+    mutationFn: (memberId: string) =>
+      operatorApi.removeMember(accountId, memberId),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: operatorKeys.members(accountId) })
+      qc.invalidateQueries({ queryKey: operatorKeys.accounts() })
+    },
   })
 }
 
-export function useOperatorUsers(accountId: string, params?: { page?: number; size?: number }) {
+export function useAcceptOperatorInvite() {
+  return useMutation({
+    mutationFn: (token: string) => operatorApi.acceptOperatorInvite(token),
+  })
+}
+
+export function useOperatorUsers(
+  accountId: string,
+  params?: { page?: number; size?: number }
+) {
   return useQuery({
     queryKey: operatorKeys.users(accountId),
     queryFn: () => operatorApi.getUsers(accountId, params),
@@ -55,13 +83,16 @@ export function useOperatorUsers(accountId: string, params?: { page?: number; si
   })
 }
 
-export function useOperatorAuditLog(accountId: string, params?: {
-  eventType?: string
-  dateFrom?: string
-  dateTo?: string
-  page?: number
-  size?: number
-}) {
+export function useOperatorAuditLog(
+  accountId: string,
+  params?: {
+    eventType?: string
+    dateFrom?: string
+    dateTo?: string
+    page?: number
+    size?: number
+  }
+) {
   return useQuery({
     queryKey: [...operatorKeys.auditLog(accountId), params],
     queryFn: () => operatorApi.getAuditLog(accountId, params),
@@ -70,13 +101,14 @@ export function useOperatorAuditLog(accountId: string, params?: {
   })
 }
 
-export function useOperatorTraffic() {
+export function useOperatorTraffic(accountId: string) {
   return useQuery({
-    queryKey: operatorKeys.traffic(),
-    queryFn: operatorApi.getTraffic,
+    queryKey: operatorKeys.traffic(accountId),
+    queryFn: () => operatorApi.getTraffic(accountId),
     staleTime: 30 * 1000,
     refetchInterval: 60 * 1000,
     refetchIntervalInBackground: true,
+    enabled: !!accountId,
   })
 }
 
@@ -94,7 +126,8 @@ export function useCreateApiKey(accountId: string) {
   return useMutation({
     mutationFn: (body: { applicationName: string; description?: string }) =>
       operatorApi.createApiKey(accountId, body),
-    onSuccess: () => qc.invalidateQueries({ queryKey: operatorKeys.apiKey(accountId) }),
+    onSuccess: () =>
+      qc.invalidateQueries({ queryKey: operatorKeys.apiKey(accountId) }),
   })
 }
 
@@ -102,7 +135,8 @@ export function useRotateApiKey(accountId: string) {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: () => operatorApi.rotateApiKey(accountId),
-    onSuccess: () => qc.invalidateQueries({ queryKey: operatorKeys.apiKey(accountId) }),
+    onSuccess: () =>
+      qc.invalidateQueries({ queryKey: operatorKeys.apiKey(accountId) }),
   })
 }
 
@@ -110,6 +144,7 @@ export function useDeleteApiKey(accountId: string) {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: () => operatorApi.deleteApiKey(accountId),
-    onSuccess: () => qc.invalidateQueries({ queryKey: operatorKeys.apiKey(accountId) }),
+    onSuccess: () =>
+      qc.invalidateQueries({ queryKey: operatorKeys.apiKey(accountId) }),
   })
 }

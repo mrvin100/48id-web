@@ -13,10 +13,7 @@ export const propertyTestConfig = {
 export const userIdArbitrary = fc.uuid()
 
 export const matriculeArbitrary = fc
-  .tuple(
-    fc.integer({ min: 1, max: 99 }),
-    fc.integer({ min: 1, max: 9999 })
-  )
+  .tuple(fc.integer({ min: 1, max: 99 }), fc.integer({ min: 1, max: 9999 }))
   .map(([b, seq]) => `K48-B${b}-${seq}`)
 
 export const emailArbitrary = fc.emailAddress()

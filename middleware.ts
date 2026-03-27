@@ -14,6 +14,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { jwtVerify } from 'jose'
 import { config as envConfig } from '@/lib/env'
 import { ROUTES } from '@/lib/routes'
+import { hasAdminRole, hasOperatorRole } from '@/lib/role-utils'
 
 // JWT Secret for token verification
 const JWT_SECRET = new TextEncoder().encode(envConfig.auth.jwtSecret)
@@ -25,6 +26,8 @@ const PUBLIC_ROUTES = [
   ROUTES.HOME,
   ROUTES.ACTIVATE_ACCOUNT,
   ROUTES.RESET_PASSWORD,
+  ROUTES.OPERATOR_INVITE, // Accept operator invite (/operator-invite)
+  '/accept-operator-invite', // Matches backend default email URL
 ]
 
 const API_ROUTES = [
@@ -33,44 +36,32 @@ const API_ROUTES = [
   ROUTES.API.AUTH.REFRESH,
   ROUTES.API.AUTH.ACTIVATE,
   ROUTES.API.AUTH.RESET_PASSWORD,
+  '/api/auth/accept-operator-invite', // Public — no JWT required, token in body
 ]
 
-const PROTECTED_ROUTES = [
-  ROUTES.DASHBOARD,
-  ROUTES.USERS,
-  ROUTES.CSV_IMPORT,
-  ROUTES.AUDIT,
-  ROUTES.API_KEYS,
-  ROUTES.OPERATOR.DASHBOARD,
-  ROUTES.OPERATOR.USERS,
-  ROUTES.OPERATOR.AUDIT,
-  ROUTES.OPERATOR.TRAFFIC,
-  ROUTES.OPERATOR.API_KEY,
-]
+const PROTECTED_ROUTES = [ROUTES.DASHBOARD, '/dashboard']
 
 // Admin-only page routes
 const ADMIN_ROUTES = [
   ROUTES.USERS,
   ROUTES.CSV_IMPORT,
-  ROUTES.AUDIT,
   ROUTES.API_KEYS,
+  ROUTES.SETTINGS,
   '/api/users',
   '/api/csv',
-  '/api/audit',
   '/api/api-keys',
   '/api/dashboard',
   '/api/admin',
 ]
 
-// Operator-only page routes
-const OPERATOR_ROUTES = [
-  ROUTES.OPERATOR.DASHBOARD,
-  ROUTES.OPERATOR.USERS,
-  ROUTES.OPERATOR.AUDIT,
-  ROUTES.OPERATOR.TRAFFIC,
-  ROUTES.OPERATOR.API_KEY,
-  '/api/operator',
-]
+// Operator-only page routes (traffic and api-key are operator-specific)
+const OPERATOR_ROUTES = [ROUTES.TRAFFIC, ROUTES.API_KEY, '/api/operator']
+
+// Shared routes (AUDIT and USERS are accessible by both ADMIN and OPERATOR)
+const SHARED_ROUTES = [ROUTES.AUDIT]
+
+// Student-only page routes
+const STUDENT_ROUTES = [ROUTES.STUDENT.PROFILE, ROUTES.STUDENT.OPERATORS]
 
 interface TokenPayload {
   sub: string
@@ -100,14 +91,6 @@ async function verifyToken(token: string): Promise<TokenPayload | null> {
   }
 }
 
-function hasAdminAccess(role: string): boolean {
-  return role.split(',').some(r => r.trim() === 'ROLE_ADMIN' || r.trim() === 'ADMIN')
-}
-
-function hasOperatorAccess(role: string): boolean {
-  return role.split(',').some(r => r.trim() === 'ROLE_OPERATOR' || r.trim() === 'OPERATOR')
-}
-
 function isProtectedRoute(pathname: string): boolean {
   return PROTECTED_ROUTES.some(route => pathname.startsWith(route))
 }
@@ -117,7 +100,14 @@ function isAdminRoute(pathname: string): boolean {
 }
 
 function isOperatorRoute(pathname: string): boolean {
-  return OPERATOR_ROUTES.some(route => pathname.startsWith(route))
+  return (
+    OPERATOR_ROUTES.some(route => pathname.startsWith(route)) ||
+    SHARED_ROUTES.some(route => pathname.startsWith(route))
+  )
+}
+
+function isStudentRoute(pathname: string): boolean {
+  return STUDENT_ROUTES.some(route => pathname.startsWith(route))
 }
 
 function isPublicRoute(pathname: string): boolean {
@@ -166,14 +156,19 @@ export async function middleware(request: NextRequest) {
       )
     }
 
-    if (isAdminRoute(pathname) && !hasAdminAccess(payload.role)) {
+    if (isAdminRoute(pathname) && !hasAdminRole(payload.role)) {
       return NextResponse.json(
         { error: 'Insufficient permissions' },
         { status: 403 }
       )
     }
 
-    if (isOperatorRoute(pathname) && !hasOperatorAccess(payload.role)) {
+    // Operator routes: allow both OPERATOR and ADMIN
+    if (
+      isOperatorRoute(pathname) &&
+      !hasOperatorRole(payload.role) &&
+      !hasAdminRole(payload.role)
+    ) {
       return NextResponse.json(
         { error: 'Insufficient permissions' },
         { status: 403 }
@@ -240,21 +235,23 @@ export async function middleware(request: NextRequest) {
       return response
     }
 
-    // OPERATOR trying to access admin routes → access denied
-    if (isAdminRoute(pathname) && !hasAdminAccess(payload.role)) {
+    // Role-based access control for admin-only routes
+    if (isAdminRoute(pathname) && !hasAdminRole(payload.role)) {
       return NextResponse.redirect(new URL(ROUTES.ACCESS_DENIED, request.url))
     }
 
-    // Non-OPERATOR trying to access operator routes → access denied
-    if (isOperatorRoute(pathname) && !hasOperatorAccess(payload.role)) {
+    // Role-based access control for operator-only routes (ADMIN can also access)
+    if (
+      isOperatorRoute(pathname) &&
+      !hasOperatorRole(payload.role) &&
+      !hasAdminRole(payload.role)
+    ) {
       return NextResponse.redirect(new URL(ROUTES.ACCESS_DENIED, request.url))
     }
 
-    // OPERATOR hitting /dashboard → redirect to operator dashboard
-    if (pathname === ROUTES.DASHBOARD && hasOperatorAccess(payload.role)) {
-      return NextResponse.redirect(
-        new URL(ROUTES.OPERATOR.DASHBOARD, request.url)
-      )
+    // Role-based access control for student-only routes
+    if (isStudentRoute(pathname) && payload.role !== 'STUDENT') {
+      return NextResponse.redirect(new URL(ROUTES.ACCESS_DENIED, request.url))
     }
 
     return NextResponse.next()
@@ -264,5 +261,7 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\..*|public).*)'],
+  matcher: [
+    String.raw`/((?!_next/static|_next/image|favicon.ico|.*\..*|public).*)`,
+  ],
 }

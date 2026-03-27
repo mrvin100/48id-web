@@ -32,7 +32,7 @@ export function AccessDeniedModule() {
   }
 
   const handleContactAdmin = () => {
-    window.location.href = `mailto:${config.contact.adminEmail}?subject=Access Request - 48ID Admin Portal&body=Hello,%0D%0A%0D%0AI am requesting access to additional features in the 48ID Admin Portal.%0D%0A%0D%0AUser Details:%0D%0AMatricule: ${user?.matricule || 'N/A'}%0D%0ARole: ${user?.role || 'N/A'}%0D%0A%0D%0APlease review my access permissions.%0D%0A%0D%0AThank you.`
+    window.location.href = `mailto:${config.contact.adminEmail}?subject=Access Request - 48ID Admin Portal&body=Hello,%0D%0A%0D%0AI am requesting access to additional features in the 48ID Admin Portal.%0D%0A%0D%0AUser Details:%0D%0AMatricule: ${user?.matricule || 'N/A'}%0D%0ARole: ${user?.roles?.join(', ') || 'N/A'}%0D%0A%0D%0APlease review my access permissions.%0D%0A%0D%0AThank you.`
   }
 
   return (
@@ -77,7 +77,9 @@ export function AccessDeniedModule() {
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-sm text-gray-600">Role:</span>
-                <Badge variant="outline">{user.role}</Badge>
+                <Badge variant="outline">
+                  {user.roles?.join(', ') || 'N/A'}
+                </Badge>
               </div>
             </CardContent>
           </Card>

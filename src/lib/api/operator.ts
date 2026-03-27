@@ -19,28 +19,32 @@ export interface MyOperatorAccount {
 }
 
 export interface OperatorMember {
+  /** membership record id (used for remove operations) */
   id: string
   userId: string
   memberRole: 'OWNER' | 'COLLABORATOR'
-  status: 'ACTIVE' | 'PENDING'
+  status: 'ACTIVE' | 'PENDING' | 'REMOVED'
   createdAt: string
 }
 
-export interface OperatorUser {
-  id: string
+/**
+ * A 48ID user who has authenticated externally via this operator account's API key.
+ * These are the "consumers" of the operator's platform — NOT account members.
+ */
+export interface ApiConsumer {
+  userId: string
   matricule: string
   email: string
   name?: string
-  firstName?: string
-  lastName?: string
   batch?: string
   status: string
-  roles: string[]
-  createdAt: string
+  totalCalls: number
+  firstSeen: string
+  lastSeen: string
 }
 
-export interface PaginatedOperatorUsersResponse {
-  content: OperatorUser[]
+export interface PaginatedApiConsumersResponse {
+  content: ApiConsumer[]
   totalElements: number
   totalPages: number
   size: number
@@ -89,11 +93,22 @@ export const operatorApi = {
   getAccounts: (): Promise<MyOperatorAccount[]> =>
     apiClient.get('operator/accounts').json<MyOperatorAccount[]>(),
 
-  createAccount: (body: { name: string; description?: string }): Promise<MyOperatorAccount> =>
-    apiClient.post('operator/accounts', { json: body }).json<MyOperatorAccount>(),
+  createAccount: (body: {
+    name: string
+    description?: string
+  }): Promise<MyOperatorAccount> =>
+    apiClient
+      .post('operator/accounts', { json: body })
+      .json<MyOperatorAccount>(),
 
   deleteAccount: (accountId: string): Promise<void> =>
     apiClient.delete(`operator/accounts/${accountId}`).then(() => undefined),
+
+  // Members of an operator account (OWNER + COLLABORATORs)
+  getMembers: (accountId: string): Promise<OperatorMember[]> =>
+    apiClient
+      .get(`operator/accounts/${accountId}/members`)
+      .json<OperatorMember[]>(),
 
   inviteMember: (accountId: string, matricule: string): Promise<void> =>
     apiClient
@@ -105,34 +120,56 @@ export const operatorApi = {
       .delete(`operator/accounts/${accountId}/members/${memberId}`)
       .then(() => undefined),
 
-  // Users (account-scoped)
-  getUsers: (accountId: string, params?: { page?: number; size?: number }): Promise<PaginatedOperatorUsersResponse> => {
+  // Accept operator invite (public — no auth cookie needed)
+  acceptOperatorInvite: (token: string): Promise<void> =>
+    apiClient
+      .post('auth/accept-operator-invite', { json: { token } })
+      .then(() => undefined),
+
+  // Users — API consumers who authenticated via this operator's API key
+  getUsers: (
+    accountId: string,
+    params?: { page?: number; size?: number }
+  ): Promise<PaginatedApiConsumersResponse> => {
     const searchParams = new URLSearchParams({ accountId })
-    if (params?.page !== undefined) searchParams.set('page', params.page.toString())
-    if (params?.size !== undefined) searchParams.set('size', params.size.toString())
-    return apiClient.get('operator/users', { searchParams }).json<PaginatedOperatorUsersResponse>()
+    if (params?.page !== undefined)
+      searchParams.set('page', params.page.toString())
+    if (params?.size !== undefined)
+      searchParams.set('size', params.size.toString())
+    return apiClient
+      .get('operator/users', { searchParams })
+      .json<PaginatedApiConsumersResponse>()
   },
 
   // Audit log (account-scoped)
-  getAuditLog: (accountId: string, params?: {
-    eventType?: string
-    dateFrom?: string
-    dateTo?: string
-    page?: number
-    size?: number
-  }): Promise<PaginatedAuditEventsResponse> => {
+  getAuditLog: (
+    accountId: string,
+    params?: {
+      eventType?: string
+      dateFrom?: string
+      dateTo?: string
+      page?: number
+      size?: number
+    }
+  ): Promise<PaginatedAuditEventsResponse> => {
     const searchParams = new URLSearchParams({ accountId })
     if (params?.eventType) searchParams.set('eventType', params.eventType)
     if (params?.dateFrom) searchParams.set('from', params.dateFrom)
     if (params?.dateTo) searchParams.set('to', params.dateTo)
-    if (params?.page !== undefined) searchParams.set('page', params.page.toString())
-    if (params?.size !== undefined) searchParams.set('size', params.size.toString())
-    return apiClient.get('operator/audit-log', { searchParams }).json<PaginatedAuditEventsResponse>()
+    if (params?.page !== undefined)
+      searchParams.set('page', params.page.toString())
+    if (params?.size !== undefined)
+      searchParams.set('size', params.size.toString())
+    return apiClient
+      .get('operator/audit-log', { searchParams })
+      .json<PaginatedAuditEventsResponse>()
   },
 
-  // Traffic (resolved from JWT membership server-side)
-  getTraffic: (): Promise<OperatorTrafficResponse> =>
-    apiClient.get('operator/traffic').json<OperatorTrafficResponse>(),
+  // Traffic (scoped to operator account)
+  getTraffic: (accountId: string): Promise<OperatorTrafficResponse> =>
+    apiClient
+      .get('operator/traffic', { searchParams: { accountId } })
+      .json<OperatorTrafficResponse>(),
 
   // API Keys (account-scoped)
   getApiKey: (accountId: string): Promise<ApiKeyMetadata | null> =>
@@ -141,14 +178,17 @@ export const operatorApi = {
       .json<ApiKeyMetadata>()
       .catch(() => null),
 
-  createApiKey: (accountId: string, body: { applicationName: string; description?: string }): Promise<ApiKeyCreatedResponse> =>
+  createApiKey: (
+    accountId: string,
+    body: { applicationName: string; description?: string }
+  ): Promise<ApiKeyCreatedResponse> =>
     apiClient
       .post('operator/api-keys', { json: body, searchParams: { accountId } })
       .json<ApiKeyCreatedResponse>(),
 
   rotateApiKey: (accountId: string): Promise<ApiKeyCreatedResponse> =>
     apiClient
-      .put('operator/api-keys', { searchParams: { accountId } })
+      .put('operator/api-keys/rotate', { searchParams: { accountId } })
       .json<ApiKeyCreatedResponse>(),
 
   deleteApiKey: (accountId: string): Promise<void> =>

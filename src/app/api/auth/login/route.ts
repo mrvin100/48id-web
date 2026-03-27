@@ -1,15 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
-import ky from 'ky'
-import { LoginRequest, LoginResponse, User, UserRole } from '@/types/auth.types'
+import ky, { TimeoutError } from 'ky'
+import { LoginRequest, LoginResponse, User } from '@/types/auth.types'
 import { config } from '@/lib/env'
 import { ROUTES } from '@/lib/routes'
 import { validateMatricule } from '@/lib/validations'
+import { hasOperatorRole } from '@/lib/role-utils'
 
 export async function POST(request: NextRequest) {
   try {
     // Parse request body
-    const body: LoginRequest = await request.json()
+    let body: LoginRequest
+    try {
+      body = await request.json()
+    } catch {
+      return NextResponse.json(
+        {
+          success: false,
+          message: 'Invalid request body. Please try again.',
+        } as LoginResponse,
+        { status: 400 }
+      )
+    }
 
     // Validate required fields
     if (!body.matricule || !body.password) {
@@ -39,10 +51,7 @@ export async function POST(request: NextRequest) {
           password: body.password,
         },
         timeout: config.backend.timeout,
-        retry: {
-          limit: config.backend.retryLimit,
-          methods: ['post'],
-        },
+        retry: 0, // No retries for login — avoids duplicate auth attempts and compounding timeouts
       })
       .json<{
         access_token: string
@@ -53,14 +62,19 @@ export async function POST(request: NextRequest) {
         user: {
           id: string
           matricule: string
+          email: string
           name: string
           roles: string[]
           batch?: string
           specialization?: string
           status: string
+          profile_completed: boolean
           profileCompleted: boolean
+          last_login_at?: string
           lastLoginAt?: string
+          created_at?: string
           createdAt: string
+          updated_at?: string
           updatedAt: string
           profilePicture?: string
         }
@@ -76,27 +90,34 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Derive first/last name from the full name field
+    const nameParts = (backendResponse.user.name ?? '').trim().split(/\s+/)
+    const firstName = nameParts[0] ?? ''
+    const lastName = nameParts.slice(1).join(' ')
+
     const user: User = {
       id: backendResponse.user.id,
       matricule: backendResponse.user.matricule,
-      email: '',
+      email: backendResponse.user.email ?? '',
       name: backendResponse.user.name,
       batch: backendResponse.user.batch,
       specialization: backendResponse.user.specialization,
-      status: backendResponse.user.status,
-      roles: backendResponse.user.roles,
-      profileCompleted: backendResponse.user.profileCompleted,
-      lastLoginAt: backendResponse.user.lastLoginAt,
-      createdAt: backendResponse.user.createdAt,
-      updatedAt: backendResponse.user.updatedAt,
-      firstName: backendResponse.user.name?.split(' ')[0] || '',
-      lastName: backendResponse.user.name?.split(' ').slice(1).join(' ') || '',
+      status: backendResponse.user.status ?? 'ACTIVE',
+      roles: backendResponse.user.roles ?? [],
+      profileCompleted: backendResponse.user.profileCompleted ?? false,
+      lastLoginAt:
+        backendResponse.user.lastLoginAt ?? backendResponse.user.last_login_at,
+      createdAt:
+        backendResponse.user.createdAt ?? backendResponse.user.created_at,
+      updatedAt:
+        backendResponse.user.updatedAt ?? backendResponse.user.updated_at,
+      firstName,
+      lastName,
       profilePicture: backendResponse.user.profilePicture,
     }
 
-    const redirectUrl = user.roles.includes(UserRole.OPERATOR)
-      ? ROUTES.OPERATOR.DASHBOARD
-      : ROUTES.DASHBOARD
+    // Always redirect to /dashboard — role-based view is handled client-side
+    const redirectUrl = ROUTES.DASHBOARD
 
     // Create response
     const response = NextResponse.json(
@@ -141,11 +162,23 @@ export async function POST(request: NextRequest) {
     console.error('Login error:', error)
 
     // Handle specific error types
+    if (error instanceof TimeoutError) {
+      return NextResponse.json(
+        {
+          success: false,
+          message:
+            'Authentication service is temporarily unavailable. Please try again.',
+        } as LoginResponse,
+        { status: 503 }
+      )
+    }
+
     if (error instanceof Error) {
-      // Network or timeout errors
+      // Network or timeout errors (fallback string check)
       if (
         error.message.includes('timeout') ||
-        error.message.includes('fetch')
+        error.message.includes('fetch') ||
+        error.name === 'TimeoutError'
       ) {
         return NextResponse.json(
           {

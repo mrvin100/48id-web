@@ -125,6 +125,14 @@ export const useAuthStore = create<AuthStoreState>()(
             // Continue with local logout regardless of service error
           }
 
+          // Clear operator context from sessionStorage so the next login
+          // always starts in student view, not in a stale operator mode.
+          try {
+            sessionStorage.removeItem('48id-operator-context')
+          } catch {
+            // sessionStorage not available (SSR guard)
+          }
+
           set(state => {
             state.user = null
             state.isAuthenticated = false

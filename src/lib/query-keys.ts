@@ -27,6 +27,7 @@ export const dashboardKeys = {
   metrics: () => [...dashboardKeys.all, 'metrics'] as const,
   loginActivity: () => [...dashboardKeys.all, 'login-activity'] as const,
   recentActivity: () => [...dashboardKeys.all, 'recent-activity'] as const,
+  traffic: () => [...dashboardKeys.all, 'traffic'] as const,
 }
 
 /**
@@ -75,8 +76,14 @@ export const provisioningKeys = {
 export const operatorKeys = {
   all: ['operator'] as const,
   accounts: () => [...operatorKeys.all, 'accounts'] as const,
-  users: (accountId: string) => [...operatorKeys.all, 'users', accountId] as const,
-  auditLog: (accountId: string) => [...operatorKeys.all, 'audit-log', accountId] as const,
-  traffic: () => [...operatorKeys.all, 'traffic'] as const,
-  apiKey: (accountId: string) => [...operatorKeys.all, 'api-key', accountId] as const,
+  members: (accountId: string) =>
+    [...operatorKeys.all, 'members', accountId] as const,
+  users: (accountId: string) =>
+    [...operatorKeys.all, 'users', accountId] as const,
+  auditLog: (accountId: string) =>
+    [...operatorKeys.all, 'audit-log', accountId] as const,
+  traffic: (accountId: string) =>
+    [...operatorKeys.all, 'traffic', accountId] as const,
+  apiKey: (accountId: string) =>
+    [...operatorKeys.all, 'api-key', accountId] as const,
 }

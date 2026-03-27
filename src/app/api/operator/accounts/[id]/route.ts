@@ -12,13 +12,24 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const jwtToken = await getToken()
-  if (!jwtToken) return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
+  if (!jwtToken)
+    return NextResponse.json(
+      { error: 'Authentication required' },
+      { status: 401 }
+    )
 
   const { id } = await params
-  const response = await fetch(`${config.backend.apiUrl}/operator/accounts/${id}`, {
-    method: 'DELETE',
-    headers: { Authorization: `Bearer ${jwtToken}` },
-  })
-  if (!response.ok) return NextResponse.json({ error: `Backend error: ${response.status}` }, { status: response.status })
+  const response = await fetch(
+    `${config.backend.apiUrl}/operator/accounts/${id}`,
+    {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${jwtToken}` },
+    }
+  )
+  if (!response.ok)
+    return NextResponse.json(
+      { error: `Backend error: ${response.status}` },
+      { status: response.status }
+    )
   return new NextResponse(null, { status: 204 })
 }

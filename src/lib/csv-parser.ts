@@ -1,9 +1,13 @@
-// CSV parsing utilities - implementation coming in Sprint 4
+// CSV parsing utilities with centralized validation
 
 import { User } from '@/types/auth.types'
 import { CSVValidationResult, CSVError } from '@/types/csv.types'
+import {
+  validateCsvImportRow,
+  buildCsvTemplateContent,
+} from '@/lib/validations'
 
-// ── CSV parsing stubs ─────────────────────────────────────────────────────────
+// ── CSV parsing utilities ──────────────────────────────────────────────────────
 
 export interface CSVParseOptions {
   delimiter?: string
@@ -42,12 +46,36 @@ export class CSVParser {
   }
 
   validateUser(
-    _userData: Record<string, unknown>,
-    _rowNumber: number
+    userData: Record<string, unknown>,
+    rowNumber: number
   ): CSVError[] {
-    // User validation logic will be implemented in Sprint 4
-    console.log('CSVParser.validateUser - implementation coming in Sprint 4')
-    return []
+    const errors: CSVError[] = []
+    const matricule = String(userData.matricule || '')
+    const email = String(userData.email || '')
+    const name = String(userData.name || '')
+    const phone = String(userData.phone || '')
+    const batch = String(userData.batch || '')
+    const specialization = String(userData.specialization || '')
+
+    const rowError = validateCsvImportRow({
+      matricule,
+      email,
+      name,
+      phone,
+      batch,
+      specialization,
+    })
+    if (rowError) {
+      errors.push({
+        row: rowNumber,
+        matricule,
+        error: 'INVALID_ROW',
+        message: rowError,
+        severity: 'error',
+      })
+    }
+
+    return errors
   }
 }
 
@@ -59,11 +87,7 @@ export class CSVFormatter {
   }
 
   static generateTemplate(): string {
-    // Template generation logic will be implemented in Sprint 4
-    console.log(
-      'CSVFormatter.generateTemplate - implementation coming in Sprint 4'
-    )
-    return 'matricule,email,name,phone,batch,specialization\n'
+    return buildCsvTemplateContent()
   }
 }
 

@@ -6,12 +6,18 @@ export async function GET(request: NextRequest) {
   const cookieStore = await cookies()
   const jwtToken = cookieStore.get(config.auth.jwtCookieName)?.value
   if (!jwtToken)
-    return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
+    return NextResponse.json(
+      { error: 'Authentication required' },
+      { status: 401 }
+    )
 
   const { searchParams } = new URL(request.url)
   const accountId = searchParams.get('accountId')
   if (!accountId)
-    return NextResponse.json({ error: 'accountId is required' }, { status: 400 })
+    return NextResponse.json(
+      { error: 'accountId is required' },
+      { status: 400 }
+    )
 
   const params = new URLSearchParams({ accountId })
   const page = searchParams.get('page') || '0'
@@ -22,7 +28,8 @@ export async function GET(request: NextRequest) {
   const from = searchParams.get('from')
   const to = searchParams.get('to')
   if (eventType) params.set('eventType', eventType)
-  if (from && from.match(/^\d{4}-\d{2}-\d{2}$/)) params.set('from', `${from}T00:00:00Z`)
+  if (from && from.match(/^\d{4}-\d{2}-\d{2}$/))
+    params.set('from', `${from}T00:00:00Z`)
   if (to && to.match(/^\d{4}-\d{2}-\d{2}$/)) params.set('to', `${to}T23:59:59Z`)
 
   const response = await fetch(
@@ -30,6 +37,9 @@ export async function GET(request: NextRequest) {
     { headers: { Authorization: `Bearer ${jwtToken}` } }
   )
   if (!response.ok)
-    return NextResponse.json({ error: `Backend error: ${response.status}` }, { status: response.status })
+    return NextResponse.json(
+      { error: `Backend error: ${response.status}` },
+      { status: response.status }
+    )
   return NextResponse.json(await response.json())
 }

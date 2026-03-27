@@ -51,7 +51,7 @@ describe('OperatorUsersModule', () => {
       error: null,
     } as ReturnType<typeof operatorHooks.useOperatorUsers>)
 
-    render(<OperatorUsersModule />, { wrapper })
+    render(<OperatorUsersModule accountId="test-account-id" />, { wrapper })
     expect(screen.getByText('Users')).toBeInTheDocument()
   })
 
@@ -60,13 +60,18 @@ describe('OperatorUsersModule', () => {
       data: {
         content: [
           {
-            id: '1',
+            userId: 'user-1',
             matricule: 'K48-B1-1',
             email: 'a@test.com',
             name: 'Alice',
             status: 'ACTIVE',
             roles: ['STUDENT'],
             createdAt: '2024-01-01T00:00:00Z',
+            batch: 'B1',
+            firstSeen: '2024-01-01T00:00:00Z',
+            lastSeen: '2024-01-02T00:00:00Z',
+            loginCount: 5,
+            totalCalls: 10,
           },
         ],
         totalElements: 1,
@@ -80,9 +85,8 @@ describe('OperatorUsersModule', () => {
       error: null,
     } as ReturnType<typeof operatorHooks.useOperatorUsers>)
 
-    render(<OperatorUsersModule />, { wrapper })
+    render(<OperatorUsersModule accountId="test-account-id" />, { wrapper })
     expect(screen.getByText('K48-B1-1')).toBeInTheDocument()
-    expect(screen.getByText('ACTIVE')).toBeInTheDocument()
   })
 
   it('shows empty state when no users', () => {
@@ -100,8 +104,8 @@ describe('OperatorUsersModule', () => {
       error: null,
     } as ReturnType<typeof operatorHooks.useOperatorUsers>)
 
-    render(<OperatorUsersModule />, { wrapper })
-    expect(screen.getByText('No users found')).toBeInTheDocument()
+    render(<OperatorUsersModule accountId="test-account-id" />, { wrapper })
+    expect(screen.getByText('No API consumers yet')).toBeInTheDocument()
   })
 
   it('shows error state', () => {
@@ -111,7 +115,7 @@ describe('OperatorUsersModule', () => {
       error: new Error('Network error'),
     } as ReturnType<typeof operatorHooks.useOperatorUsers>)
 
-    render(<OperatorUsersModule />, { wrapper })
+    render(<OperatorUsersModule accountId="test-account-id" />, { wrapper })
     expect(screen.getByText(/Network error/)).toBeInTheDocument()
   })
 })
@@ -202,7 +206,9 @@ describe('ApiKeyPanel', () => {
       error: null,
     } as ReturnType<typeof operatorHooks.useOperatorApiKey>)
 
-    render(<ApiKeyPanel />, { wrapper })
+    render(<ApiKeyPanel accountId="test-account-id" isOwner={true} />, {
+      wrapper,
+    })
     expect(screen.getByText('Generate API Key')).toBeInTheDocument()
   })
 
@@ -219,7 +225,9 @@ describe('ApiKeyPanel', () => {
       error: null,
     } as ReturnType<typeof operatorHooks.useOperatorApiKey>)
 
-    render(<ApiKeyPanel />, { wrapper })
+    render(<ApiKeyPanel accountId="test-account-id" isOwner={true} />, {
+      wrapper,
+    })
     expect(screen.getByText('48Hub')).toBeInTheDocument()
     expect(screen.getByText('Rotate')).toBeInTheDocument()
     expect(screen.getByText('Revoke')).toBeInTheDocument()
@@ -237,7 +245,9 @@ describe('ApiKeyPanel', () => {
       error: null,
     } as ReturnType<typeof operatorHooks.useOperatorApiKey>)
 
-    render(<ApiKeyPanel />, { wrapper })
+    render(<ApiKeyPanel accountId="test-account-id" isOwner={false} />, {
+      wrapper,
+    })
     expect(screen.queryByText('Rotate')).not.toBeInTheDocument()
     expect(screen.queryByText('Revoke')).not.toBeInTheDocument()
   })
@@ -253,17 +263,31 @@ describe('ApiKeyPanel', () => {
       id: 'key-1',
       appName: '48Hub',
       createdAt: '2024-01-01T00:00:00Z',
-      memberRole: 'OWNER',
-      rawKey: 'sk_live_abc123xyz',
+      // ApiKeyCreatedResponse uses 'key' (not 'rawKey')
+      key: 'sk_live_abc123xyz',
     })
     vi.mocked(operatorHooks.useCreateApiKey).mockReturnValue({
       mutateAsync: mockCreate,
       isPending: false,
     } as unknown as ReturnType<typeof operatorHooks.useCreateApiKey>)
 
-    render(<ApiKeyPanel />, { wrapper })
+    render(<ApiKeyPanel accountId="test-account-id" isOwner={true} />, {
+      wrapper,
+    })
+
+    // Click "Generate API Key" to open the dialog
     await userEvent.click(screen.getByText('Generate API Key'))
 
+    // Fill the application name field in the dialog
+    await waitFor(() =>
+      expect(screen.getByLabelText('Application Name')).toBeInTheDocument()
+    )
+    await userEvent.type(screen.getByLabelText('Application Name'), '48Hub')
+
+    // Submit the form
+    await userEvent.click(screen.getByRole('button', { name: /generate/i }))
+
+    // Raw key should be displayed after creation
     await waitFor(() => {
       expect(screen.getByText('sk_live_abc123xyz')).toBeInTheDocument()
     })
@@ -275,14 +299,30 @@ describe('ApiKeyPanel', () => {
 describe('OperatorDashboardModule', () => {
   it('renders metric cards', () => {
     vi.mocked(operatorHooks.useOperatorUsers).mockReturnValue({
-      data: { totalElements: 42, content: [], totalPages: 1, size: 20, number: 0, first: true, last: true },
+      data: {
+        totalElements: 42,
+        content: [],
+        totalPages: 1,
+        size: 20,
+        number: 0,
+        first: true,
+        last: true,
+      },
       isLoading: false,
       error: null,
     } as ReturnType<typeof operatorHooks.useOperatorUsers>)
 
     vi.mocked(operatorHooks.useOperatorTraffic).mockReturnValue({
       data: {
-        apiKeyCalls: [{ timestamp: '', ip: '', endpoint: '', method: 'GET', totalInWindow: 1 }],
+        apiKeyCalls: [
+          {
+            timestamp: '',
+            ip: '',
+            endpoint: '',
+            method: 'GET',
+            totalInWindow: 1,
+          },
+        ],
         memberActions: [],
         generatedAt: '',
       },

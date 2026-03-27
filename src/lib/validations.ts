@@ -56,7 +56,7 @@ export const userSchema = z.object({
     .string()
     .min(1, 'Email is required')
     .email('Invalid email address')
-    .endsWith('@k48.fr', 'Email must be a K48 email address'),
+    .endsWith('@k48.io', 'Email must be a K48 email address'),
   name: z
     .string()
     .min(1, 'Name is required')
@@ -122,7 +122,7 @@ export const csvUserSchema = z.object({
     .string()
     .min(1, 'Email is required')
     .email('Invalid email address')
-    .endsWith('@k48.fr', 'Must be a K48 email address'),
+    .endsWith('@k48.io', 'Must be a K48 email address'),
   name: z
     .string()
     .min(1, 'Name is required')
@@ -285,7 +285,7 @@ export const isValidMatriculeFormat = (matricule: string): boolean => {
 
 export const validateEmail = (email: string): boolean => {
   return (
-    z.string().email().safeParse(email).success && email.endsWith('@k48.fr')
+    z.string().email().safeParse(email).success && email.endsWith('@k48.io')
   )
 }
 
@@ -295,6 +295,72 @@ export const validatePhone = (phone: string): boolean => {
 
 export const validateBatch = (batch: string): boolean => {
   return batchPattern.test(batch)
+}
+
+export const CSV_TEMPLATE_FILENAME = '48id_import_template.csv'
+
+export const CSV_EXPECTED_HEADERS = [
+  'matricule',
+  'email',
+  'name',
+  'phone',
+  'batch',
+  'specialization',
+] as const
+
+export interface CsvImportRowLike {
+  matricule: string
+  email: string
+  name: string
+  phone: string
+  batch: string
+  specialization: string
+}
+
+const CSV_TEMPLATE_EXAMPLE_ROW: CsvImportRowLike = {
+  matricule: 'K48-B1-1',
+  email: 'john.doe@k48.io',
+  name: 'John Doe',
+  phone: '+237600000000',
+  batch: 'B1',
+  specialization: 'Software Engineering',
+}
+
+export const buildCsvTemplateContent = (): string => {
+  const headerLine = CSV_EXPECTED_HEADERS.join(',')
+  const exampleLine = CSV_EXPECTED_HEADERS.map(
+    key => CSV_TEMPLATE_EXAMPLE_ROW[key]
+  ).join(',')
+  return `${headerLine}\n${exampleLine}\n`
+}
+
+export const normalizeCsvHeaders = (headers: string[]): string[] =>
+  headers.map(header => String(header).trim().toLowerCase())
+
+export const hasExpectedCsvHeaders = (headers: string[]): boolean => {
+  if (headers.length !== CSV_EXPECTED_HEADERS.length) return false
+  return CSV_EXPECTED_HEADERS.every(
+    (expected, index) => headers[index] === expected
+  )
+}
+
+export const validateCsvImportRow = (row: CsvImportRowLike): string | null => {
+  if (!row.matricule) return 'Missing matricule'
+  if (!row.email) return 'Missing email'
+  if (!row.name) return 'Missing name'
+  if (!row.batch) return 'Missing batch'
+  if (!row.specialization) return 'Missing specialization'
+
+  if (!validateEmail(row.email)) return 'Invalid email format'
+  if (row.phone && !validatePhone(row.phone)) return 'Invalid phone format'
+  if (!validateBatch(row.batch)) return 'Invalid batch format'
+
+  const matriculeError = validateMatricule(
+    row.matricule,
+    row.batch || undefined
+  )
+  if (matriculeError) return matriculeError
+  return null
 }
 
 /**

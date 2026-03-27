@@ -14,22 +14,34 @@ export const ROUTES = {
   // Auth routes
   ACTIVATE_ACCOUNT: '/activate-account',
   RESET_PASSWORD: '/reset-password',
+  OPERATOR_INVITE: '/operator-invite',
+  ACCEPT_OPERATOR_INVITE: '/accept-operator-invite', // Matches backend email URL default
 
-  // Dashboard routes (ADMIN)
+  // Dashboard routes (ADMIN & OPERATOR)
   DASHBOARD: '/dashboard',
-  USERS: '/users',
-  USER_DETAIL: (id: string) => `/users/${id}`,
-  CSV_IMPORT: '/csv-import',
-  AUDIT: '/audit',
-  API_KEYS: '/api-keys',
+  USERS: '/dashboard/users',
+  USER_DETAIL: (id: string) => `/dashboard/users/${id}`,
+  CSV_IMPORT: '/dashboard/csv-import',
+  AUDIT: '/dashboard/audit',
+  API_KEYS: '/dashboard/api-keys',
+  API_KEY: '/dashboard/api-key',
+  TRAFFIC: '/dashboard/traffic',
+  SETTINGS: '/dashboard/settings',
 
-  // Operator routes
+  STUDENT: {
+    DASHBOARD: '/dashboard',
+    PROFILE: '/dashboard/profile',
+    OPERATORS: '/dashboard/operators',
+    OPERATOR_VIEW: '/dashboard/operators/view',
+  },
+
+  // Operator routes - Deprecated: Use unified /dashboard/* namespace instead
   OPERATOR: {
-    DASHBOARD: '/operator/dashboard',
-    USERS: '/operator/users',
-    AUDIT: '/operator/audit',
-    TRAFFIC: '/operator/traffic',
-    API_KEY: '/operator/api-key',
+    DASHBOARD: '/dashboard',
+    USERS: '/dashboard/users',
+    AUDIT: '/dashboard/audit',
+    TRAFFIC: '/dashboard/traffic',
+    API_KEY: '/dashboard/api-key',
   },
 
   // API routes
@@ -100,16 +112,15 @@ export const getPageTitle = (pathname: string): string => {
     [ROUTES.HOME]: '48ID Portal',
     [ROUTES.LOGIN]: 'Login - 48ID Portal',
     [ROUTES.ACCESS_DENIED]: 'Access Denied - 48ID Portal',
-    [ROUTES.DASHBOARD]: 'Dashboard - 48ID Admin Portal',
-    [ROUTES.USERS]: 'Users - 48ID Admin Portal',
+    [ROUTES.DASHBOARD]: 'Dashboard - 48ID Portal',
+    [ROUTES.USERS]: 'Users - 48ID Portal',
     [ROUTES.CSV_IMPORT]: 'CSV Import - 48ID Admin Portal',
-    [ROUTES.AUDIT]: 'Audit Logs - 48ID Admin Portal',
+    [ROUTES.AUDIT]: 'Audit Logs - 48ID Portal',
     [ROUTES.API_KEYS]: 'API Keys - 48ID Admin Portal',
-    [ROUTES.OPERATOR.DASHBOARD]: 'Dashboard - 48ID Operator Portal',
-    [ROUTES.OPERATOR.USERS]: 'Users - 48ID Operator Portal',
-    [ROUTES.OPERATOR.AUDIT]: 'Audit Logs - 48ID Operator Portal',
-    [ROUTES.OPERATOR.TRAFFIC]: 'Traffic - 48ID Operator Portal',
-    [ROUTES.OPERATOR.API_KEY]: 'API Key - 48ID Operator Portal',
+    [ROUTES.API_KEY]: 'API Key - 48ID Operator Portal',
+    [ROUTES.TRAFFIC]: 'Traffic - 48ID Operator Portal',
+    [ROUTES.STUDENT.PROFILE]: 'Profile - 48ID Student Portal',
+    [ROUTES.STUDENT.OPERATORS]: 'Operators - 48ID Student Portal',
   }
 
   return titles[pathname] || '48ID Portal'
