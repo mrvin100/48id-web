@@ -82,7 +82,7 @@ export function AcceptOperatorInviteModule() {
             <>
               <CheckCircle2 className="h-12 w-12 text-green-500" />
               <p className="font-medium text-green-700 dark:text-green-400">
-                You've joined the operator account!
+                You&apos;ve joined the operator account!
               </p>
               <p className="text-muted-foreground text-sm">
                 You now have collaborator access. Log in to view your operator

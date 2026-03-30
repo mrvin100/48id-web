@@ -1,5 +1,4 @@
 import { getServerUserRole } from '@/lib/server-role'
-import { UserRole } from '@/types/auth.types'
 import { OperatorApiKeyPage } from '@/components/modules/operator'
 import { AccessDeniedModule } from '@/components/modules/auth'
 

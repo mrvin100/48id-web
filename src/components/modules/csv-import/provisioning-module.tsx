@@ -70,7 +70,7 @@ export function ProvisioningModule() {
     try {
       await downloadTemplate.mutateAsync()
       toast.success('Template downloaded')
-    } catch (_error) {
+    } catch {
       toast.error('Failed to download template')
     }
   }

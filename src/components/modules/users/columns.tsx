@@ -19,7 +19,9 @@ interface ColumnsProps {
   onViewDetails?: (user: User) => void
 }
 
-export const columns = ({ onViewDetails }: ColumnsProps): ColumnDef<User>[] => [
+export const columns = ({
+  onViewDetails: _onViewDetails,
+}: ColumnsProps): ColumnDef<User>[] => [
   {
     id: 'select',
     header: ({ table }) => (

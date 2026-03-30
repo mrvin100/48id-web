@@ -44,13 +44,18 @@ export async function POST(
     )
 
     if (!response.ok) {
-      const text = await response.text().catch(() => '')
+      // Backend returns application/problem+json — fields: title, detail, message
       let message = `Request failed with status ${response.status}`
       try {
-        const json = JSON.parse(text)
-        message = json.message || json.error || message
+        const text = await response.text()
+        if (text) {
+          const json = JSON.parse(text)
+          // Spring problem+json uses 'detail', custom errors use 'message' or 'error'
+          message =
+            json.detail ?? json.message ?? json.error ?? json.title ?? message
+        }
       } catch {
-        /* ignore */
+        /* ignore parse errors */
       }
       return NextResponse.json({ error: message }, { status: response.status })
     }

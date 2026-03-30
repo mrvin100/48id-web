@@ -14,12 +14,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import fc from 'fast-check'
 import { authService } from '@/services/auth.service'
 import { useAuthStore } from '@/stores/auth-store'
-import {
-  LoginCredentials,
-  User,
-  UserRole,
-  UserStatus,
-} from '@/types/auth.types'
+import { UserRole, UserStatus } from '@/types/auth.types'
 
 // Mock ky globally — the authService singleton is built with ky.create at import time,
 // so we need the mock to be in place before the module loads.

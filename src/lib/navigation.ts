@@ -129,10 +129,14 @@ export function getNavigationForStudent(
     // Build operator nav items with accountId + isOwner embedded in the href
     return navigationConfig
       .filter(item => item.roles.includes(UserRole.OPERATOR))
-      .map(item => ({
-        ...item,
-        href: `${item.href}?accountId=${operatorId}${item.href === ROUTES.API_KEY ? `&isOwner=${isOwner ?? false}` : ''}`,
-      }))
+      .map(item => {
+        const needsOwner =
+          item.href === ROUTES.API_KEY || item.href === ROUTES.USERS
+        return {
+          ...item,
+          href: `${item.href}?accountId=${operatorId}${needsOwner ? `&isOwner=${isOwner ?? false}` : ''}`,
+        }
+      })
   }
   // Return student navigation by default
   return navigationConfig.filter(item => item.roles.includes(UserRole.STUDENT))

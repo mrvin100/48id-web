@@ -79,7 +79,7 @@ export function StudentOperatorsModule() {
     null
   )
 
-  const operators = data ?? []
+  const operators = useMemo(() => data ?? [], [data])
   const totalPages = Math.max(1, Math.ceil(operators.length / PAGE_SIZE))
 
   const paginatedOperators = useMemo(() => {

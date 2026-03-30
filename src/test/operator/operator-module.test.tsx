@@ -13,6 +13,9 @@ import React from 'react'
 
 vi.mock('@/hooks/use-operator', () => ({
   useOperatorUsers: vi.fn(),
+  useOperatorMembers: vi.fn(),
+  useInviteOperatorMember: vi.fn(),
+  useRemoveOperatorMember: vi.fn(),
   useOperatorAuditLog: vi.fn(),
   useOperatorTraffic: vi.fn(),
   useOperatorApiKey: vi.fn(),
@@ -44,76 +47,68 @@ function wrapper({ children }: { children: React.ReactNode }) {
 // ── OperatorUsersModule ────────────────────────────────────────────────────
 
 describe('OperatorUsersModule', () => {
+  beforeEach(() => {
+    // Members tab (default) needs these hooks
+    vi.mocked(operatorHooks.useOperatorMembers).mockReturnValue({
+      data: [],
+      isLoading: false,
+      error: null,
+    } as ReturnType<typeof operatorHooks.useOperatorMembers>)
+    vi.mocked(operatorHooks.useInviteOperatorMember).mockReturnValue({
+      mutate: vi.fn(),
+      isPending: false,
+    } as unknown as ReturnType<typeof operatorHooks.useInviteOperatorMember>)
+    vi.mocked(operatorHooks.useRemoveOperatorMember).mockReturnValue({
+      mutate: vi.fn(),
+      isPending: false,
+    } as unknown as ReturnType<typeof operatorHooks.useRemoveOperatorMember>)
+  })
+
   it('shows loading skeletons', () => {
-    vi.mocked(operatorHooks.useOperatorUsers).mockReturnValue({
+    vi.mocked(operatorHooks.useOperatorMembers).mockReturnValue({
       data: undefined,
       isLoading: true,
       error: null,
-    } as ReturnType<typeof operatorHooks.useOperatorUsers>)
+    } as ReturnType<typeof operatorHooks.useOperatorMembers>)
 
     render(<OperatorUsersModule accountId="test-account-id" />, { wrapper })
     expect(screen.getByText('Users')).toBeInTheDocument()
   })
 
-  it('renders user rows', () => {
-    vi.mocked(operatorHooks.useOperatorUsers).mockReturnValue({
-      data: {
-        content: [
-          {
-            userId: 'user-1',
-            matricule: 'K48-B1-1',
-            email: 'a@test.com',
-            name: 'Alice',
-            status: 'ACTIVE',
-            roles: ['STUDENT'],
-            createdAt: '2024-01-01T00:00:00Z',
-            batch: 'B1',
-            firstSeen: '2024-01-01T00:00:00Z',
-            lastSeen: '2024-01-02T00:00:00Z',
-            loginCount: 5,
-            totalCalls: 10,
-          },
-        ],
-        totalElements: 1,
-        totalPages: 1,
-        size: 20,
-        number: 0,
-        first: true,
-        last: true,
-      },
+  it('renders member rows', () => {
+    vi.mocked(operatorHooks.useOperatorMembers).mockReturnValue({
+      data: [
+        {
+          id: 'mem-1',
+          userId: 'user-1',
+          matricule: 'K48-B1-1',
+          name: 'Alice',
+          memberRole: 'COLLABORATOR',
+          status: 'ACTIVE',
+          createdAt: '2024-01-01T00:00:00Z',
+        },
+      ],
       isLoading: false,
       error: null,
-    } as ReturnType<typeof operatorHooks.useOperatorUsers>)
+    } as ReturnType<typeof operatorHooks.useOperatorMembers>)
 
-    render(<OperatorUsersModule accountId="test-account-id" />, { wrapper })
+    render(<OperatorUsersModule accountId="test-account-id" isOwner />, {
+      wrapper,
+    })
     expect(screen.getByText('K48-B1-1')).toBeInTheDocument()
   })
 
-  it('shows empty state when no users', () => {
-    vi.mocked(operatorHooks.useOperatorUsers).mockReturnValue({
-      data: {
-        content: [],
-        totalElements: 0,
-        totalPages: 0,
-        size: 20,
-        number: 0,
-        first: true,
-        last: true,
-      },
-      isLoading: false,
-      error: null,
-    } as ReturnType<typeof operatorHooks.useOperatorUsers>)
-
+  it('shows empty state when no members', () => {
     render(<OperatorUsersModule accountId="test-account-id" />, { wrapper })
-    expect(screen.getByText('No API consumers yet')).toBeInTheDocument()
+    expect(screen.getByText('No members yet')).toBeInTheDocument()
   })
 
-  it('shows error state', () => {
-    vi.mocked(operatorHooks.useOperatorUsers).mockReturnValue({
+  it('shows error state on members tab', () => {
+    vi.mocked(operatorHooks.useOperatorMembers).mockReturnValue({
       data: undefined,
       isLoading: false,
       error: new Error('Network error'),
-    } as ReturnType<typeof operatorHooks.useOperatorUsers>)
+    } as ReturnType<typeof operatorHooks.useOperatorMembers>)
 
     render(<OperatorUsersModule accountId="test-account-id" />, { wrapper })
     expect(screen.getByText(/Network error/)).toBeInTheDocument()
@@ -130,7 +125,7 @@ describe('TrafficTable', () => {
       error: null,
     } as ReturnType<typeof operatorHooks.useOperatorTraffic>)
 
-    render(<TrafficTable />, { wrapper })
+    render(<TrafficTable accountId="test-account-id" />, { wrapper })
     expect(screen.getByText('API Key Calls')).toBeInTheDocument()
     expect(screen.getByText('Member Actions')).toBeInTheDocument()
   })
@@ -162,7 +157,7 @@ describe('TrafficTable', () => {
       error: null,
     } as ReturnType<typeof operatorHooks.useOperatorTraffic>)
 
-    render(<TrafficTable />, { wrapper })
+    render(<TrafficTable accountId="test-account-id" />, { wrapper })
     expect(screen.getByText('1.2.3.4')).toBeInTheDocument()
     expect(screen.getByText('K48-B1-3')).toBeInTheDocument()
     expect(screen.getByText('GET')).toBeInTheDocument()
@@ -175,7 +170,7 @@ describe('TrafficTable', () => {
       error: null,
     } as ReturnType<typeof operatorHooks.useOperatorTraffic>)
 
-    render(<TrafficTable />, { wrapper })
+    render(<TrafficTable accountId="test-account-id" />, { wrapper })
     expect(screen.getByText('No API key calls yet')).toBeInTheDocument()
     expect(screen.getByText('No member actions yet')).toBeInTheDocument()
   })
@@ -330,7 +325,7 @@ describe('OperatorDashboardModule', () => {
       error: null,
     } as ReturnType<typeof operatorHooks.useOperatorTraffic>)
 
-    render(<OperatorDashboardModule />, { wrapper })
+    render(<OperatorDashboardModule accountId="test-account-id" />, { wrapper })
     expect(screen.getByText('Total Users')).toBeInTheDocument()
     expect(screen.getByText('42')).toBeInTheDocument()
   })

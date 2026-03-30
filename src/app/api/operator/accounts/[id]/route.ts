@@ -7,10 +7,10 @@ async function getToken() {
   return cookieStore.get(config.auth.jwtCookieName)?.value
 }
 
-export async function DELETE(
-  _request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+type Params = { params: Promise<{ id: string }> }
+
+/** DELETE /api/operator/accounts/[id] — Delete an operator account (OWNER only) */
+export async function DELETE(_request: NextRequest, { params }: Params) {
   const jwtToken = await getToken()
   if (!jwtToken)
     return NextResponse.json(
@@ -21,10 +21,7 @@ export async function DELETE(
   const { id } = await params
   const response = await fetch(
     `${config.backend.apiUrl}/operator/accounts/${id}`,
-    {
-      method: 'DELETE',
-      headers: { Authorization: `Bearer ${jwtToken}` },
-    }
+    { method: 'DELETE', headers: { Authorization: `Bearer ${jwtToken}` } }
   )
   if (!response.ok)
     return NextResponse.json(

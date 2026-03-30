@@ -19,9 +19,12 @@ export interface MyOperatorAccount {
 }
 
 export interface OperatorMember {
-  /** membership record id (used for remove operations) */
+  /** membership record id */
   id: string
+  /** the 48ID user's UUID — pass this to removeMember */
   userId: string
+  matricule?: string
+  name?: string
   memberRole: 'OWNER' | 'COLLABORATOR'
   status: 'ACTIVE' | 'PENDING' | 'REMOVED'
   createdAt: string

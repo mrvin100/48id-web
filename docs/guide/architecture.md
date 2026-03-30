@@ -2,329 +2,140 @@
 
 ## System Overview
 
-48ID Web is the admin portal for the K48 identity platform. It is a **Next.js 16 application** that acts as a BFF (Backend For Frontend) — it proxies all API calls to the 48ID backend, manages tokens in HttpOnly cookies, and serves a React UI to authenticated administrators.
+48ID Web is a **Next.js 15 App Router BFF (Backend For Frontend)** that provides:
 
-```mermaid
-graph TB
-    subgraph "Browser"
-        UI[React UI]
-        Zustand[Zustand Store]
-        TQ[TanStack Query Cache]
-    end
+- An admin portal for managing users, audit logs, and system settings
+- A student portal for identity management and operator account access
+- An operator board for managing API keys, consumers, and traffic
 
-    subgraph "Next.js App (48id-web)"
-        Pages[Pages / Layouts]
-        Modules[Feature Modules]
-        Hooks[Custom Hooks]
-        ApiLib[lib/api functions]
-        BFF[BFF Route Handlers<br/>app/api/]
-        MW[middleware.ts<br/>Route Guard]
-    end
-
-    subgraph "48ID Backend"
-        AuthAPI[/auth/*]
-        AdminAPI[/admin/*]
-        AuditAPI[/admin/audit-log]
-    end
-
-    UI --> Modules
-    Modules --> Hooks
-    Hooks --> TQ
-    TQ --> ApiLib
-    ApiLib -->|HTTP + cookies| BFF
-    BFF -->|Bearer token| AuthAPI
-    BFF -->|Bearer token| AdminAPI
-    BFF -->|Bearer token| AuditAPI
-    MW -->|validates cookie| BFF
 ```
-
-## Data Flow
-
-Every feature follows this exact layered pattern:
-
-```text
-Page (thin wrapper)
-  └── Module Component (UI logic)
-        └── Custom Hook (TanStack Query)
-              └── lib/api function (HTTP)
-                    └── BFF Route Handler (proxy)
-                          └── 48ID Backend
+Browser ──► Next.js BFF (localhost:3000) ──► Spring Boot Backend (localhost:8080) ──► PostgreSQL
+              ↑ HttpOnly cookies                ↑ JWT Bearer / API Key
 ```
-
-No component ever calls `fetch` or `apiClient` directly. No page contains business logic.
-
-### Layer responsibilities
-
-| Layer          | Location                     | Responsibility                                   |
-| -------------- | ---------------------------- | ------------------------------------------------ |
-| **Page**       | `app/(dashboard)/*/page.tsx` | Renders the module. Nothing else.                |
-| **Module**     | `components/modules/*/`      | UI rendering, form state, user interactions      |
-| **Hook**       | `hooks/use-*.ts`             | TanStack Query `useQuery` / `useMutation`        |
-| **API**        | `lib/api/*.ts`               | Pure HTTP functions using `apiClient`            |
-| **BFF**        | `app/api/*/route.ts`         | Auth proxy — reads cookie, forwards Bearer token |
-| **Middleware** | `middleware.ts`              | Route protection, silent token refresh           |
 
 ---
 
-## Authentication Architecture
+## Role System
 
-### ADR-006: Authentication Strategy
+| Role                 | Source                                     | Primary View                           |
+| -------------------- | ------------------------------------------ | -------------------------------------- |
+| `ADMIN`              | JWT claim `ROLE_ADMIN`                     | Admin dashboard, users, audit, traffic |
+| `STUDENT`            | JWT claim `ROLE_STUDENT`                   | Student dashboard, profile, operators  |
+| `STUDENT + OPERATOR` | JWT claims after creating/joining operator | Student view + optional operator mode  |
 
-**Decision:** Custom BFF with HttpOnly cookies. Better Auth was evaluated and rejected.
+**Key design decision**: `ROLE_OPERATOR` is a _capability_ granted to students — not a standalone login role. Students always land on their student view first and consciously switch to operator mode via the operator store.
 
-**Rationale:**
+When a student creates an operator account or accepts an invite, the backend grants `ROLE_OPERATOR`. The frontend calls `/api/auth/refresh` immediately to get a new JWT with the updated role (required for all `/operator/*` backend endpoints which use `@PreAuthorize("hasRole('OPERATOR')")`).
 
-- 48ID is already a full identity provider — it issues JWTs, manages sessions, handles refresh
-- Better Auth would require its own database tables (`session`, `account`, `user`) duplicating what already exists in PostgreSQL managed by 48ID
-- Two sources of truth for the same user identity is a maintenance problem
-- The custom BFF is ~60 lines of code — not complex enough to justify a framework
+---
 
-### Token lifecycle
+## Client-Side Operator Mode
 
-```mermaid
-sequenceDiagram
-    participant Browser
-    participant MW as middleware.ts
-    participant BFF as BFF /api/auth
-    participant Backend as 48ID
+Operator mode switching is handled by **Zustand `operator-store`** with `persist` middleware (sessionStorage):
 
-    Browser->>MW: GET /dashboard
-    MW->>MW: Read k48_access_token cookie
-    alt Token valid
-        MW-->>Browser: Allow request
-    else Token expired, refresh token present
-        MW->>BFF: POST /api/auth/refresh
-        BFF->>Backend: POST /auth/refresh
-        Backend-->>BFF: new access_token
-        BFF-->>MW: Set-Cookie (new token)
-        MW-->>Browser: Allow request with new cookie
-    else No token / refresh failed
-        MW-->>Browser: Redirect to /login
-    end
+```
+Student selects operator → selectOperator() → isOperatorMode=true → JWT refresh → navigate to /dashboard
+Dashboard → StudentDashboardWrapper → reads isOperatorMode → renders OperatorDashboardModule
+Sidebar → reads isOperatorMode → shows operator tabs with ?accountId=xxx in URLs
+Page routes → read accountId from searchParams → render operator-scoped modules
+"Back to Student View" → clearOperator() → isOperatorMode=false → student nav restores
+Logout → sessionStorage cleared → next login always starts in student view
 ```
 
-### Silent refresh deduplication
+Hydration is handled by `useOperatorHydrated()` which uses `useOperatorContext.persist.onFinishHydration()` — no `useEffect mounted` anti-pattern.
 
-The `lib/api/client.ts` ky instance handles 401 responses from BFF routes:
+---
 
-```typescript
-let refreshPromise: Promise<boolean> | null = null
+## Data Flow
 
-// afterResponse hook — fires on every 401
-;async (request, _options, response) => {
-  if (response.status === 401) {
-    // All concurrent 401s share one refresh call
-    const refreshed = await attemptRefresh()
-    if (refreshed) return ky(request) // retry original
-    window.location.href = '/login?reason=session_expired'
-  }
-}
 ```
-
-### Session persistence
-
-- **Tokens:** HttpOnly cookies only — never in JavaScript
-- **User profile:** `localStorage` via Zustand persist (display data only)
-- **Session timeout:** 30 minutes of inactivity clears the Zustand store
+Page (server component)
+  └─ renders Module (client component)
+       └─ calls Hook (TanStack Query)
+            └─ calls API function (lib/api/*.ts)
+                 └─ HTTP to BFF route (app/api/**/*.ts)
+                      └─ HTTP to Spring Boot backend (with JWT from cookie)
+```
 
 ---
 
 ## Module Structure
 
-```text
+```
 src/
-├── app/
-│   ├── (auth)/                   # Unauthenticated routes
-│   │   ├── login/
-│   │   ├── activate-account/
-│   │   └── reset-password/
-│   ├── (dashboard)/              # Authenticated routes (protected by middleware)
-│   │   ├── dashboard/
-│   │   ├── users/
-│   │   ├── provisioning/
-│   │   ├── audit/
-│   │   ├── api-keys/
-│   │   └── settings/
-│   └── api/                      # BFF Route Handlers
-│       ├── auth/                 # login, logout, refresh, activate, reset-password
-│       ├── users/[id]/           # GET, PUT, status, reset-password
-│       ├── admin/
-│       │   ├── users/import/     # CSV import proxy
-│       │   ├── audit-log/        # Audit log with user resolution
-│       │   └── api-keys/         # API key management
-│       ├── dashboard/            # metrics, login-activity, recent-activity
-│       └── csv/                  # template download
-├── components/
-│   ├── modules/                  # Feature modules (one folder per feature)
-│   ├── ui/                       # shadcn/ui — do not edit
-│   └── global/                   # Shared layout components
-├── hooks/                        # TanStack Query hooks
-├── lib/
-│   ├── api/                      # HTTP functions
-│   ├── routes.ts                 # Route constants (single source of truth)
-│   ├── query-keys.ts             # Query key factories
-│   └── env.ts                    # Environment config
-├── services/                     # Auth service
-├── stores/                       # Zustand stores
-└── types/                        # TypeScript interfaces
+  app/
+    api/                    # BFF route handlers
+      auth/                 # login, logout, refresh, activate, reset-password
+      users/                # admin user management
+      admin/                # audit-log, api-keys, csv import
+      dashboard/            # metrics, login-activity, recent-activity, traffic
+      operator/
+        accounts/           # CRUD + invite + members
+        users/              # API consumers
+        audit-log/          # operator audit
+        traffic/            # operator traffic
+        api-keys/           # operator API key management
+        dashboard/          # operator metrics
+    dashboard/              # page routes (server components)
+      page.tsx              # role-based: admin → DashboardModule, student → StudentDashboardWrapper
+      users/page.tsx        # accountId? → OperatorUsersModule : (admin → UsersModule)
+      audit/page.tsx        # accountId? → OperatorAuditPage : (admin → AuditLogModule)
+      traffic/page.tsx      # accountId? → OperatorTrafficPage : (admin → AdminTrafficModule)
+      api-key/page.tsx      # accountId? → OperatorApiKeyPage : AccessDenied
+      api-keys/page.tsx     # admin only → ApiKeysModule
+      operators/page.tsx    # student only → StudentOperatorsModule
+      profile/page.tsx      # student only → SettingsModule
+      settings/page.tsx     # admin only → SettingsModule
+      csv-import/page.tsx   # admin only → ProvisioningModule
+
+  components/
+    modules/
+      dashboard/            # DashboardModule, AdminTrafficModule, StudentDashboardModule,
+                            # StudentDashboardWrapper, OperatorDashboardModule
+      users/                # UsersModule (admin user management table)
+      audit/                # AuditLogModule (with pagination)
+      api-keys/             # ApiKeysModule (admin-managed keys)
+      operator/             # OperatorUsersModule (Members tab + API Consumers tab),
+                            # TrafficTable, ApiKeyPanel, OperatorAuditModule
+      student/              # StudentOperatorsModule (create, list, enter, delete)
+      auth/                 # Login, Logout, ActivateAccount, ResetPassword, AccessDenied
+      csv-import/           # ProvisioningModule
+      settings/             # SettingsModule
+
+  hooks/                    # TanStack Query hooks (use-dashboard, use-operator, use-users, etc.)
+  lib/
+    api/                    # API functions calling BFF routes
+    server-role.ts          # Server-side JWT decode (decodeJwt, not verify) → UserRole
+    role-utils.ts           # resolvePrimaryRole: ADMIN > STUDENT > OPERATOR
+    navigation.ts           # getNavigationForRole, getNavigationForStudent (with accountId in operator URLs)
+    routes.ts               # ROUTES constants
+    query-keys.ts           # TanStack Query cache keys
+  stores/
+    auth-store.ts           # User auth state (Zustand + immer)
+    operator-store.ts       # Operator mode (Zustand + persist → sessionStorage)
+  types/                    # TypeScript interfaces for all API shapes
 ```
 
 ---
 
-## State Management
+## Navigation
 
-### TanStack Query (server state)
+The sidebar (`AppSidebar`) is a reactive client component that reads from both the auth store and the operator store:
 
-All data fetched from the backend is managed by TanStack Query:
-
-```typescript
-// Query key factories ensure consistent cache management
-export const usersKeys = {
-  all: ['users'] as const,
-  list: (filters?: UserFilters) => [...usersKeys.all, 'list', filters] as const,
-  detail: (id: string) => [...usersKeys.all, 'detail', id] as const,
-}
-
-// Hooks wrap api functions
-export function useUsers(filters?: UserFilters) {
-  return useQuery({
-    queryKey: usersKeys.list(filters),
-    queryFn: () => usersApi.getUsers(filters),
-    staleTime: 5 * 60 * 1000,
-  })
-}
-```
-
-### Zustand (client state)
-
-| Store        | Purpose                   | Persistence         |
-| ------------ | ------------------------- | ------------------- |
-| `auth-store` | User profile, auth status | `localStorage`      |
-| `ui-store`   | Sidebar state, theme      | `localStorage`      |
-| `csv-store`  | CSV import wizard state   | None (session only) |
+- **ADMIN**: Dashboard, Users, Audit Logs, Traffic, API Keys, CSV Import
+- **STUDENT (default)**: Dashboard, Profile, Operators
+- **STUDENT in operator mode**: Dashboard, Users, Traffic, API Key (all with `?accountId=xxx&isOwner=true/false`)
+  - Footer shows "Back to Student View" button
+  - Header shows selected operator account name + role badge
 
 ---
 
-## Middleware (Route Protection)
+## Key Design Decisions
 
-`middleware.ts` runs before every request and handles:
-
-1. **Static files / Next.js internals** — pass through
-2. **Public routes** (`/login`, `/activate-account`, `/reset-password`) — pass through
-3. **Public API routes** (`/api/auth/login`, `/api/auth/refresh`, etc.) — pass through
-4. **Protected API routes** — validate JWT cookie, return 401 if invalid
-5. **Protected pages** — validate JWT, attempt silent refresh, redirect to `/login` if failed
-
-All route strings are defined as constants in `lib/routes.ts` — the middleware imports them directly.
-
----
-
-## Validation
-
-### Matricule format
-
-All matricule values across the app must match the backend-enforced format:
-
-```text
-^K48-B[0-9]+-[0-9]+$
-```
-
-Examples: `K48-B1-1`, `K48-B1-12`, `K48-B10-999`
-
-The batch embedded in the matricule must match the user's `batch` field:
-
-| matricule      | batch | result                                                     |
-| -------------- | ----- | ---------------------------------------------------------- |
-| `K48-B1-12`    | `B1`  | ✅ valid                                                   |
-| `K48-B2-5`     | `B1`  | ❌ `"Matricule prefix 'K48-B2' does not match batch 'B1'"` |
-| `K48-2024-001` | any   | ❌ `"does not match required format K48-B{n}-{seq}"`       |
-
-### Where validation lives
-
-| Concern                        | Location                                         | Function                                                  |
-| ------------------------------ | ------------------------------------------------ | --------------------------------------------------------- |
-| Matricule format + batch check | `lib/csv-parser.ts`                              | `validateMatricule(matricule, batch?)` → `string \| null` |
-| Batch-aware helper text        | `lib/csv-parser.ts`                              | `getMatriculeHelperText(batch)` → `string`                |
-| Zod schemas (forms)            | `lib/validations.ts`                             | `loginSchema`, `userSchema`, `csvUserSchema`, etc.        |
-| CSV row validation             | `components/modules/csv-import/csv-dropzone.tsx` | `validateRow()` — calls `validateMatricule`               |
-
-### Error message contract
-
-The error message from `validateMatricule` **must match the backend exactly** — the frontend and backend share the same string so error messages are consistent whether validation fires client-side or server-side:
-
-```text
-"Matricule prefix 'K48-B2' does not match batch 'B1'"
-```
-
-### Form validation pattern
-
-All forms use React Hook Form + Zod via `zodResolver`:
-
-```tsx
-const form = useForm<FormData>({ resolver: zodResolver(schema) })
-
-// Inline error display — always this exact pattern
-{
-  form.formState.errors.field && (
-    <p className="text-destructive text-sm">
-      {form.formState.errors.field.message}
-    </p>
-  )
-}
-```
-
-Default form mode: `onBlur` validate, `onChange` re-validate (configured in `lib/form-config.ts`).
-
-### CSV row error display
-
-Invalid rows are highlighted amber (`bg-yellow-50`) with a destructive badge showing the error message. The import button is disabled while any row has `hasError: true`.
-
----
-
-## Error Handling
-
-### Backend error format
-
-The 48ID backend returns [RFC 9457 Problem Details](https://www.rfc-editor.org/rfc/rfc9457):
-
-```json
-{
-  "type": "https://48id.k48.io/errors/reset-token-invalid",
-  "title": "Reset Token Invalid",
-  "status": 400,
-  "detail": "Invalid reset token.",
-  "timestamp": "2026-03-19T10:00:00Z",
-  "code": "RESET_TOKEN_INVALID"
-}
-```
-
-BFF routes read `data.detail` (not `data.message`) when forwarding errors to the frontend.
-
-### Client error handling
-
-- `lib/api/*.ts` functions catch `HTTPError` from ky and throw plain `Error` with the backend `detail` message
-- TanStack Query surfaces errors via `isError` / `error` in hooks
-- Components display `(error as Error).message` — never raw ky error strings
-
----
-
-## ADR Index
-
-| ADR     | Decision                                | Status     |
-| ------- | --------------------------------------- | ---------- |
-| ADR-001 | Next.js App Router over Pages Router    | ✅ Adopted |
-| ADR-002 | TanStack Query for server state         | ✅ Adopted |
-| ADR-003 | Zustand for client state                | ✅ Adopted |
-| ADR-004 | ky over axios for HTTP                  | ✅ Adopted |
-| ADR-005 | shadcn/ui over custom component library | ✅ Adopted |
-| ADR-006 | Custom BFF over Better Auth             | ✅ Adopted |
-| ADR-007 | pnpm over npm/yarn                      | ✅ Adopted |
-
----
-
-## Next Steps
-
-- **[Environment Setup](environment-setup.md)** — Configure and run locally
-- **[Contributing](../../CONTRIBUTING.md)** — How to contribute
-- **[Story Workflow](../developers/story-workflow.md)** — Implement backlog stories
-- **[BFF API Reference](../api/bff-routes.md)** — All route handlers documented
+| Decision                              | Rationale                                                                                                                         |
+| ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| BFF decodes JWT without verification  | Backend signs with its own private key. BFF reads role claims from HttpOnly cookie — trust boundary is the cookie, not signature. |
+| `STUDENT > OPERATOR` in role priority | OPERATOR is a capability, not a login role. Students with `ROLE_OPERATOR` must remain in student view by default.                 |
+| accountId via URL params              | Server pages need accountId to scope operator data. Zustand store is client-only; URL params bridge server/client.                |
+| sessionStorage for operator context   | Persists across navigation, clears on tab close. Multiple tabs = independent operator sessions.                                   |
+| JWT refresh on operator enter         | `/operator/*` backend endpoints require `ROLE_OPERATOR` in JWT. Student's initial JWT may lack it until refreshed.                |

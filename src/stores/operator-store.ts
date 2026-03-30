@@ -128,20 +128,17 @@ export const useOperatorContext = create<OperatorContextState>()(
  */
 export function useOperatorHydrated(): boolean {
   // Start as false — sessionStorage hasn't been read yet on the server or initial render
-  const [hydrated, setHydrated] = useState(false)
+  const [hydrated, setHydrated] = useState(() =>
+    useOperatorContext.persist.hasHydrated()
+  )
 
   useEffect(() => {
-    // If the store is already hydrated (e.g. component mounts after hydration completed)
-    if (useOperatorContext.persist.hasHydrated()) {
-      setHydrated(true)
-      return
-    }
-    // Otherwise wait for hydration to finish
+    if (hydrated) return
     const unsub = useOperatorContext.persist.onFinishHydration(() => {
       setHydrated(true)
     })
     return unsub
-  }, [])
+  }, [hydrated])
 
   return hydrated
 }

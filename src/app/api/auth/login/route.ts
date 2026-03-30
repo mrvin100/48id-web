@@ -5,8 +5,6 @@ import { LoginRequest, LoginResponse, User } from '@/types/auth.types'
 import { config } from '@/lib/env'
 import { ROUTES } from '@/lib/routes'
 import { validateMatricule } from '@/lib/validations'
-import { hasOperatorRole } from '@/lib/role-utils'
-
 export async function POST(request: NextRequest) {
   try {
     // Parse request body
