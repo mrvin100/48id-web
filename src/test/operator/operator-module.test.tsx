@@ -53,7 +53,7 @@ describe('OperatorUsersModule', () => {
       data: [],
       isLoading: false,
       error: null,
-    } as ReturnType<typeof operatorHooks.useOperatorMembers>)
+    } as unknown as ReturnType<typeof operatorHooks.useOperatorMembers>)
     vi.mocked(operatorHooks.useInviteOperatorMember).mockReturnValue({
       mutate: vi.fn(),
       isPending: false,
@@ -123,7 +123,7 @@ describe('TrafficTable', () => {
       data: undefined,
       isLoading: true,
       error: null,
-    } as ReturnType<typeof operatorHooks.useOperatorTraffic>)
+    } as unknown as ReturnType<typeof operatorHooks.useOperatorTraffic>)
 
     render(<TrafficTable accountId="test-account-id" />, { wrapper })
     expect(screen.getByText('API Key Calls')).toBeInTheDocument()
@@ -155,7 +155,7 @@ describe('TrafficTable', () => {
       },
       isLoading: false,
       error: null,
-    } as ReturnType<typeof operatorHooks.useOperatorTraffic>)
+    } as unknown as ReturnType<typeof operatorHooks.useOperatorTraffic>)
 
     render(<TrafficTable accountId="test-account-id" />, { wrapper })
     expect(screen.getByText('1.2.3.4')).toBeInTheDocument()
@@ -168,7 +168,7 @@ describe('TrafficTable', () => {
       data: { apiKeyCalls: [], memberActions: [], generatedAt: '' },
       isLoading: false,
       error: null,
-    } as ReturnType<typeof operatorHooks.useOperatorTraffic>)
+    } as unknown as ReturnType<typeof operatorHooks.useOperatorTraffic>)
 
     render(<TrafficTable accountId="test-account-id" />, { wrapper })
     expect(screen.getByText('No API key calls yet')).toBeInTheDocument()
@@ -199,7 +199,7 @@ describe('ApiKeyPanel', () => {
       data: null,
       isLoading: false,
       error: null,
-    } as ReturnType<typeof operatorHooks.useOperatorApiKey>)
+    } as unknown as ReturnType<typeof operatorHooks.useOperatorApiKey>)
 
     render(<ApiKeyPanel accountId="test-account-id" isOwner={true} />, {
       wrapper,
@@ -218,7 +218,7 @@ describe('ApiKeyPanel', () => {
       },
       isLoading: false,
       error: null,
-    } as ReturnType<typeof operatorHooks.useOperatorApiKey>)
+    } as unknown as ReturnType<typeof operatorHooks.useOperatorApiKey>)
 
     render(<ApiKeyPanel accountId="test-account-id" isOwner={true} />, {
       wrapper,
@@ -238,7 +238,7 @@ describe('ApiKeyPanel', () => {
       },
       isLoading: false,
       error: null,
-    } as ReturnType<typeof operatorHooks.useOperatorApiKey>)
+    } as unknown as ReturnType<typeof operatorHooks.useOperatorApiKey>)
 
     render(<ApiKeyPanel accountId="test-account-id" isOwner={false} />, {
       wrapper,
@@ -252,7 +252,7 @@ describe('ApiKeyPanel', () => {
       data: null,
       isLoading: false,
       error: null,
-    } as ReturnType<typeof operatorHooks.useOperatorApiKey>)
+    } as unknown as ReturnType<typeof operatorHooks.useOperatorApiKey>)
 
     const mockCreate = vi.fn().mockResolvedValue({
       id: 'key-1',
@@ -305,7 +305,7 @@ describe('OperatorDashboardModule', () => {
       },
       isLoading: false,
       error: null,
-    } as ReturnType<typeof operatorHooks.useOperatorUsers>)
+    } as unknown as ReturnType<typeof operatorHooks.useOperatorUsers>)
 
     vi.mocked(operatorHooks.useOperatorTraffic).mockReturnValue({
       data: {
@@ -323,7 +323,7 @@ describe('OperatorDashboardModule', () => {
       },
       isLoading: false,
       error: null,
-    } as ReturnType<typeof operatorHooks.useOperatorTraffic>)
+    } as unknown as ReturnType<typeof operatorHooks.useOperatorTraffic>)
 
     render(<OperatorDashboardModule accountId="test-account-id" />, { wrapper })
     expect(screen.getByText('Total Users')).toBeInTheDocument()

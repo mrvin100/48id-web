@@ -48,8 +48,16 @@ const mockTraffic = {
     {
       accountId: 'acc-1',
       accountName: '48Hub Platform',
-      apiKeyTraffic: { totalCalls: 500, last24h: 42, lastCalledAt: '2026-03-30T12:00:00Z' },
-      memberActivity: { totalActions: 100, last24h: 8, lastActionAt: '2026-03-30T11:00:00Z' },
+      apiKeyTraffic: {
+        totalCalls: 500,
+        last24h: 42,
+        lastCalledAt: '2026-03-30T12:00:00Z',
+      },
+      memberActivity: {
+        totalActions: 100,
+        last24h: 8,
+        lastActionAt: '2026-03-30T11:00:00Z',
+      },
     },
   ],
   generatedAt: '2026-03-30T14:00:00Z',
@@ -94,7 +102,7 @@ describe('WEB-S4-FE-02 — Admin Dashboard metrics', () => {
 
   it('shows loading state when data is not ready', () => {
     vi.mocked(useDashboard).mockReturnValue({
-      metrics: null,
+      metrics: undefined,
       loginActivity: [],
       recentActivity: [],
       isLoading: true,
@@ -109,7 +117,7 @@ describe('WEB-S4-FE-02 — Admin Dashboard metrics', () => {
 
   it('shows error alert when data fetch fails', () => {
     vi.mocked(useDashboard).mockReturnValue({
-      metrics: null,
+      metrics: undefined,
       loginActivity: [],
       recentActivity: [],
       isLoading: false,
