@@ -58,7 +58,23 @@ vi.mock('ky', () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ;(mockKy as any).delete = vi.fn(() => mockResponse)
 
-  return { default: mockKy, __esModule: true }
+  return {
+    default: mockKy,
+    __esModule: true,
+    HTTPError: class MockHTTPError extends Error {
+      response: { status: number; json: () => Promise<unknown> }
+      constructor(response = { status: 500, json: () => Promise.resolve({}) }) {
+        super('HTTP Error')
+        this.response = response
+      }
+    },
+    TimeoutError: class MockTimeoutError extends Error {
+      constructor() {
+        super('Request timed out')
+        this.name = 'TimeoutError'
+      }
+    },
+  }
 })
 
 // Global test setup

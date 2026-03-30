@@ -18,6 +18,7 @@ vi.mock('recharts', async () => {
 
 vi.mock('@/hooks/use-dashboard', () => ({
   useDashboard: vi.fn(),
+  useAdminTraffic: vi.fn(() => ({ data: null, isLoading: false, error: null })),
 }))
 
 import { useDashboard } from '@/hooks/use-dashboard'

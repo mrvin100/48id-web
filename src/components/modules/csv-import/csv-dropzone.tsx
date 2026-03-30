@@ -16,7 +16,13 @@ import { Upload, FileText, X, CheckCircle2, AlertCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { validateMatricule, getMatriculeHelperText } from '@/lib/validations'
+import {
+  CSV_EXPECTED_HEADERS,
+  getMatriculeHelperText,
+  hasExpectedCsvHeaders,
+  normalizeCsvHeaders,
+  validateCsvImportRow,
+} from '@/lib/validations'
 
 interface CsvDropzoneProps {
   onFileSelect: (file: File, preview: CsvPreviewRow[]) => void
@@ -35,15 +41,6 @@ export interface CsvPreviewRow {
   hasError?: boolean
   errorMessage?: string
 }
-
-const EXPECTED_HEADERS = [
-  'matricule',
-  'email',
-  'name',
-  'phone',
-  'batch',
-  'specialization',
-]
 
 export function CsvDropzone({
   onFileSelect,
@@ -64,8 +61,15 @@ export function CsvDropzone({
     const batch = row[4]?.trim() || ''
     const specialization = row[5]?.trim() || ''
 
-    // Check required fields
-    if (!matricule) {
+    const errorMessage = validateCsvImportRow({
+      matricule,
+      email,
+      name,
+      phone,
+      batch,
+      specialization,
+    })
+    if (errorMessage) {
       return {
         row: {
           rowNumber,
@@ -77,118 +81,7 @@ export function CsvDropzone({
           specialization,
         },
         hasError: true,
-        errorMessage: 'Missing matricule',
-      }
-    }
-    if (!email) {
-      return {
-        row: {
-          rowNumber,
-          matricule,
-          email,
-          name,
-          phone,
-          batch,
-          specialization,
-        },
-        hasError: true,
-        errorMessage: 'Missing email',
-      }
-    }
-    if (!name) {
-      return {
-        row: {
-          rowNumber,
-          matricule,
-          email,
-          name,
-          phone,
-          batch,
-          specialization,
-        },
-        hasError: true,
-        errorMessage: 'Missing name',
-      }
-    }
-    if (!phone) {
-      return {
-        row: {
-          rowNumber,
-          matricule,
-          email,
-          name,
-          phone,
-          batch,
-          specialization,
-        },
-        hasError: true,
-        errorMessage: 'Missing phone',
-      }
-    }
-    if (!batch) {
-      return {
-        row: {
-          rowNumber,
-          matricule,
-          email,
-          name,
-          phone,
-          batch,
-          specialization,
-        },
-        hasError: true,
-        errorMessage: 'Missing batch',
-      }
-    }
-    if (!specialization) {
-      return {
-        row: {
-          rowNumber,
-          matricule,
-          email,
-          name,
-          phone,
-          batch,
-          specialization,
-        },
-        hasError: true,
-        errorMessage: 'Missing specialization',
-      }
-    }
-
-    // Validate email format
-    const emailRegex = /^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/
-    if (!emailRegex.test(email)) {
-      return {
-        row: {
-          rowNumber,
-          matricule,
-          email,
-          name,
-          phone,
-          batch,
-          specialization,
-        },
-        hasError: true,
-        errorMessage: 'Invalid email format',
-      }
-    }
-
-    // Validate matricule format and batch prefix (E-BE-01 contract)
-    const matriculeError = validateMatricule(matricule, batch || undefined)
-    if (matriculeError) {
-      return {
-        row: {
-          rowNumber,
-          matricule,
-          email,
-          name,
-          phone,
-          batch,
-          specialization,
-        },
-        hasError: true,
-        errorMessage: matriculeError,
+        errorMessage,
       }
     }
 
@@ -218,24 +111,19 @@ export function CsvDropzone({
             return
           }
 
-          const headers = firstRow.map((h: string) =>
-            String(h).trim().toLowerCase()
-          )
+          const headers = normalizeCsvHeaders(firstRow as string[])
 
           // Validate headers
-          if (!headers || headers.length !== EXPECTED_HEADERS.length) {
+          if (!headers || headers.length !== CSV_EXPECTED_HEADERS.length) {
             setParseError(
-              `Invalid CSV format. Expected exactly 6 columns: ${EXPECTED_HEADERS.join(', ')}. Passwords are managed by the system — remove the password column if present.`
+              `Invalid CSV format. Expected exactly 6 columns: ${CSV_EXPECTED_HEADERS.join(', ')}. Passwords are managed by the system - remove the password column if present.`
             )
             return
           }
 
-          const headerMismatch = EXPECTED_HEADERS.some(
-            (h, i) => headers[i] !== h
-          )
-          if (headerMismatch) {
+          if (!hasExpectedCsvHeaders(headers)) {
             setParseError(
-              `Invalid CSV headers. Expected: ${EXPECTED_HEADERS.join(', ')}`
+              `Invalid CSV headers. Expected: ${CSV_EXPECTED_HEADERS.join(', ')}`
             )
             return
           }

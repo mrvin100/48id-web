@@ -11,3 +11,12 @@ export * from './use-audit'
 export * from './use-api-keys'
 export * from './use-activation'
 export { useActivateAccount, useResetPassword } from './use-activation'
+export {
+  useOperatorUsers,
+  useOperatorAuditLog,
+  useOperatorTraffic,
+  useOperatorApiKey,
+  useCreateApiKey as useCreateOperatorApiKey,
+  useRotateApiKey,
+  useDeleteApiKey,
+} from './use-operator'

@@ -37,6 +37,32 @@ export interface RecentActivityResponse {
   activities: RecentActivityData[]
 }
 
+// ── Admin Traffic (AggregatedTrafficView from backend) ─────────────────────
+
+export interface ApiKeyTraffic {
+  totalCalls: number
+  last24h: number
+  lastCalledAt: string | null
+}
+
+export interface MemberActivity {
+  totalActions: number
+  last24h: number
+  lastActionAt: string | null
+}
+
+export interface AccountTraffic {
+  accountId: string
+  accountName: string
+  apiKeyTraffic: ApiKeyTraffic
+  memberActivity: MemberActivity
+}
+
+export interface AggregatedTrafficView {
+  accounts: AccountTraffic[]
+  generatedAt: string
+}
+
 // API Functions
 export const dashboardApi = {
   /**
@@ -56,6 +82,12 @@ export const dashboardApi = {
    */
   getRecentActivity: (): Promise<RecentActivityResponse> =>
     apiClient.get('dashboard/recent-activity').json<RecentActivityResponse>(),
+
+  /**
+   * Get aggregated traffic stats across all operator accounts (ADMIN only)
+   */
+  getAggregatedTraffic: (): Promise<AggregatedTrafficView> =>
+    apiClient.get('dashboard/traffic').json<AggregatedTrafficView>(),
 }
 
 export default dashboardApi

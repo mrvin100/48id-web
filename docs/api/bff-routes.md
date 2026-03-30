@@ -1,212 +1,214 @@
 # BFF Route Reference
 
-All BFF (Backend For Frontend) route handlers in `src/app/api/`.
+All BFF (Backend For Frontend) route handlers live in `src/app/api/`.
 
 The BFF layer:
 
-- Reads the JWT from the `k48_access_token` HttpOnly cookie
-- Forwards requests to 48ID with `Authorization: Bearer <token>`
-- Never exposes raw tokens in response bodies
+- Reads the JWT from the `auth-token` HttpOnly cookie (name configured via `JWT_COOKIE_NAME` env var)
+- Forwards authenticated requests to the 48ID Spring Boot backend
+- Handles response serialization and error wrapping
+- Surfaces backend `ProblemDetail` error messages (`json.detail`) as `{ error: string }` to the frontend
 
 ---
 
 ## Authentication Routes
 
-### POST /api/auth/login
+### `POST /api/auth/login`
 
-Authenticates an admin and sets HttpOnly cookies.
+Authenticates a user, sets `auth-token` + `refresh-token` HttpOnly cookies, stores user data in auth store.
 
-**Request:** `{ matricule: string, password: string }`  
-**Response:** `{ success: boolean, user: User, message: string }`  
-**Cookies set:** `k48_access_token` (15 min), `k48_refresh_token` (7 days)  
-**Errors:** 400 invalid input, 401 bad credentials, 403 non-admin role
+**Request body:**
 
----
+```json
+{ "matricule": "K48-B1-1", "password": "SecurePass123!" }
+```
 
-### POST /api/auth/refresh
-
-Silently refreshes the access token using the refresh token cookie.
-
-**Request:** none (reads cookie automatically)  
-**Response:** `{ success: boolean, user: User }`  
-**Cookies updated:** `k48_access_token`  
-**Errors:** 401 no/invalid refresh token
+**Response (200):** User object including `id, matricule, email, name, roles, status, batch, specialization, lastLoginAt`.
+All users redirect to `/dashboard`. Role-based view is determined client-side.
 
 ---
 
-### POST /api/auth/logout
+### `POST /api/auth/refresh`
 
-Terminates the session on both client and backend.
+Refreshes the access token using the refresh token cookie. Called automatically when a student creates or enters an operator account (to get `ROLE_OPERATOR` in new JWT).
 
-**Request:** none  
-**Response:** `{ success: boolean }`  
-**Cookies cleared:** `k48_access_token`, `k48_refresh_token`
+**Response (200):** New access token set in cookie.
 
 ---
 
-### POST /api/auth/activate
+### `POST /api/auth/logout`
 
-Activates a provisioned account using the email token.
-
-**Request:** `{ token: string }`  
-**Response:** `{ success: boolean, message: string }`  
-**Errors:** 400 invalid/used/expired token
+Invalidates the session server-side and clears both auth cookies. Also removes `48id-operator-context` from sessionStorage client-side.
 
 ---
 
-### POST /api/auth/reset-password
+### `POST /api/auth/activate`
 
-Resets a user's password using the email token. Tokens are single-use.
-
-**Request:** `{ token: string, newPassword: string }`  
-**Response:** `{ success: boolean, message: string }`  
-**Errors:** 400 invalid/used/expired token, 400 password policy violation
+Activates a student account using a token from the activation email.
 
 ---
 
-## User Routes
+### `POST /api/auth/reset-password`
 
-### GET /api/users
-
-Returns a paginated list of users.
-
-**Query params:** `page`, `size`, `sort`, `status`, `batch`, `role`, `search`  
-**Response:** Spring Page `{ content: User[], totalElements, totalPages, ... }`
+Resets password using a token from the reset email.
 
 ---
 
-### GET /api/users/[id]
+## User Routes (Admin only)
 
-Returns a single user by ID.
+### `GET /api/users`
 
-**Response:** `User`
+List all users with pagination and optional filters (`status`, `batch`, `role`).
 
----
+### `GET /api/users/[id]`
 
-### PUT /api/users/[id]
+Get a single user by UUID.
 
-Updates a user's profile fields.
+### `PUT /api/users/[id]`
 
-**Request:** `{ name?, phone?, batch?, specialization? }`  
-**Response:** `User`
+Update user profile fields.
 
----
+### `POST /api/users/[id]/reset-password`
 
-### PUT /api/users/[id]/status
+Force a password reset email to the user.
 
-Changes a user's status (ACTIVE / SUSPENDED).
+### `PATCH /api/users/[id]/status`
 
-**Request:** `{ status: "ACTIVE" | "SUSPENDED" }`  
-**Response:** `User`
-
----
-
-### POST /api/users/[id]/reset-password
-
-Forces a password reset email for a user.
-
-**Request:** none  
-**Response:** `{ message: string }`
+Change user status (`ACTIVE` | `SUSPENDED` | `INACTIVE`).
 
 ---
 
 ## Admin Routes
 
-### GET /api/admin/audit-log
+### `GET /api/admin/audit-log`
 
-Returns paginated audit events with resolved user names.
+Paginated audit log. Query params: `page`, `size`, `eventType`, `dateFrom`, `dateTo`.
 
-**Query params:** `page`, `size`, `eventType`, `userId`, `from`, `to`  
-**Response:** Spring Page with enriched `{ userName, userMatricule }` fields  
-**Note:** BFF resolves unique `userId`s in parallel before returning
+### `GET /api/admin/api-keys`
 
----
+List all system API keys.
 
-### GET /api/admin/api-keys
+### `POST /api/admin/api-keys`
 
-Returns all registered API keys.
+Create a new admin-managed API key.
 
-**Response:** `ApiKey[]`
+### `DELETE /api/admin/api-keys/[id]`
 
----
+Revoke an API key.
 
-### POST /api/admin/api-keys
+### `GET /api/admin/users/import` / `POST /api/admin/users/import`
 
-Creates a new API key. Returns the raw key value once.
-
-**Request:** `{ appName: string, description?: string }`  
-**Response:** `{ id, appName, key, createdAt }`
+CSV bulk import template download and user provisioning.
 
 ---
 
-### DELETE /api/admin/api-keys/[id]
+## Dashboard Routes (Admin only)
 
-Revokes an API key.
+### `GET /api/dashboard/metrics`
 
-**Response:** 204 No Content
+Returns `totalUsers`, `activeUsers`, `activeSessions`, `pendingActivations`.
 
----
+### `GET /api/dashboard/login-activity`
 
-### POST /api/admin/api-keys/[id]/rotate
+Returns 7-day login activity data for charts.
 
-Rotates an API key. Invalidates the current key immediately.
+### `GET /api/dashboard/recent-activity`
 
-**Response:** `{ id, appName, key, createdAt }`
+Returns recent audit events for the activity feed.
 
----
+### `GET /api/dashboard/traffic`
 
-### POST /api/admin/users/import
-
-Imports users from a CSV file (multipart/form-data).
-
-**Request:** `FormData` with `file` field (CSV)  
-**Response:** `{ imported: number, failed: number, errors: CsvRowError[] }`  
-**CSV format:** `matricule,email,name,phone,batch,specialization` (6 columns, no password)
+Returns `AggregatedTrafficView`: list of all operator accounts with their `apiKeyTraffic` (totalCalls, last24h, lastCalledAt) and `memberActivity` (totalActions, last24h, lastActionAt) stats. Admin only.
 
 ---
 
-## Dashboard Routes
+## Operator Account Routes
 
-### GET /api/dashboard/metrics
+### `GET /api/operator/accounts`
 
-Returns user count metrics.
+List all operator accounts the authenticated user belongs to (as owner or collaborator). Used to populate student dashboard and operators page.
 
-**Response:** `{ totalUsers, activeUsers, pendingUsers, suspendedUsers }`
+### `POST /api/operator/accounts`
+
+Create a new operator account. Caller becomes OWNER. Backend assigns `ROLE_OPERATOR` to user. Frontend calls `/api/auth/refresh` immediately after to get updated JWT.
+
+### `DELETE /api/operator/accounts/[id]`
+
+Delete an operator account (OWNER only).
+
+### `GET /api/operator/accounts/[id]/members`
+
+List all members of an operator account with `id, userId, matricule, name, memberRole, status, createdAt`.
+
+### `POST /api/operator/accounts/[id]/invite`
+
+Invite a student by matricule. Backend creates PENDING membership and sends invite email.
+
+- **404**: No user found with that matricule
+- **409 "already an active member"**: User is already active → show error
+- **409 "yourself"**: Owner invited themselves → show error
+- **409 (other)**: User already has PENDING invite → backend resends email (idempotent)
+
+### `DELETE /api/operator/accounts/[id]/members/[memberId]`
+
+Remove a collaborator by `userId` (not membership record ID). OWNER only. Cannot remove the OWNER.
 
 ---
 
-### GET /api/dashboard/login-activity
+## Operator Feature Routes
 
-Returns 7-day login activity for the chart.
+### `GET /api/operator/users?accountId=`
 
-**Response:** `{ date, loginSuccess, loginFailure }[]`
+Returns paginated list of 48ID users who authenticated externally via this operator account's API key (API consumers). Fields: `userId, matricule, email, name, batch, status, totalCalls, firstSeen, lastSeen`.
 
----
+### `GET /api/operator/audit-log?accountId=`
 
-### GET /api/dashboard/recent-activity
+Returns paginated audit log scoped to the operator account.
 
-Returns the last 10 audit events.
+### `GET /api/operator/traffic?accountId=`
 
-**Response:** `AuditEvent[]`
+Returns traffic data for a specific operator account: `apiKeyCalls[]` and `memberActions[]`.
+
+### `GET /api/operator/api-keys?accountId=`
+
+Returns the API key metadata for the operator account (key value never returned after creation).
+
+### `POST /api/operator/api-keys?accountId=`
+
+Creates a new API key for the operator account. Returns raw key once — must be saved immediately.
+
+### `PUT /api/operator/api-keys/rotate?accountId=`
+
+Rotates the API key. Existing key is immediately invalidated. Returns new raw key once.
+
+### `DELETE /api/operator/api-keys?accountId=`
+
+Revokes the operator API key.
+
+### `GET /api/operator/dashboard?accountId=`
+
+Returns operator-scoped dashboard metrics.
 
 ---
 
 ## CSV Routes
 
-### GET /api/csv/template
+### `GET /api/csv/template`
 
-Downloads the official CSV import template.
+Download CSV import template file.
 
-**Response:** `text/csv` file download  
-**Filename:** `48id_import_template.csv`  
-**Columns:** `matricule,email,name,phone,batch,specialization`
+### `POST /api/csv/validate`
+
+Dry-run CSV validation (returns errors without importing).
+
+### `POST /api/csv/import`
+
+Import users from validated CSV.
 
 ---
 
 ## Health
 
-### GET /api/health
+### `GET /api/health`
 
-Returns application health status.
-
-**Response:** `{ status: "ok" }`
+Returns `{ status: "ok" }`. Used for monitoring.

@@ -47,21 +47,55 @@ import {
 } from '@/components/ui/popover'
 import { cn } from '@/lib/utils'
 
+const PAGE_SIZE = 20
+
 export function AuditLogModule() {
   const [eventType, setEventType] = useState<string>('all')
   const [search, setSearch] = useState<string>('')
   const [dateFrom, setDateFrom] = useState<Date | undefined>()
   const [dateTo, setDateTo] = useState<Date | undefined>()
+  const [page, setPage] = useState(0)
+
+  // Reset to page 0 when filters change
+  const handleEventTypeChange = (value: string) => {
+    setEventType(value)
+    setPage(0)
+  }
+  const handleSearchChange = (value: string) => {
+    setSearch(value)
+    setPage(0)
+  }
+  const handleDateFromChange = (date: Date | undefined) => {
+    setDateFrom(date)
+    setPage(0)
+  }
+  const handleDateToChange = (date: Date | undefined) => {
+    setDateTo(date)
+    setPage(0)
+  }
 
   const { data, isLoading, error } = useAuditLog({
     eventType: eventType !== 'all' ? eventType : undefined,
     dateFrom: dateFrom ? format(dateFrom, 'yyyy-MM-dd') : undefined,
     dateTo: dateTo ? format(dateTo, 'yyyy-MM-dd') : undefined,
-    page: 0,
-    size: 50,
+    page,
+    size: PAGE_SIZE,
   })
 
   const events = data?.content ?? []
+  const totalPages = data?.totalPages ?? 1
+  const totalElements = data?.totalElements ?? 0
+
+  // Client-side search filter (server doesn't support text search)
+  const filteredEvents = search
+    ? events.filter(
+        e =>
+          e.userName?.toLowerCase().includes(search.toLowerCase()) ||
+          e.userMatricule?.toLowerCase().includes(search.toLowerCase()) ||
+          e.eventType?.toLowerCase().includes(search.toLowerCase()) ||
+          e.ipAddress?.toLowerCase().includes(search.toLowerCase())
+      )
+    : events
 
   if (error) {
     return (
@@ -89,16 +123,16 @@ export function AuditLogModule() {
         <div className="relative min-w-[200px] flex-1">
           <Search className="text-muted-foreground absolute top-2.5 left-2 h-4 w-4" />
           <Input
-            placeholder="Search events..."
+            placeholder="Search by user, matricule, event, IP..."
             value={search}
-            onChange={e => setSearch(e.target.value)}
+            onChange={e => handleSearchChange(e.target.value)}
             className="pl-8"
           />
           {search && (
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => setSearch('')}
+              onClick={() => handleSearchChange('')}
               className="absolute top-0 right-0 h-full px-3"
             >
               <X className="h-4 w-4" />
@@ -106,7 +140,7 @@ export function AuditLogModule() {
           )}
         </div>
 
-        <Select value={eventType} onValueChange={setEventType}>
+        <Select value={eventType} onValueChange={handleEventTypeChange}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Filter by event type" />
           </SelectTrigger>
@@ -141,7 +175,7 @@ export function AuditLogModule() {
             <Calendar
               mode="single"
               selected={dateFrom}
-              onSelect={setDateFrom}
+              onSelect={handleDateFromChange}
               initialFocus
             />
           </PopoverContent>
@@ -164,7 +198,7 @@ export function AuditLogModule() {
             <Calendar
               mode="single"
               selected={dateTo}
-              onSelect={setDateTo}
+              onSelect={handleDateToChange}
               initialFocus
             />
           </PopoverContent>
@@ -175,8 +209,8 @@ export function AuditLogModule() {
             variant="ghost"
             size="sm"
             onClick={() => {
-              setDateFrom(undefined)
-              setDateTo(undefined)
+              handleDateFromChange(undefined)
+              handleDateToChange(undefined)
             }}
           >
             Clear Dates
@@ -199,21 +233,14 @@ export function AuditLogModule() {
             {isLoading ? (
               Array.from({ length: 10 }).map((_, i) => (
                 <TableRow key={i}>
-                  <TableCell>
-                    <Skeleton className="h-6 w-32" />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton className="h-6 w-40" />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton className="h-6 w-24" />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton className="h-6 w-32" />
-                  </TableCell>
+                  {Array.from({ length: 4 }).map((__, j) => (
+                    <TableCell key={j}>
+                      <Skeleton className="h-6 w-28" />
+                    </TableCell>
+                  ))}
                 </TableRow>
               ))
-            ) : events.length === 0 ? (
+            ) : filteredEvents.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={4} className="h-32">
                   <Empty>
@@ -230,7 +257,7 @@ export function AuditLogModule() {
                 </TableCell>
               </TableRow>
             ) : (
-              events.map(event => (
+              filteredEvents.map(event => (
                 <TableRow key={event.id}>
                   <TableCell>
                     <AuditEventBadge eventType={event.eventType} />
@@ -255,6 +282,38 @@ export function AuditLogModule() {
           </TableBody>
         </Table>
       </div>
+
+      {/* Pagination */}
+      {!isLoading && (
+        <div className="flex items-center justify-between">
+          <p className="text-muted-foreground text-sm">
+            {totalElements > 0
+              ? `Showing ${page * PAGE_SIZE + 1}–${Math.min((page + 1) * PAGE_SIZE, totalElements)} of ${totalElements} events`
+              : '0 events'}
+          </p>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={page === 0}
+              onClick={() => setPage(p => Math.max(0, p - 1))}
+            >
+              Previous
+            </Button>
+            <span className="text-muted-foreground text-sm">
+              Page {page + 1} of {totalPages}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={page >= totalPages - 1}
+              onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
+            >
+              Next
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

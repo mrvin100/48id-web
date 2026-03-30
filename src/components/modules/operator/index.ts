@@ -1,0 +1,7 @@
+// Re-export from centralized dashboard module
+export { OperatorDashboardModule } from '@/components/modules/dashboard'
+export { OperatorUsersModule as OperatorUsersPage } from './operator-users'
+export { OperatorAuditModule as OperatorAuditPage } from './operator-audit'
+export { TrafficTable as OperatorTrafficPage } from './traffic-table'
+export { ApiKeyPanel as OperatorApiKeyPage } from './api-key-panel'
+export { MemberManagementPanel } from './member-management-panel'

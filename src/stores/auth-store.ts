@@ -41,7 +41,6 @@ interface AuthStoreState extends AuthState {
 
   // Computed getters
   isAdmin: () => boolean
-  isSystemOperator: () => boolean
   hasAdminAccess: () => boolean
   getUserDisplayName: () => string
   getSessionTimeRemaining: () => number | null
@@ -126,6 +125,14 @@ export const useAuthStore = create<AuthStoreState>()(
             // Continue with local logout regardless of service error
           }
 
+          // Clear operator context from sessionStorage so the next login
+          // always starts in student view, not in a stale operator mode.
+          try {
+            sessionStorage.removeItem('48id-operator-context')
+          } catch {
+            // sessionStorage not available (SSR guard)
+          }
+
           set(state => {
             state.user = null
             state.isAuthenticated = false
@@ -199,17 +206,16 @@ export const useAuthStore = create<AuthStoreState>()(
         // Computed getters
         isAdmin: () => {
           const { user } = get()
-          return user?.role === 'ADMIN'
-        },
-
-        isSystemOperator: () => {
-          const { user } = get()
-          return user?.role === 'SYSTEM_OPERATOR'
+          return Array.isArray(user?.roles)
+            ? user.roles.includes('ADMIN')
+            : false
         },
 
         hasAdminAccess: () => {
           const { user } = get()
-          return user?.role === 'ADMIN' || user?.role === 'SYSTEM_OPERATOR'
+          return Array.isArray(user?.roles)
+            ? user.roles.includes('ADMIN')
+            : false
         },
 
         getUserDisplayName: () => {
@@ -242,7 +248,6 @@ export const useAuthStore = create<AuthStoreState>()(
                 name:
                   state.user.name ||
                   `${state.user.firstName} ${state.user.lastName}`,
-                phone: state.user.phone,
                 batch: state.user.batch,
                 specialization: state.user.specialization,
                 status: state.user.status,
@@ -256,8 +261,6 @@ export const useAuthStore = create<AuthStoreState>()(
                 updatedAt: state.user.updatedAt,
                 firstName: state.user.firstName,
                 lastName: state.user.lastName,
-                role: state.user.role,
-                isEmailVerified: state.user.isEmailVerified,
                 profilePicture: state.user.profilePicture,
               }
             : null,
@@ -303,7 +306,6 @@ export const authSelectors = {
   isLoading: (state: AuthStoreState) => state.isLoading,
   error: (state: AuthStoreState) => state.error,
   isAdmin: (state: AuthStoreState) => state.isAdmin(),
-  isSystemOperator: (state: AuthStoreState) => state.isSystemOperator(),
   hasAdminAccess: (state: AuthStoreState) => state.hasAdminAccess(),
   userDisplayName: (state: AuthStoreState) => state.getUserDisplayName(),
   userEmail: (state: AuthStoreState) => state.user?.email ?? '',

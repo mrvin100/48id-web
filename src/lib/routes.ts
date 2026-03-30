@@ -14,20 +14,35 @@ export const ROUTES = {
   // Auth routes
   ACTIVATE_ACCOUNT: '/activate-account',
   RESET_PASSWORD: '/reset-password',
+  OPERATOR_INVITE: '/operator-invite',
+  ACCEPT_OPERATOR_INVITE: '/accept-operator-invite', // Matches backend email URL default
 
-  // Dashboard routes
+  // Dashboard routes (ADMIN & OPERATOR)
   DASHBOARD: '/dashboard',
-  USERS: '/users',
-  USER_DETAIL: (id: string) => `/users/${id}`,
+  USERS: '/dashboard/users',
+  USER_DETAIL: (id: string) => `/dashboard/users/${id}`,
+  CSV_IMPORT: '/dashboard/csv-import',
+  AUDIT: '/dashboard/audit',
+  API_KEYS: '/dashboard/api-keys',
+  API_KEY: '/dashboard/api-key',
+  TRAFFIC: '/dashboard/traffic',
+  SETTINGS: '/dashboard/settings',
 
-  // CSV import routes
-  CSV_IMPORT: '/csv-import',
+  STUDENT: {
+    DASHBOARD: '/dashboard',
+    PROFILE: '/dashboard/profile',
+    OPERATORS: '/dashboard/operators',
+    OPERATOR_VIEW: '/dashboard/operators/view',
+  },
 
-  // Audit routes
-  AUDIT: '/audit',
-
-  // API keys routes
-  API_KEYS: '/api-keys',
+  // Operator routes - Deprecated: Use unified /dashboard/* namespace instead
+  OPERATOR: {
+    DASHBOARD: '/dashboard',
+    USERS: '/dashboard/users',
+    AUDIT: '/dashboard/audit',
+    TRAFFIC: '/dashboard/traffic',
+    API_KEY: '/dashboard/api-key',
+  },
 
   // API routes
   API: {
@@ -56,39 +71,25 @@ export const ROUTES = {
     API_KEYS: {
       LIST: '/api/api-keys',
     },
+    OPERATOR: {
+      USERS: '/api/operator/users',
+      AUDIT_LOG: '/api/operator/audit-log',
+      TRAFFIC: '/api/operator/traffic',
+      API_KEYS: '/api/operator/api-keys',
+      DASHBOARD: '/api/operator/dashboard',
+      ACCOUNTS: '/api/operator/accounts',
+      ACCOUNT: (id: string) => `/api/operator/accounts/${id}`,
+      ACCOUNT_INVITE: (id: string) => `/api/operator/accounts/${id}/invite`,
+      ACCOUNT_MEMBER: (id: string, memberId: string) =>
+        `/api/operator/accounts/${id}/members/${memberId}`,
+    },
   },
 } as const
 
 /**
- * Navigation items for the sidebar
+ * @deprecated Use getNavigationForRole() from '@/lib/navigation' instead.
  */
-export const NAVIGATION_ITEMS = [
-  {
-    title: 'Dashboard',
-    href: ROUTES.DASHBOARD,
-    icon: 'LayoutDashboard',
-  },
-  {
-    title: 'Users',
-    href: ROUTES.USERS,
-    icon: 'Users',
-  },
-  {
-    title: 'CSV Import',
-    href: ROUTES.CSV_IMPORT,
-    icon: 'Upload',
-  },
-  {
-    title: 'Audit Logs',
-    href: ROUTES.AUDIT,
-    icon: 'FileText',
-  },
-  {
-    title: 'API Keys',
-    href: ROUTES.API_KEYS,
-    icon: 'Key',
-  },
-] as const
+export const NAVIGATION_ITEMS = [] as const
 
 /**
  * Helper function to check if a route is active
@@ -108,15 +109,19 @@ export const isRouteActive = (
  */
 export const getPageTitle = (pathname: string): string => {
   const titles: Record<string, string> = {
-    [ROUTES.HOME]: '48ID Admin Portal',
-    [ROUTES.LOGIN]: 'Login - 48ID Admin Portal',
-    [ROUTES.ACCESS_DENIED]: 'Access Denied - 48ID Admin Portal',
-    [ROUTES.DASHBOARD]: 'Dashboard - 48ID Admin Portal',
-    [ROUTES.USERS]: 'Users - 48ID Admin Portal',
+    [ROUTES.HOME]: '48ID Portal',
+    [ROUTES.LOGIN]: 'Login - 48ID Portal',
+    [ROUTES.ACCESS_DENIED]: 'Access Denied - 48ID Portal',
+    [ROUTES.DASHBOARD]: 'Dashboard - 48ID Portal',
+    [ROUTES.USERS]: 'Users - 48ID Portal',
     [ROUTES.CSV_IMPORT]: 'CSV Import - 48ID Admin Portal',
-    [ROUTES.AUDIT]: 'Audit Logs - 48ID Admin Portal',
+    [ROUTES.AUDIT]: 'Audit Logs - 48ID Portal',
     [ROUTES.API_KEYS]: 'API Keys - 48ID Admin Portal',
+    [ROUTES.API_KEY]: 'API Key - 48ID Operator Portal',
+    [ROUTES.TRAFFIC]: 'Traffic - 48ID Operator Portal',
+    [ROUTES.STUDENT.PROFILE]: 'Profile - 48ID Student Portal',
+    [ROUTES.STUDENT.OPERATORS]: 'Operators - 48ID Student Portal',
   }
 
-  return titles[pathname] || '48ID Admin Portal'
+  return titles[pathname] || '48ID Portal'
 }

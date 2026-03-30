@@ -104,7 +104,7 @@ export function UserDetailSheet({
                     )}
                     {currentUser && (
                       <Badge variant="outline" className="text-xs">
-                        {currentUser.role}
+                        {currentUser.roles?.join(', ') || 'N/A'}
                       </Badge>
                     )}
                   </SheetDescription>
@@ -300,7 +300,9 @@ export function UserDetailSheet({
                           </p>
                         </div>
                       </div>
-                      <Badge variant="outline">{currentUser.role}</Badge>
+                      <Badge variant="outline">
+                        {currentUser.roles?.join(', ') || 'N/A'}
+                      </Badge>
                     </div>
 
                     <div className="bg-card flex items-center justify-between rounded-lg border p-3">

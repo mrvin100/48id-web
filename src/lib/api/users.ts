@@ -178,9 +178,6 @@ function transformBackendUser(backendUser: BackendUser): User {
     // Computed fields for frontend compatibility
     firstName: backendUser.name?.split(' ')[0] || '',
     lastName: backendUser.name?.split(' ').slice(1).join(' ') || '',
-    role: Array.isArray(backendUser.roles)
-      ? backendUser.roles[0]
-      : (backendUser.roles ?? ''),
     isEmailVerified: backendUser.profileCompleted ?? false,
     profilePicture: backendUser.profilePicture,
   }

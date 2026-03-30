@@ -8,6 +8,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { dashboardApi } from '@/lib/api/dashboard'
 import { dashboardKeys } from '@/lib/query-keys'
+export type { AggregatedTrafficView, AccountTraffic } from '@/lib/api/dashboard'
 
 /**
  * Hook to fetch dashboard metrics with auto-refresh
@@ -44,6 +45,18 @@ export function useRecentActivity() {
     staleTime: 30 * 1000, // 30 seconds
     refetchInterval: 60 * 1000, // Refetch every minute
     refetchIntervalInBackground: true,
+  })
+}
+
+/**
+ * Hook to fetch aggregated traffic stats across all operator accounts (ADMIN only)
+ */
+export function useAdminTraffic() {
+  return useQuery({
+    queryKey: dashboardKeys.traffic(),
+    queryFn: dashboardApi.getAggregatedTraffic,
+    staleTime: 60 * 1000,
+    refetchInterval: 2 * 60 * 1000,
   })
 }
 

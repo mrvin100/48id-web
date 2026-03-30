@@ -1,35 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import ky from 'ky'
-import { RefreshTokenResponse, User, UserRole } from '@/types/auth.types'
+import { RefreshTokenResponse } from '@/types/auth.types'
 import { config } from '@/lib/env'
 
+// Shape returned by backend POST /api/v1/auth/refresh
 interface BackendRefreshResponse {
-  success: boolean
-  user?: {
-    id: string
-    matricule: string
-    email: string
-    firstName: string
-    lastName: string
-    status: string
-    role: string
-    createdAt: string
-    updatedAt: string
-    lastLoginAt?: string
-    isEmailVerified?: boolean
-    profilePicture?: string
-    name?: string
-    phone?: string
-    batch?: string
-    specialization?: string
-    roles?: string[]
-    profileCompleted?: boolean
-  }
-  token?: string
-  refreshToken?: string
-  expiresAt?: string
-  message?: string
+  access_token: string
+  refresh_token: string
+  token_type: string
+  expires_in: number
 }
 
 export async function POST(_request: NextRequest) {
@@ -49,110 +29,42 @@ export async function POST(_request: NextRequest) {
     }
 
     try {
-      // Call backend token refresh API
+      // Call backend token refresh API.
+      // The backend expects the refresh token in the JSON body as { refresh_token: "..." }.
+      // It returns { access_token, refresh_token, token_type, expires_in } on success.
       const backendResponse = await ky
         .post(`${config.backend.apiUrl}/auth/refresh`, {
-          headers: {
-            Authorization: `Bearer ${refreshToken}`,
-            'Content-Type': 'application/json',
-          },
+          json: { refresh_token: refreshToken },
           timeout: config.backend.timeout,
-          retry: {
-            limit: config.backend.retryLimit,
-            methods: ['post'],
-          },
+          retry: 0, // No retries — avoids duplicate refresh calls
         })
         .json<BackendRefreshResponse>()
 
-      if (
-        !backendResponse.success ||
-        !backendResponse.token ||
-        !backendResponse.user
-      ) {
-        // Clear invalid refresh token
-        cookieStore.delete(config.auth.refreshCookieName)
-        cookieStore.delete(config.auth.jwtCookieName)
-
+      if (!backendResponse.access_token) {
+        // Unexpected empty response — don't clear cookies (tokens may still be valid)
         return NextResponse.json(
           {
             success: false,
-            message: backendResponse.message || 'Token refresh failed',
+            message: 'Token refresh failed',
           } as RefreshTokenResponse,
           { status: 401 }
         )
       }
 
-      // Transform backend user data to frontend User interface
-      const user: User = {
-        id: backendResponse.user.id,
-        matricule: backendResponse.user.matricule,
-        email: backendResponse.user.email,
-        name:
-          backendResponse.user.name ||
-          `${backendResponse.user.firstName} ${backendResponse.user.lastName}`,
-        phone: backendResponse.user.phone,
-        batch: backendResponse.user.batch,
-        specialization: backendResponse.user.specialization,
-        status: backendResponse.user.status,
-        roles: backendResponse.user.roles || [backendResponse.user.role],
-        profileCompleted:
-          backendResponse.user.profileCompleted ??
-          backendResponse.user.isEmailVerified ??
-          false,
-        lastLoginAt: backendResponse.user.lastLoginAt,
-        createdAt: backendResponse.user.createdAt,
-        updatedAt: backendResponse.user.updatedAt,
-        firstName: backendResponse.user.firstName,
-        lastName: backendResponse.user.lastName,
-        role: backendResponse.user.role as UserRole,
-        isEmailVerified: backendResponse.user.isEmailVerified || false,
-        profilePicture: backendResponse.user.profilePicture,
-      }
-
-      // Validate user role (only admin and system operators allowed)
-      if (
-        user.role !== UserRole.ADMIN &&
-        user.role !== UserRole.SYSTEM_OPERATOR
-      ) {
-        // Clear tokens for unauthorized users
-        cookieStore.delete(config.auth.refreshCookieName)
-        cookieStore.delete(config.auth.jwtCookieName)
-
-        return NextResponse.json(
-          {
-            success: false,
-            message:
-              'Access denied. Admin portal is restricted to administrators only.',
-          } as RefreshTokenResponse,
-          { status: 403 }
-        )
-      }
-
-      // Create response
-      const response = NextResponse.json(
-        {
-          success: true,
-          user,
-          expiresAt: backendResponse.expiresAt,
-          message: 'Token refreshed successfully',
-        } as RefreshTokenResponse,
-        { status: 200 }
-      )
-
-      // Update JWT token cookie
-      cookieStore.set(config.auth.jwtCookieName, backendResponse.token, {
+      // Update access token cookie with the new JWT
+      cookieStore.set(config.auth.jwtCookieName, backendResponse.access_token, {
         httpOnly: true,
         secure: config.security.secureCookies,
         sameSite: 'strict',
-        maxAge: 60 * 60 * 24, // 24 hours
+        maxAge: backendResponse.expires_in ?? 60 * 60 * 24,
         path: '/',
       })
 
-      // Update refresh token cookie if new one provided
-      if (backendResponse.refreshToken) {
+      // Rotate refresh token cookie if the backend issued a new one
+      if (backendResponse.refresh_token) {
         cookieStore.set(
           config.auth.refreshCookieName,
-          backendResponse.refreshToken,
+          backendResponse.refresh_token,
           {
             httpOnly: true,
             secure: config.security.secureCookies,
@@ -163,49 +75,43 @@ export async function POST(_request: NextRequest) {
         )
       }
 
-      return response
+      return NextResponse.json(
+        {
+          success: true,
+          message: 'Token refreshed successfully',
+        } as RefreshTokenResponse,
+        { status: 200 }
+      )
     } catch (backendError) {
       console.error('Backend refresh error:', backendError)
 
-      // Clear potentially invalid tokens
-      cookieStore.delete(config.auth.refreshCookieName)
-      cookieStore.delete(config.auth.jwtCookieName)
+      // Only clear cookies when the backend explicitly rejects the token (401).
+      // Do NOT clear on 500 (backend error) or network issues — the tokens are
+      // still valid and clearing them forces an unnecessary re-login.
+      const isTokenInvalid =
+        backendError instanceof Error &&
+        (backendError.message.includes('401') ||
+          backendError.message.includes('REFRESH_TOKEN_INVALID'))
 
-      // Handle specific backend errors
-      if (backendError instanceof Error) {
-        if (
-          backendError.message.includes('401') ||
-          backendError.message.includes('403')
-        ) {
-          return NextResponse.json(
-            {
-              success: false,
-              message: 'Refresh token expired or invalid. Please login again.',
-            } as RefreshTokenResponse,
-            { status: 401 }
-          )
-        }
-
-        if (
-          backendError.message.includes('timeout') ||
-          backendError.message.includes('fetch')
-        ) {
-          return NextResponse.json(
-            {
-              success: false,
-              message: 'Authentication service is temporarily unavailable.',
-            } as RefreshTokenResponse,
-            { status: 503 }
-          )
-        }
+      if (isTokenInvalid) {
+        cookieStore.delete(config.auth.refreshCookieName)
+        cookieStore.delete(config.auth.jwtCookieName)
+        return NextResponse.json(
+          {
+            success: false,
+            message: 'Session expired. Please login again.',
+          } as RefreshTokenResponse,
+          { status: 401 }
+        )
       }
 
+      // Backend 500 or network error — return 503, keep cookies intact
       return NextResponse.json(
         {
           success: false,
-          message: 'Token refresh failed. Please login again.',
+          message: 'Authentication service is temporarily unavailable.',
         } as RefreshTokenResponse,
-        { status: 401 }
+        { status: 503 }
       )
     }
   } catch (error) {

@@ -1,33 +1,46 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { cookies } from 'next/headers'
+import { config } from '@/lib/env'
+import {
+  CSV_TEMPLATE_FILENAME,
+  buildCsvTemplateContent,
+} from '@/lib/validations'
 
 export async function GET(_request: NextRequest) {
   try {
-    // Create CSV template content
-    const headers = [
-      'matricule',
-      'email',
-      'name',
-      'phone',
-      'batch',
-      'specialization',
-    ]
-    const exampleRow = [
-      'K48-2024-001',
-      'john.doe@k48.io',
-      'John Doe',
-      '+237600000000',
-      '2024',
-      'Software Engineering',
-    ]
+    const cookieStore = await cookies()
+    const jwtToken = cookieStore.get(config.auth.jwtCookieName)?.value
+    const backendUrl = `${config.backend.apiUrl}/admin/users/import/template`
 
-    const csvContent = [headers.join(','), exampleRow.join(',')].join('\n')
+    // Prefer backend-generated template so frontend download always matches backend contract.
+    if (jwtToken) {
+      const response = await fetch(backendUrl, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${jwtToken}`,
+        },
+      })
 
-    // Return as downloadable CSV file
+      if (response.ok) {
+        const csvContent = await response.text()
+        const contentType = response.headers.get('content-type') || 'text/csv'
+        return new NextResponse(csvContent, {
+          headers: {
+            'Content-Type': contentType,
+            'Content-Disposition': `attachment; filename="${CSV_TEMPLATE_FILENAME}"`,
+          },
+          status: 200,
+        })
+      }
+    }
+
+    // Fallback template in same centralized format.
+    const csvContent = buildCsvTemplateContent()
+
     return new NextResponse(csvContent, {
       headers: {
         'Content-Type': 'text/csv',
-        'Content-Disposition':
-          'attachment; filename="48id_import_template.csv"',
+        'Content-Disposition': `attachment; filename="${CSV_TEMPLATE_FILENAME}"`,
       },
       status: 200,
     })

@@ -6,8 +6,9 @@
  */
 
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { provisioningApi, type CsvImportResponse } from '@/lib/api/provisioning'
+import { provisioningApi } from '@/lib/api/provisioning'
 import { usersKeys } from '@/lib/query-keys'
+import { CSV_TEMPLATE_FILENAME } from '@/lib/validations'
 
 /**
  * Hook to download CSV import template
@@ -19,7 +20,7 @@ export function useDownloadTemplate() {
       const url = window.URL.createObjectURL(blob)
       const link = document.createElement('a')
       link.href = url
-      link.download = '48id_import_template.csv'
+      link.download = CSV_TEMPLATE_FILENAME
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)
