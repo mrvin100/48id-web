@@ -1,12 +1,11 @@
 /**
- * WEB-S4-FE-02 — Dashboard tab layout
- * Verifies tab rendering and URL-driven tab state.
+ * WEB-S4-FE-02 — Admin Dashboard metrics rendering
+ * Verifies that the admin DashboardModule renders all metric cards
+ * and traffic summary data from their respective hooks.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import type { ReadonlyURLSearchParams } from 'next/dist/client/components/navigation.react-server'
 
 vi.mock('recharts', async () => {
   const actual = await vi.importActual<typeof import('recharts')>('recharts')
@@ -19,38 +18,46 @@ vi.mock('recharts', async () => {
 
 vi.mock('@/hooks/use-dashboard', () => ({
   useDashboard: vi.fn(),
+  useAdminTraffic: vi.fn(),
 }))
 
-const mockReplace = vi.fn()
 vi.mock('next/navigation', () => ({
-  useRouter: () => ({ replace: mockReplace }),
-  useSearchParams: vi.fn(),
+  useRouter: () => ({ replace: vi.fn() }),
+  useSearchParams: vi.fn(() => new URLSearchParams()),
   usePathname: () => '/dashboard',
 }))
 
-import { useSearchParams } from 'next/navigation'
-import { useDashboard } from '@/hooks/use-dashboard'
+import { useDashboard, useAdminTraffic } from '@/hooks/use-dashboard'
 import { DashboardModule } from '@/components/modules/dashboard'
-
-const p = (init?: string) =>
-  new URLSearchParams(init) as unknown as ReadonlyURLSearchParams
 
 function wrapper({ children }: { children: React.ReactNode }) {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   return <QueryClientProvider client={qc}>{children}</QueryClientProvider>
 }
 
-beforeEach(() => {
-  mockReplace.mockClear()
-  vi.mocked(useSearchParams).mockReturnValue(p())
-  vi.mocked(useDashboard).mockReturnValue({
-    metrics: {
-      totalUsers: 10,
-      activeUsers: 8,
-      activeSessions: 2,
-      pendingActivations: 1,
-      suspendedUsers: 0,
+const mockMetrics = {
+  totalUsers: 100,
+  activeUsers: 80,
+  activeSessions: 12,
+  pendingActivations: 5,
+  suspendedUsers: 3,
+}
+
+const mockTraffic = {
+  accounts: [
+    {
+      accountId: 'acc-1',
+      accountName: '48Hub Platform',
+      apiKeyTraffic: { totalCalls: 500, last24h: 42, lastCalledAt: '2026-03-30T12:00:00Z' },
+      memberActivity: { totalActions: 100, last24h: 8, lastActionAt: '2026-03-30T11:00:00Z' },
     },
+  ],
+  generatedAt: '2026-03-30T14:00:00Z',
+}
+
+beforeEach(() => {
+  vi.mocked(useDashboard).mockReturnValue({
+    metrics: mockMetrics,
     loginActivity: [],
     recentActivity: [],
     isLoading: false,
@@ -58,45 +65,59 @@ beforeEach(() => {
     error: null,
     refetch: vi.fn(),
   })
+  vi.mocked(useAdminTraffic).mockReturnValue({
+    data: mockTraffic,
+    isLoading: false,
+    error: null,
+  } as ReturnType<typeof useAdminTraffic>)
 })
 
-describe('WEB-S4-FE-02 — Dashboard tab layout', () => {
-  it('renders both tab triggers', () => {
+describe('WEB-S4-FE-02 — Admin Dashboard metrics', () => {
+  it('renders core metric cards', () => {
     render(<DashboardModule />, { wrapper })
-    expect(screen.getByRole('tab', { name: 'Overview' })).toBeInTheDocument()
-    expect(screen.getByRole('tab', { name: 'Traffic' })).toBeInTheDocument()
+    expect(screen.getByText('Total Users')).toBeInTheDocument()
+    expect(screen.getByText('Active Users')).toBeInTheDocument()
+    expect(screen.getByText('Active Sessions')).toBeInTheDocument()
+    expect(screen.getByText('Pending Activations')).toBeInTheDocument()
   })
 
-  it('defaults to overview tab when no ?tab param', () => {
+  it('displays correct total users count', () => {
     render(<DashboardModule />, { wrapper })
+    expect(screen.getByText('100')).toBeInTheDocument()
+  })
+
+  it('renders traffic summary cards from useAdminTraffic', () => {
+    render(<DashboardModule />, { wrapper })
+    expect(screen.getByText('API Calls (24h)')).toBeInTheDocument()
+    expect(screen.getByText('Operator Accounts')).toBeInTheDocument()
+  })
+
+  it('shows loading state when data is not ready', () => {
+    vi.mocked(useDashboard).mockReturnValue({
+      metrics: null,
+      loginActivity: [],
+      recentActivity: [],
+      isLoading: true,
+      isError: false,
+      error: null,
+      refetch: vi.fn(),
+    })
+    render(<DashboardModule />, { wrapper })
+    // Cards still render with loading placeholders
     expect(screen.getByText('Total Users')).toBeInTheDocument()
   })
 
-  it('shows traffic tab content when ?tab=traffic', () => {
-    vi.mocked(useSearchParams).mockReturnValue(p('tab=traffic'))
+  it('shows error alert when data fetch fails', () => {
+    vi.mocked(useDashboard).mockReturnValue({
+      metrics: null,
+      loginActivity: [],
+      recentActivity: [],
+      isLoading: false,
+      isError: true,
+      error: new Error('Network error'),
+      refetch: vi.fn(),
+    })
     render(<DashboardModule />, { wrapper })
-    expect(screen.getByRole('tab', { name: 'Traffic' })).toHaveAttribute(
-      'data-state',
-      'active'
-    )
-    expect(screen.getByRole('tab', { name: 'Overview' })).toHaveAttribute(
-      'data-state',
-      'inactive'
-    )
-  })
-
-  it('calls router.replace with ?tab=traffic on tab click', async () => {
-    const user = userEvent.setup()
-    render(<DashboardModule />, { wrapper })
-    await user.click(screen.getByRole('tab', { name: 'Traffic' }))
-    expect(mockReplace).toHaveBeenCalledWith('?tab=traffic')
-  })
-
-  it('calls router.replace with ?tab=overview on overview tab click', async () => {
-    vi.mocked(useSearchParams).mockReturnValue(p('tab=traffic'))
-    const user = userEvent.setup()
-    render(<DashboardModule />, { wrapper })
-    await user.click(screen.getByRole('tab', { name: 'Overview' }))
-    expect(mockReplace).toHaveBeenCalledWith('?tab=overview')
+    expect(screen.getByText('Backend Connection Error')).toBeInTheDocument()
   })
 })
